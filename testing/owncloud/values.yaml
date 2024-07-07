@@ -1,0 +1,76 @@
+
+# global options for scalable service
+replicas: 1
+externalDomain: ocis.owncloud.test
+
+image:
+  repository: owncloud/ocis
+  tag: "2.0.0-beta2"
+  pullPolicy: IfNotPresent
+
+ingress:
+  enabled: true
+
+logging:
+  level: "error"
+  pretty: "false"
+  color: "false"
+
+deploymentStrategy:
+  type: RollingUpdate
+
+storageMetadata:
+  storageBackend:
+    driver: ocis
+  persistence:
+    enabled: true
+    accessModes:
+      - ReadWriteMany
+    size: 5Gi
+    finalizers:
+      - kubernetes.io/pvc-protection
+
+storageSharing:
+  storageBackend:
+    driver: ocis
+  persistence:
+    enabled: true
+    accessModes:
+      - ReadWriteMany
+    size: 5Gi
+    finalizers:
+      - kubernetes.io/pvc-protection
+
+storageUsers:
+  storageBackend:
+    driver: ocis
+  persistence:
+    enabled: true
+    accessModes:
+      - ReadWriteMany
+    size: 50Gi
+    finalizers:
+      - kubernetes.io/pvc-protection
+
+store:
+  storageBackend:
+    driver: ocis
+  persistence:
+    enabled: true
+    accessModes:
+      - ReadWriteMany
+    size: 5Gi
+    finalizers:
+      - kubernetes.io/pvc-protection
+
+thumbnails:
+  storageBackend:
+    driver: ocis
+  persistence:
+    enabled: true
+    accessModes:
+      - ReadWriteMany
+    size: 10Gi
+
+
+

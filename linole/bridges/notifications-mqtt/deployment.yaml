@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notifications-mqtt
+  namespace: linole
+  labels:
+    app: notifications-mqtt
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notifications-mqtt
+  template:
+    metadata:
+      namespace: linole
+      labels:
+        app: notifications-mqtt
+    spec:
+      containers:
+        - name: notifications-mqtt
+          image: olklokk/notifications-mqtt:latest
+          env:
+            - name: HOST
+              value: "broker-mqtt.linole"
+            - name: HOMEASSISTANT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: notifications-mqtt-secrets
+                  key: HOMEASSISTANT_TOKEN
+                  optional: false

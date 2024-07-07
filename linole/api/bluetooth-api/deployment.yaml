@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bluetooth-api
+  namespace: linole
+  labels:
+    app: bluetooth-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bluetooth-api
+  template:
+    metadata:
+      labels:
+        app: bluetooth-api
+    spec:
+      hostNetwork: true
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - node2
+      containers:
+        - name: bluetooth-api
+          image: olklokk/bluetooth-api:latest
+          securityContext:
+            capabilities:
+              add:
+                - NET_ADMIN
+                - NET_RAW

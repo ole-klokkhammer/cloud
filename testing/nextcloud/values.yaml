@@ -1,0 +1,124 @@
+image:
+  repository: nextcloud
+  tag: 23.0.3-apache
+  pullPolicy: IfNotPresent
+
+replicaCount: 1
+
+service:
+  type: LoadBalancer
+  port: 8080
+  loadBalancerIP: 192.168.0.209
+
+extraEnv:
+  - name: S3_KEY
+    valueFrom:
+      secretKeyRef:
+        name: nextcloud-secrets
+        key: S3_KEY
+  - name: S3_SECRET
+    valueFrom:
+      secretKeyRef:
+        name: nextcloud-secrets
+        key: S3_SECRET
+  - name: S3_REGION
+    valueFrom:
+      secretKeyRef:
+        name: nextcloud-secrets
+        key: S3_REGION
+  - name: REDIS_HOST
+    valueFrom:
+      secretKeyRef:
+        name: nextcloud-secrets
+        key: REDIS_HOST
+  - name: REDIS_HOST_PORT
+    valueFrom:
+      secretKeyRef:
+        name: nextcloud-secrets
+        key: REDIS_HOST_PORT
+  - name: REDIS_HOST_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: nextcloud-secrets
+        key: REDIS_HOST_PASSWORD
+nextcloud:
+  existingSecret:
+    enabled: true
+    secretName: nextcloud-secrets
+    usernameKey: USERNAME
+    passwordKey: PASSWORD
+    tokenKey: SERVERINFO_TOKEN
+    smtpUsernameKey: SMTP_USERNAME
+    smtpPasswordKey: SMTP_PASSWORD
+  defaultConfigs:
+    # To protect /var/www/html/config
+    .htaccess: true
+    # Redis default configuration
+    redis.config.php: false
+    # Apache configuration for rewrite urls
+    apache-pretty-urls.config.php: true
+    # Define APCu as local cache
+    apcu.config.php: true
+    # Apps directory configs
+    apps.config.php: true
+    # Used for auto configure database
+    autoconfig.php: true
+    # SMTP default configuration
+    smtp.config.php: true
+  configs:
+    s3.config.php: |-
+      <?php
+      $CONFIG = array (
+        'objectstore' => array(
+          'class' => '\\OC\\Files\\ObjectStore\\S3',
+          'arguments' => array(
+            'bucket'     => 'linole-nextcloud',
+            'autocreate' => false,
+            'key'        => getenv('S3_KEY'),
+            'secret'     => getenv('S3_SECRET'),
+            'region'     => getenv('S3_REGION'),
+            'use_ssl'    => true
+          )
+        )
+      );
+    redis.config.php: |-
+      <?php
+      $CONFIG = array (
+        'memcache.local' => '\\OC\\Memcache\\Redis',
+        'memcache.distributed' => '\OC\Memcache\Redis',
+        'memcache.locking' => '\OC\Memcache\Redis',
+        'redis' => array(
+          'host' => 'redis.default.svc.cluster.local',
+          'port' => '6379',
+          'password' => 'Gnxzsd7B'
+        )
+      ); 
+
+internalDatabase:
+  enabled: false
+
+externalDatabase:
+  enabled: true
+  type: postgresql
+  host: timescaledb.default.svc.cluster.local
+  database: nextcloud
+  existingSecret:
+    enabled: true
+    secretName: nextcloud-secrets
+    usernameKey: POSTGRES_USERNAME
+    passwordKey: POSTGRES_PASSWORD
+persistence:
+  # Most data is stored in s3, but some other data is stored here: Nextcloud Data (/var/www/html).
+  enabled: true
+  accessMode: ReadWriteOnce
+  size: 8Gi
+
+cronjob:
+  enabled: true
+  # Every 5 minutes
+  # Note: Setting this to any any other value than 5 minutes might
+  #  cause issues with how nextcloud background jobs are executed
+  schedule: "*/5 * * * *"
+  curlInsecure: false
+  failedJobsHistoryLimit: 5
+  successfulJobsHistoryLimit: 2

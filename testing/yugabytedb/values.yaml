@@ -1,0 +1,46 @@
+Image:
+  repository: "192.168.0.203:5000/yugabytedb"
+  tag: 2.2
+  pullPolicy: IfNotPresent
+
+tls:
+  enabled: false
+  nodeToNode: false
+  clientToServer: false
+  certManager:
+    enabled: false
+
+storage:
+  ephemeral: false  # will not allocate PVs when true
+  master:
+    count: 2
+    size: 10Gi
+    storageClass: "local-path"
+  tserver:
+    count: 2
+    size: 10Gi
+    storageClass: "local-path"
+
+resource:
+  master:
+    requests:
+      cpu: 1
+      memory: 1Gi
+    limits:
+      cpu: 1
+      memory: 1Gi
+  tserver:
+    requests:
+      cpu: 2
+      memory: 2Gi
+    limits:
+      cpu: 2
+      memory: 2Gi
+
+replicas:
+  master: 3
+  tserver: 3
+
+partition:
+  master: 3
+  tserver: 3

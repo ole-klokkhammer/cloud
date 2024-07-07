@@ -1,0 +1,37 @@
+replicaCount: 2
+secrets:
+  credentialsSecretName: example-credentials
+  certificateSecretName: example-certificate
+  pgbackrestSecretName: example-pgbackrest
+
+patroni:
+  postgresql:
+    parameters:
+      shared_buffers: 4MB # We're not testing Postgres, we're testing the Charts
+      min_wal_size: 600MB # We need to be able to have at least 2 256MB WAL segments
+
+persistentVolumes:
+  data:
+    size: 1G
+  wal:
+    size: 1G
+
+pgBouncer:
+  pg_hba:
+  # These are test values, these should *never* be used like this in a production environment
+  - local all all     trust
+  - host  all all all trust
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+backup:
+  enabled: false
+
+prometheus:
+  enabled: true

@@ -1,0 +1,29 @@
+apiVersion: pingcap.com/v1alpha1
+kind: TidbMonitor
+metadata:
+  name: tidb-amd64
+spec:
+  replicas: 1
+  clusters:
+    - name: basic
+  prometheus:
+    nodeSelector:
+      kubernetes.io/arch: amd64
+    baseImage: prom/prometheus
+    version: v2.27.1
+  grafana:
+    nodeSelector:
+      kubernetes.io/arch: amd64
+    baseImage: grafana/grafana
+    version: 7.5.11
+  initializer:
+    nodeSelector:
+      kubernetes.io/arch: amd64
+    baseImage: pingcap/tidb-monitor-initializer
+    version: v5.4.0
+  reloader:
+    nodeSelector:
+      kubernetes.io/arch: amd64
+    baseImage: pingcap/tidb-monitor-reloader
+    version: v1.0.1
+  imagePullPolicy: IfNotPresent

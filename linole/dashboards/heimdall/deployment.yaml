@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: heimdall
+  namespace: application-dashboard
+spec:
+  replicas: 1
+  serviceName: heimdall
+  selector:
+    matchLabels:
+      app: heimdall
+  template:
+    metadata:
+      namespace: application-dashboard
+      labels:
+        app: heimdall
+    spec:
+      containers:
+        - name: heimdall
+          image: linuxserver/heimdall
+          env:
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: TZ
+              value: "Europe/Oslo"
+          volumeMounts:
+            - name: heimdall-config
+              mountPath: /config
+  volumeClaimTemplates:
+    - metadata:
+        name: heimdall-config
+        namespace: application-dashboard
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: "longhorn"
+        resources:
+          requests:
+            storage: 50Mi

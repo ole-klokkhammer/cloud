@@ -1,0 +1,13 @@
+version: 1.0
+provider:
+  name: openfaas
+  gateway: http://192.168.0.203:8080
+
+functions:
+  sunshine-follower:
+    lang: python3
+    handler: ./sunshine-follower
+    image: olklokk/sunshine-follower:latest
+    annotations:
+      topic: homeassistant/sun/sun/state
+

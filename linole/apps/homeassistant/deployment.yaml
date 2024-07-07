@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: homeassistant
+  namespace: linole
+  labels:
+    app: homeassistant
+spec:
+  replicas: 1
+  serviceName: homeassistant
+  selector:
+    matchLabels:
+      app: homeassistant
+  template:
+    metadata:
+      namespace: linole
+      labels:
+        app: homeassistant
+    spec:
+      containers:
+        - name: homeassistant
+          image: homeassistant/home-assistant:latest
+          ports:
+            - containerPort: 8123
+          volumeMounts:
+            - mountPath: /config
+              name: homeassistant-data
+  volumeClaimTemplates:
+    - metadata:
+        name: homeassistant-data
+        namespace: linole
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: "longhorn"
+        resources:
+          requests:
+            storage: 500Mi

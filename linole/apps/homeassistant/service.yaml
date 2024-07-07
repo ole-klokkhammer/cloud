@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: homeassistant
+  namespace: linole
+spec:
+  type: LoadBalancer
+  selector:
+    app: homeassistant
+  ports:
+    - port: 6102
+      targetPort: 8123
+      name: http

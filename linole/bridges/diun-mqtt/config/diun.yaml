@@ -1,0 +1,20 @@
+db:
+  path: diun.db
+
+watch:
+  workers: 10
+  schedule: "0 18 * * *"
+  firstCheckNotif: true
+
+notif:
+  mqtt:
+    scheme: mqtt
+    host: broker-mqtt.linole
+    port: 1883
+    client: diun
+    topic: diun
+    qos: 0
+
+providers:
+  file:
+    filename: /etc/diun/image-watch.yaml

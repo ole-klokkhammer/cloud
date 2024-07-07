@@ -1,0 +1,181 @@
+homeassistant: true
+permit_join: false
+frontend:
+  port: 8080
+mqtt:
+  base_topic: zigbee2mqtt
+  server: mqtt://192.168.0.201:1883
+  client_id: zigbee2mqtt
+  version: 5
+  keepalive: 60
+  include_device_information: true
+  reject_unauthorized: true
+serial:
+  port: /dev/ttyUSB0
+advanced:
+  log_level: warn
+  rtscts: false
+  channel: 25
+  network_key:
+    - 202
+    - 88
+    - 203
+    - 238
+    - 187
+    - 7
+    - 59
+    - 205
+    - 143
+    - 77
+    - 32
+    - 22
+    - 244
+    - 167
+    - 180
+    - 161
+  last_seen: epoch
+  homeassistant_legacy_triggers: false
+  legacy_api: false
+  ikea_ota_use_test_url: false
+  log_syslog:
+    app_name: Zigbee2MQTT
+    eol: /n
+    host: localhost
+    localhost: localhost
+    path: /dev/log
+    pid: process.pid
+    port: 123
+    protocol: tcp4
+    type: '5424'
+  report: false
+map_options:
+  graphviz:
+    colors:
+      fill:
+        enddevice: '#fff8ce'
+        coordinator: '#e04e5d'
+        router: '#4ea3e0'
+      font:
+        coordinator: '#ffffff'
+        router: '#ffffff'
+        enddevice: '#000000'
+      line:
+        active: '#009900'
+        inactive: '#994444'
+devices:
+  '0x00178801043587e3':
+    friendly_name: entrance_2
+    optimistic: true
+    retain: true
+  '0x00178801043597d6':
+    friendly_name: bedroom_roof
+    optimistic: true
+    retain: true
+  '0x0017880109132b76':
+    friendly_name: bedroom_office
+    optimistic: true
+    retain: true
+  '0x0017880108e58cce':
+    friendly_name: smartplug_1
+    optimistic: true
+    retain: true
+  '0x0017880104363c78':
+    friendly_name: entrance_1
+    optimistic: true
+    retain: true
+  '0x0017880106e86e7a':
+    friendly_name: bedroom_switch
+    optimistic: true
+    retain: true
+  '0x00178801086accb7':
+    friendly_name: kitchen_switch
+    optimistic: true
+    retain: true
+  '0x90fd9ffffe8b2b32':
+    friendly_name: kitchen_5
+    optimistic: true
+    retain: true
+  '0x90fd9ffffe8ed4a2':
+    friendly_name: kitchen_1
+    optimistic: true
+    retain: true
+  '0x000b57fffec47f40':
+    friendly_name: kitchen_4
+    optimistic: true
+    retain: true
+  '0x90fd9ffffed4cf1c':
+    friendly_name: kitchen_3
+    optimistic: true
+    retain: true
+  '0x90fd9ffffe88a6b8':
+    friendly_name: kitchen_6
+    optimistic: true
+    retain: true
+  '0x000b57fffee9c08d':
+    friendly_name: kitchen_2
+    optimistic: true
+    retain: true
+  '0x0017880108a02476':
+    friendly_name: garden_1
+    optimistic: true
+    retain: true
+  '0x00158d000291020a':
+    friendly_name: livingroom_switch
+    optimistic: true
+    retain: true
+  '0x000d6f0013f04d3e':
+    friendly_name: livingroom_chandelier
+    optimistic: true
+    retain: true
+  '0x000d6ffffe16f9c8':
+    friendly_name: bedroom_switch2
+    optimistic: true
+    retain: true
+  '0x001788010673318d':
+    friendly_name: '0x001788010673318d'
+groups:
+  '1':
+    friendly_name: all
+    devices:
+      - 0x00178801043587e3/11
+      - 0x00178801043597d6/11
+      - 0x0017880109132b76/11
+      - 0x0017880108e58cce/11
+      - 0x0017880104363c78/11
+      - 0x90fd9ffffe8b2b32/1
+      - 0x90fd9ffffe8ed4a2/1
+      - 0x000b57fffec47f40/1
+      - 0x90fd9ffffed4cf1c/1
+      - 0x90fd9ffffe88a6b8/1
+      - 0x000b57fffee9c08d/1
+      - 0x0017880108a02476/11
+      - 0x000d6f0013f04d3e/1
+  '2':
+    friendly_name: bedroom
+    devices:
+      - 0x00178801043597d6/11
+      - 0x0017880109132b76/11
+  '3':
+    friendly_name: entrance
+    devices:
+      - 0x0017880104363c78/11
+      - 0x00178801043587e3/11
+  '4':
+    friendly_name: livingroom
+    devices:
+      - 0x000d6f0013f04d3e/1
+  '5':
+    friendly_name: kitchen
+    devices:
+      - 0x90fd9ffffe8ed4a2/1
+      - 0x000b57fffee9c08d/1
+      - 0x90fd9ffffed4cf1c/1
+      - 0x000b57fffec47f40/1
+      - 0x90fd9ffffe8b2b32/1
+      - 0x90fd9ffffe88a6b8/1
+  '6':
+    friendly_name: garden
+    devices:
+      - 0x0017880108a02476/11
+experimental:
+  output: attribute_and_json

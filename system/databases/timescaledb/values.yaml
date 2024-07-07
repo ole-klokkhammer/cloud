@@ -1,0 +1,113 @@
+replicaCount: 3
+
+# The major PostgreSQL version to use, defaults to the default version of the Docker image
+# However, in pg_upgrade scenarios, you may need to specify an explicit version
+version: 14
+
+patroni:
+  log:
+    level: WARNING
+  bootstrap:
+    dcs:
+      synchronous_mode: true
+      master_start_timeout: 0
+      postgresql:
+        use_slots: false
+        parameters:
+          checkpoint_timeout: 300s
+          synchronous_commit: remote_apply
+
+persistentVolumes:
+  data:
+    enabled: true
+    size: 100G
+    storageClass: local-path
+  wal:
+    enabled: true
+    size: 40G
+    storageClass: local-path
+
+podManagementPolicy: Parallel
+
+image:
+  # Image was built from
+  # https://github.com/timescale/timescaledb-docker-ha
+  repository: olklokk/timescaledb-ha
+  tag: latest
+
+secrets:
+  credentialsSecretName: "timescaledb-credentials"
+  certificateSecretName: "timescaledb-certificate"
+  pgbackrestSecretName: "timescaledb-pgbackrest"
+
+service:
+  primary:
+    type: ClusterIP
+    port: 5432
+    clusterIP: 10.43.126.32
+  replica:
+    type: ClusterIP
+    port: 5432
+    clusterIP: 10.43.135.173
+
+loadBalancer:
+  enabled: false
+
+replicaLoadBalancer:
+  # If not enabled, we still expose the replica's using a so called Headless Service
+  # https://kubernetes.io/docs/concepts/services-networking/service/#headless-services
+  enabled: false
+  port: 5432
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "4000"
+
+pgBouncer:
+  enabled: false
+
+# https://pgstef.github.io/2022/02/23/pgbackrest_preview_backup_bundle.html
+backup:
+  enabled: true
+  pgBackRest:
+    # https://pgbackrest.org/configuration.html
+    compress-type: lz4
+    process-max: 4
+    start-fast: "y"
+    compress-level: 3
+
+    repo1-type: s3
+    repo1-s3-region: eu1
+    repo1-s3-endpoint: gateway.storjshare.io
+    repo1-s3-bucket: linole-timescaledb
+    repo1-retention-diff: 1
+    repo1-retention-full: 1
+#    repo1-retention-archive: 1
+    repo1-cipher-type: "none"
+    bundle-size: 128MiB
+    bundle-limit: 64MiB
+    db-exclude: promscale
+  pgBackRest:archive-push:
+    process-max: 4
+    archive-async: "y"
+    archive-push-queue-max: 64MB
+  pgBackRest:archive-get:
+    process-max: 4
+    archive-async: "y"
+    archive-get-queue-max: 2GB
+  jobs:
+    - name: full-weekly
+      type: full
+      schedule: "02 02 * * 0-6"
+
+bootstrapFromBackup:
+  enabled: false
+
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 5
+  periodSeconds: 30
+  timeoutSeconds: 5
+  failureThreshold: 6
+  successThreshold: 1
+
+prometheus:
+  enabled: false

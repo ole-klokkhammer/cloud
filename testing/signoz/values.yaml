@@ -1,0 +1,24 @@
+clickhouse:
+  useNodeSelector: true # -- If enabled, operator will prefer k8s nodes with tag `clickhouse:true`
+  # -- Clickhouse cluster shards
+  shardsCount: 1
+  # -- Clickhouse cluster replicas
+  replicasCount: 1
+
+queryService:
+  nodeSelector:
+    kubernetes.io/hostname: node0
+
+frontend:
+  nodeSelector:
+    kubernetes.io/hostname: node0
+
+alertmanager:
+  nodeSelector:
+    kubernetes.io/hostname: node0
+
+otelCollector:
+  replicas: 0
+
+otelCollectorMetrics:
+  replicas: 0

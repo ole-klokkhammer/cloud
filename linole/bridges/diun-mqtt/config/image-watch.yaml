@@ -1,0 +1,3 @@
+- name: docker.io/cockroachdb/cockroach:latest
+- name: docker.io/homeassistant/home-assistant:latest
+- name: docker.io/hivemq/hivemq-ce:latest

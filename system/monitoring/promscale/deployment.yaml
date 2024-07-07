@@ -1,0 +1,65 @@
+# Source: promscale/templates/config.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: promscale
+  namespace: default
+  labels:
+    app: promscale
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade,post-delete
+    "helm.sh/hook-weight": "0"
+data:
+  config.yaml: |
+    startup.dataset.config: |
+      metrics:
+        compress_data: true
+        default_retention_period: 90d
+      traces:
+        default_retention_period: 30d
+---
+# Source: promscale/templates/deployment-promscale.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: promscale
+  namespace: default
+  labels:
+    app: promscale
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: promscale
+  template:
+    metadata:
+      labels:
+        app: promscale
+    spec:
+      serviceAccountName: promscale
+      containers:
+        - image: timescale/promscale
+          imagePullPolicy: IfNotPresent
+          name: promscale-connector
+          args:
+            - "-config=/etc/promscale/config.yaml"
+            - -otlp-grpc-server-listen-address=:9202
+            - -enable-feature=tracing
+          envFrom:
+            - secretRef:
+                name: promscale
+          ports:
+            - containerPort: 9201
+              name: metrics-port
+            - containerPort: 9202
+              name: otel-port
+          volumeMounts:
+            - name: configs
+              mountPath: /etc/promscale/
+      volumes:
+        - name: configs
+          configMap:
+            name: promscale
+---

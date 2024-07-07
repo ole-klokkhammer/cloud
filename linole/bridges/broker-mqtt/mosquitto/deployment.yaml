@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: broker-mqtt
+  namespace: linole
+  labels:
+    app: broker-mqtt
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: broker-mqtt
+  template:
+    metadata:
+      namespace: linole
+      labels:
+        app: broker-mqtt
+    spec:
+      nodeSelector:
+        kubernetes.io/arch: arm64
+      containers:
+        - name: broker-mqtt
+          image: eclipse-mosquitto:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 1883
+              name: tcp
+          volumeMounts:
+            - name: broker-mqtt-config
+              mountPath: /mosquitto/config/mosquitto.conf
+              subPath: mosquitto.conf
+      volumes:
+        - name: broker-mqtt-config
+          configMap:
+            name: broker-mqtt-config

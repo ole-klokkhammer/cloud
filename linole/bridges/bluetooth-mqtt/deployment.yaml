@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bluetooth-mqtt
+  namespace: linole
+  labels:
+    app: bluetooth-mqtt
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bluetooth-mqtt
+  template:
+    metadata:
+      labels:
+        app: bluetooth-mqtt
+    spec:
+      containers:
+        - name: bluetooth-mqtt
+          image: olklokk/bluetooth-mqtt:latest
+          env:
+            - name: HOST
+              value: "broker-mqtt.linole"

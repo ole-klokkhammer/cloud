@@ -1,5 +1,0 @@
-#values.yaml
-./timescaledb-kubernetes
-tls.crt
-tls.csr
-tls.key

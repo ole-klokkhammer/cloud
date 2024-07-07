@@ -1,22 +1,17 @@
-# Install
 
-https://longhorn.io/docs/1.2.3/advanced-resources/deploy/customizing-default-settings/#using-helm
-
+# install
 * on all nodes:
-    * sudo apt-get install open-iscsi
-* on all nodes that should have longhorn:
-    * kubectl label nodes node0 node.longhorn.io/create-default-disk=true
-    * kubectl label nodes node1 node.longhorn.io/create-default-disk=true
-    * kubectl label nodes node2 node.longhorn.io/create-default-disk=true
-    * kubectl label nodes node3 node.longhorn.io/create-default-disk=true
-    * kubectl label nodes node4 node.longhorn.io/create-default-disk=false
+  * sudo apt-get install open-iscsi
 * helm repo add longhorn https://charts.longhorn.io
 * helm repo update
-* curl -Lo values.yaml https://raw.githubusercontent.com/longhorn/charts/master/charts/longhorn/values.yaml
-* sed -i 's/createDefaultDiskLabeledNodes: ~/createDefaultDiskLabeledNodes: true/g' values.yaml
-* helm install longhorn longhorn/longhorn --namespace longhorn-system --create-namespace --values values.yaml
-* kubectl -n longhorn-system get pod
-* kubectl create -f ./service.yaml
+* helm install longhorn longhorn/longhorn --namespace longhorn-system --create-namespace --version 1.6.2
+
+# ui https://longhorn.io/docs/1.6.2/deploy/accessing-the-ui/longhorn-ingress/
+- access with proxy: kubectl port-forward -n longhorn-system svc/longhorn-frontend 8080:80
+- or:
+- USER=<USERNAME_HERE>; PASSWORD=<PASSWORD_HERE>; echo "${USER}:$(openssl passwd -stdin -apr1 <<< ${PASSWORD})" >> auth
+- kubectl -n longhorn-system create secret generic basic-auth --from-file=auth
+- kubectl -n longhorn-system apply -f longhorn-ingress.yml
 
 
 ## Backup to s3
@@ -26,4 +21,4 @@ https://longhorn.io/docs/1.2.3/advanced-resources/deploy/customizing-default-set
 
 # UI
 
-kubectl get svc --all-namespaces longhorn-frontend cluster-ip in browser 
+kubectl get svc --all-namespaces  

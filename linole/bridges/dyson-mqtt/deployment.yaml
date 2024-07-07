@@ -24,7 +24,7 @@ spec:
             - name: MQTT_MAIN_CLIENTID
               value: "dyson-bridge"
             - name: MQTT_MAIN_HOST
-              value: "broker-mqtt.linole"
+              value: "mosquitto-external.linole"
             - name: MQTT_MAIN_PORT
               value: "1883"
             - name: MQTT_MAIN_KEEPALIVE

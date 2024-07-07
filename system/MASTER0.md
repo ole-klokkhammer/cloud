@@ -2,7 +2,7 @@
 * https://docs.k3s.io/installation/requirements?os=debian 
 
 ## disable firewall
-*ufw disable
+* ufw disable
 
 ## Define server token at ~/.k3s/k3s-server-token
 * K3S_TOKEN=<find-in-keystore>

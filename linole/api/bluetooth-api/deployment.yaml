@@ -24,7 +24,7 @@ spec:
                   - key: kubernetes.io/hostname
                     operator: In
                     values:
-                      - node2
+                      - master0
       containers:
         - name: bluetooth-api
           image: olklokk/bluetooth-api:latest

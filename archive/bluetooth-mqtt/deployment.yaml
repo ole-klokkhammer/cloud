@@ -1,24 +1,23 @@
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: lightscene-mqtt
+  name: bluetooth-mqtt
   namespace: linole
   labels:
-    app: lightscene-mqtt
+    app: bluetooth-mqtt
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: lightscene-mqtt
+      app: bluetooth-mqtt
   template:
     metadata:
       labels:
-        app: lightscene-mqtt
+        app: bluetooth-mqtt
     spec:
       containers:
-        - name: lightscene-mqtt
-          image: olklokk/lightscene-mqtt:latest
+        - name: bluetooth-mqtt
+          image: olklokk/bluetooth-mqtt:latest
           env:
             - name: HOST
-              value: "broker-mqtt.linole"
+              value: "mosquitto-external.linole"

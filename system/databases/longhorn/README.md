@@ -1,4 +1,12 @@
 
+# mount disk to be used
+sudo fdisk -l
+sudo fdisk /dev/<disk>
+sudo mkfs.ext4 /dev/<disk>
+sudo mkdir /mnt/longhorn
+sudo nano /etc/fstab
+-- UUID="..." /mnt/disk1 ext4 nosuid,nodev,nofail,x-gvfs-show 0 0
+
 # install
 * on all nodes:
   * sudo apt-get install open-iscsi

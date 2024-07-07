@@ -16,21 +16,12 @@ spec:
       labels:
         app: diun-mqtt
     spec:
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-              - matchExpressions:
-                  - key: kubernetes.io/hostname
-                    operator: In
-                    values:
-                      - node0
       containers:
         - name: diun-mqtt
           image: crazymax/diun:latest
           env:
             - name: TZ
-              value: "Europe/Paris"
+              value: "Europe/Oslo"
             - name: LOG_LEVEL
               value: "info"
             - name: LOG_JSON

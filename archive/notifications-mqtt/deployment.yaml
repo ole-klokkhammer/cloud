@@ -21,7 +21,7 @@ spec:
           image: olklokk/notifications-mqtt:latest
           env:
             - name: HOST
-              value: "broker-mqtt.linole"
+              value: "mosquitto-external.linole"
             - name: HOMEASSISTANT_TOKEN
               valueFrom:
                 secretKeyRef:

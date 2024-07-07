@@ -30,8 +30,9 @@ spec:
         name: homeassistant-data
         namespace: linole
       spec:
-        accessModes: [ "ReadWriteOnce" ]
-        storageClassName: "longhorn"
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: longhorn-single-replica
         resources:
           requests:
             storage: 500Mi

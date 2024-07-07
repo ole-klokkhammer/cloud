@@ -6,14 +6,3 @@ metadata:
 spec:
   receiveInterval: 380
   transmitInterval: 270
----
-apiVersion: metallb.io/v1beta2
-kind: BGPPeer
-metadata:
-  name: peersample
-  namespace: metallb-system
-spec:
-  myASN: 64512
-  peerASN: 64512
-  peerAddress: 172.30.0.3
-  bfdProfile: testbfdprofile

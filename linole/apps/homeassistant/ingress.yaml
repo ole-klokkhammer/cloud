@@ -6,7 +6,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: homeassistant.intern.linole.no
+    - host: homeassistant.internal.linole.no
       http:
         paths:
           - path: /

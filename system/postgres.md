@@ -8,3 +8,6 @@
 
 ## certificates ?? 
 * https://www.suse.com/c/rancher_blog/deploying_ha_k3s_external_database/
+
+## access
+* sudo -u postgres psql

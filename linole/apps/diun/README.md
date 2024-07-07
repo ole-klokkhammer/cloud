@@ -1,6 +1,6 @@
 #
-* kubectl create configmap diun-mqtt-config --from-file=./config -n linole 
-* kubectl create -f ./deployment.yaml
+* kubectl -n linole create configmap diun-config --from-file=./config 
+* kubectl -n linole create -f ./deployment.yaml
 
 
 # update configmap

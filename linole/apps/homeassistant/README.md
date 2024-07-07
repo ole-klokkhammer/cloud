@@ -1,5 +1,4 @@
-# Setup database
-* kubectl exec -it cockroachdb-client-secure -- ./cockroach sql --certs-dir=/cockroach-certs --host=cockroachdb-public
+# Setup database 
 * CREATE DATABASE homeassistant;
 * CREATE USER homeassistant WITH PASSWORD 'xxxx';
 * GRANT ALL ON DATABASE homeassistant TO homeassistant;

@@ -2,6 +2,7 @@
 * CREATE DATABASE homeassistant;
 * CREATE USER homeassistant WITH PASSWORD 'xxxx';
 * GRANT ALL ON DATABASE homeassistant TO homeassistant;
+* GRANT ALL PRIVILEGES  ON SCHEMA public TO homeassistant;
 
 # Apply kube 
 * kubectl create -f ./deployment.yaml
@@ -9,7 +10,6 @@
 
 https://github.com/freol35241/ltss
 
-GRANT ALL PRIVILEGES  ON SCHEMA public TO homeassistant;
 
-
-kubectl cp ./config mqtt/homeassistant-0:/
+# restore longhorn backup volume
+- kubectl apply -f pvc-claim.yaml

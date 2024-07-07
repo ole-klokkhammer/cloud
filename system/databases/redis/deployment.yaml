@@ -2,16 +2,16 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: redis
-  namespace: default
+  namespace: redis
 spec:
   serviceName: redis
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: redis
   template:
     metadata:
-      namespace: default
+      namespace: redis
       labels:
         app: redis
     spec:
@@ -74,10 +74,10 @@ spec:
   volumeClaimTemplates:
     - metadata:
         name: data
-        namespace: default
+        namespace: redis
       spec:
         accessModes: [ "ReadWriteOnce" ]
-        storageClassName: "local-path"
+        storageClassName: longhorn-single-replica
         resources:
           requests:
             storage: 500Mi

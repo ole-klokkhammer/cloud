@@ -15,18 +15,20 @@ sudo nano /etc/fstab
 * helm install longhorn longhorn/longhorn --namespace longhorn-system --create-namespace --version 1.6.2
 
 # ui https://longhorn.io/docs/1.6.2/deploy/accessing-the-ui/longhorn-ingress/
-- access with proxy: kubectl port-forward -n longhorn-system svc/longhorn-frontend 8080:80
-- or:
-- USER=<USERNAME_HERE>; PASSWORD=<PASSWORD_HERE>; echo "${USER}:$(openssl passwd -stdin -apr1 <<< ${PASSWORD})" >> auth
-- kubectl -n longhorn-system create secret generic basic-auth --from-file=auth
-- kubectl -n longhorn-system apply -f longhorn-ingress.yml
+- access with proxy: kubectl port-forward -n longhorn-system svc/longhorn-frontend 8080:80 
 
 
 ## Backup to s3
-* https://staging--longhornio.netlify.app/docs/0.8.1/snapshots-and-backups/backup-and-restore/set-backup-target/
-* Get keys from user: https://us-east-1.console.aws.amazon.com/iam/home#/users/k3s-longhorn?section=security_credentials
-* kubectl create -f ./secret
-
-# UI
-
-kubectl get svc --all-namespaces  
+* create access key in storj
+* apiVersion: v1
+  kind: Secret
+  metadata:
+  name: longhorn-storj-backups
+  namespace: longhorn-system
+  type: Opaque
+  stringData:
+  AWS_ACCESS_KEY_ID: xxxx
+  AWS_ENDPOINTS: https://gateway.storjshare.io/
+  AWS_SECRET_ACCESS_KEY: ccxxxcc
+* set backup target credential secret in ui to: longhorn-storj-backups
+* set backup target in ui to: s3://<bucketname>@eu1/

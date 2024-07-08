@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scheduler-fn
+  namespace: linole
+  labels:
+    app: scheduler-fn
+spec:
+  replicas: 1
+  revisionHistoryLimit: 0
+  selector:
+    matchLabels:
+      app: scheduler-fn
+  template:
+    metadata:
+      labels:
+        app: scheduler-fn
+    spec:
+      containers:
+        - name: scheduler-fn
+          image: olklokk/scheduler:1.0.6
+          env:
+            - name: HOST
+              value: "mosquitto-internal.linole"

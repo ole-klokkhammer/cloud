@@ -1,51 +1,61 @@
 ---
-apiVersion: v1
-kind: Pod
+apiVersion: apps/v1
+kind: Deployment
 metadata:
   name: dyson-mqtt
   namespace: linole
   labels:
     app: dyson-mqtt
 spec:
-  containers:
-    - name: dyson-mqtt
-      image: olklokk/dyson-mqtt:latest
-      env:
-        - name: MQTT_MAIN_CLIENTID
-          value: "dyson-bridge"
-        - name: MQTT_MAIN_HOST
-          value: "mosquitto-external.linole"
-        - name: MQTT_MAIN_PORT
-          value: "1883"
-        - name: MQTT_MAIN_KEEPALIVE
-          value: "100"
+  replicas: 1
+  revisionHistoryLimit: 0
+  selector:
+    matchLabels:
+      app: dyson-mqtt
+  template:
+    metadata:
+      labels:
+        app: dyson-mqtt
+    spec:
+      containers:
+        - name: dyson-mqtt
+          image: olklokk/dyson-mqtt:1.0.1
+          env:
+            - name: MQTT_MAIN_CLIENTID
+              value: "dyson-mqtt"
+            - name: MQTT_MAIN_HOST
+              value: "mosquitto-internal.linole"
+            - name: MQTT_MAIN_PORT
+              value: "1883"
+            - name: MQTT_MAIN_KEEPALIVE
+              value: "100"
 
-        - name: MQTT_DYSON_HUMIDIFIER_CLIENTID
-          value: "dyson-bridge"
-        - name: MQTT_DYSON_HUMIDIFIER_HOST
-          value: "192.168.10.120"
-        - name: MQTT_DYSON_HUMIDIFIER_PORT
-          value: "1883"
-        - name: MQTT_DYSON_HUMIDIFIER_MODELID
-          value: "358E"
-        - name: MQTT_DYSON_HUMIDIFIER_USERNAME
-          value: "J9S-EU-PHA4334A"
-        - name: MQTT_DYSON_HUMIDIFIER_PASSWORD
-          value: "FA1RotZsHzUHBJSB4fGsDQ6nj2W3kt58tldNz0fMi4BQE5t3uv15jNN7CwEwc5ZO9/8zeTZM8ua5zXX1BM0B3A=="
-        - name: MQTT_DYSON_HUMIDIFIER_KEEPALIVE
-          value: "100"
+            - name: MQTT_DYSON_HUMIDIFIER_CLIENTID
+              value: "dyson-bridge"
+            - name: MQTT_DYSON_HUMIDIFIER_HOST
+              value: "192.168.10.120"
+            - name: MQTT_DYSON_HUMIDIFIER_PORT
+              value: "1883"
+            - name: MQTT_DYSON_HUMIDIFIER_MODELID
+              value: "358E"
+            - name: MQTT_DYSON_HUMIDIFIER_USERNAME
+              value: "J9S-EU-PHA4334A"
+            - name: MQTT_DYSON_HUMIDIFIER_PASSWORD
+              value: "FA1RotZsHzUHBJSB4fGsDQ6nj2W3kt58tldNz0fMi4BQE5t3uv15jNN7CwEwc5ZO9/8zeTZM8ua5zXX1BM0B3A=="
+            - name: MQTT_DYSON_HUMIDIFIER_KEEPALIVE
+              value: "100"
 
-        - name: MQTT_DYSON_HOT_COOL_CLIENTID
-          value: "dyson-bridge"
-        - name: MQTT_DYSON_HOT_COOL_HOST
-          value: "192.168.10.121"
-        - name: MQTT_DYSON_HOT_COOL_PORT
-          value: "1883"
-        - name: MQTT_DYSON_HOT_COOL_MODELID
-          value: "527"
-        - name: MQTT_DYSON_HOT_COOL_USERNAME
-          value: "A1B-EU-NKA0949A"
-        - name: MQTT_DYSON_HOT_COOL_PASSWORD
-          value: "Npx20xlijlI0SH4lm0X8gVn/jLKD+HxddI6wk1/+7BZ90gTCXzvQDUHdoPC6BGonpRfVUwt12Wi7yPYGMymjLw=="
-        - name: MQTT_DYSON_HOT_COOL_KEEPALIVE
-          value: "100"
+            - name: MQTT_DYSON_HOT_COOL_CLIENTID
+              value: "dyson-bridge"
+            - name: MQTT_DYSON_HOT_COOL_HOST
+              value: "192.168.10.121"
+            - name: MQTT_DYSON_HOT_COOL_PORT
+              value: "1883"
+            - name: MQTT_DYSON_HOT_COOL_MODELID
+              value: "527"
+            - name: MQTT_DYSON_HOT_COOL_USERNAME
+              value: "A1B-EU-NKA0949A"
+            - name: MQTT_DYSON_HOT_COOL_PASSWORD
+              value: "Npx20xlijlI0SH4lm0X8gVn/jLKD+HxddI6wk1/+7BZ90gTCXzvQDUHdoPC6BGonpRfVUwt12Wi7yPYGMymjLw=="
+            - name: MQTT_DYSON_HOT_COOL_KEEPALIVE
+              value: "100"

@@ -1,0 +1,26 @@
+leave_apartment:
+  mode: parallel
+  max: 10
+  sequence:
+  - data: {}
+    entity_id: all
+    service: light.turn_off
+  - data: {}
+    service: remote.turn_off
+    target:
+      device_id: 0f50ce6992e4af46c2adf8d0a5a83dfd
+  - data: {}
+    entity_id: all
+    service: media_player.turn_off
+  - data: {}
+    entity_id: all
+    service: switch.turn_off
+toggle_flower_watering:
+  alias: toggle flower watering
+  sequence:
+  - type: toggle
+    device_id: 2609dd73c3011615450cf30f2b20734e
+    entity_id: switch.smartplug_1
+    domain: switch
+  mode: single
+  icon: mdi:flower

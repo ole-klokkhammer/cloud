@@ -1,0 +1,158 @@
+# Configure a default setup of Home Assistant (frontend, api, etc)
+default_config:
+
+lovelace:
+  mode: yaml
+  resources:
+    - url: /local/header/custom-header.js?v=1.2.0 # https://maykar.github.io/custom-header/#intro
+      type: module
+    - url: /local/cards/state-switch/state-switch.js?1.0.0 # https://github.com/thomasloven/lovelace-state-switch
+      type: module
+    - url: /local/cards/entur/dist/entur.js?v=1.1.46 # https://github.com/jonkristian/entur-card
+      type: js
+    - url: /local/cards/clock/clockwork-card.js?v=1.0.10
+      type: js
+    - url: /local/cards/flower/lovelace-flower-card/flower-card.js?v=1.0.6
+      type: js
+  dashboards:
+    lovelace-generated: # Needs to contain a hyphen (-)
+      mode: yaml
+      filename: notexist.yaml
+      title: Generated
+      icon: mdi:tools
+      show_in_sidebar: true
+      require_admin: true
+    lovelace-linole:
+      title: 'Home Assistant'
+      mode: yaml
+      filename: lovelace-linole.yaml
+      show_in_sidebar: true
+
+http:
+  use_x_forwarded_for: true
+  trusted_proxies:
+    - 192.168.0.201
+  ip_ban_enabled: true
+  login_attempts_threshold: 5
+
+frontend:
+  themes:
+    midnight: !include ./themes/midnight.yml
+    dark: !include ./themes/dark.yml
+
+logger:
+  default: warn
+  logs:
+    homeassistant.setup: debug
+    homeassistant.components.webhook: debug
+
+recorder:
+  db_url: !secret db_url
+  purge_keep_days: 2
+  commit_interval: 30
+  auto_purge: true
+
+#ltss:
+#    db_url:
+#    chunk_time_interval: 2592000000000
+#    include:
+#      domains:
+#        - sun
+#        - weather
+#        - climate
+#        - media_player
+#        - person
+#        - remote
+
+mqtt:
+
+
+mqtt_statestream:
+  base_topic: homeassistant
+  publish_attributes: true
+  publish_timestamps: true
+  include:
+    domains:
+      - sun
+      - weather
+      - climate
+      - media_player
+      - person
+      - remote
+    entities:
+      - sensor.moon
+
+homeassistant:
+  auth_mfa_modules:
+    - type: totp
+
+zone:
+  - name: Work
+    latitude: 59.937522
+    longitude: 10.808216
+    radius: 100
+  - name: Work
+    latitude: 59.936654
+    longitude: 10.738349
+    radius: 100
+
+tts:
+  - platform: google_translate
+    language: 'no'
+
+#switch:
+#  - platform: dlink
+#    host: 192.168.10.33
+#    username: !secret dlink_username
+#    password: !secret dlink_password
+#  - platform: mqtt
+#    name: "Smartplug1 switch"
+#    unique_id: "smartplug_1"
+#    state_topic: "zigbee/smartplug_1"
+#    command_topic: "zigbee/smartplug_1/set"
+#    value_template: "{{ value_json.state }}"
+#    payload_on: "{\"state\":\"ON\"}"
+#    payload_off: "{\"state\":\"OFF\"}"
+#    state_on: "ON"
+#    state_off: "OFF"
+
+sun:
+  elevation: 50
+
+#plant:
+#  miflora1:
+#    sensors:
+#      moisture: sensor.miflora_plant_sensor_1_moisture
+#      battery: sensor.miflora_plant_sensor_1_battery
+#      temperature: sensor.miflora_plant_sensor_1_temperature
+#      conductivity: sensor.miflora_plant_sensor_1_conductivity
+#      brightness: sensor.miflora_plant_sensor_1_light
+#    min_moisture: 15
+#    max_moisture: 60
+#    min_conductivity: 350
+#    max_conductivity: 2000
+#    min_brightness: 600
+#    max_brightness: 20000
+#    min_temperature: 10
+#    max_temperature: 32
+#    min_battery: 10
+
+#camera:
+#  - platform: mjpeg
+#    name: GardenCamera
+#    mjpeg_url: http://192.168.1.209:8080/stream/video.mjpeg
+#    verify_ssl: false
+#
+#media_player:
+#  - platform: dlna_dmr
+#    url: http://192.168.10.32:49152/description.xml
+#
+#spotify:
+#  client_id: !secret spotify_client_id
+#  client_secret: !secret spotify_client_secret
+
+shopping_list:
+
+sensor: !include ./sensors.yaml
+script: !include ./scripts.yaml
+automation: !include ./automations.yaml

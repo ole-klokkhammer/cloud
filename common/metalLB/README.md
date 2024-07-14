@@ -10,6 +10,7 @@ https://metallb.universe.tf/installation/
 * FRR MODE???
 
 # pfsense 
+* https://blog.perfectra1n.com/setting-up-metallb-in-bgp-mode-with-pfsense/
 * https://blog.matrixpost.net/set-up-dynamic-routing-with-frr-free-range-routing-in-pfsense-openbgpd-now-depricated/
 ** https://www.danmanners.com/posts/2019-02-pfsense-bgp-kubernetes/
 ** https://www.codepro.guru/index.php/2022/06/07/k3s-isp-deployment-metallb/)

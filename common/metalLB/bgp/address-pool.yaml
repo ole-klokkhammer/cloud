@@ -5,4 +5,5 @@ metadata:
   namespace: metallb-system
 spec:
   addresses:
-    - 192.168.10.200-192.168.10.254
+    - 10.0.10.0/24
+  avoidBuggyIPs: true

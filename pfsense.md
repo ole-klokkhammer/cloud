@@ -4,3 +4,4 @@
 
 ## setup
 * create a vlan for the cloud cluster
+* https://www.wundertech.net/how-to-set-up-wireguard-on-pfsense/ 

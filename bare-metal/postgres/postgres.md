@@ -13,26 +13,32 @@
 * sudo -u postgres psql
 
 # pgbackrest 
+* https://pgbackrest.org/user-guide.html#installation
 * https://pgbackrest.org/user-guide.html#s3-support
 * https://bun.uptrace.dev/postgres/pgbackrest-s3-backups.html
 * https://thedbadmin.com/automate-postgresql-daily-database-backup-using-pgbackreast-and-bash/
 * https://www.enterprisedb.com/docs/supported-open-source/pgbackrest/07-use_case_2/
-* sudo apt install pgbackrest
-* mkdir -m 770 /var/log/pgbackrest
-* chown postgres:postgres /var/log/pgbackrest
-* mkdir /etc/pgbackrest
-* set s3 credentials in ~/.bashrc
-* copy pgbackrest conf to /etc/pgbackrest/pgbackrest.conf
-* enable archive mode in /etc/postgresql/14/main/postgresql.conf
+
+## installation
+* https://pgbackrest.org/user-guide.html#installation
+* mkdir -p /tmp/build
+* wget -q -O - \
+  https://github.com/pgbackrest/pgbackrest/archive/release/2.52.1.tar.gz | \
+  tar zx -C /tmp/build
+* sudo apt-get install python3-distutils meson gcc libpq-dev libssl-dev libxml2-dev \
+  pkg-config liblz4-dev libzstd-dev libbz2-dev libz-dev libyaml-dev libssh2-1-dev
+* meson setup /tmp/build/pgbackrest /tmp/build/pgbackrest-release-2.52.1
+* ninja -C /tmp/build/pgbackrest
+* sudo cp /tmp/build/pgbackrest/src/pgbackrest /usr/bin
+
+## commands
 * sudo -u postgres pgbackrest --stanza=main --log-level-console=info stanza-create
 * sudo -u postgres pgbackrest --stanza=main --log-level-console=info check
 * sudo -u postgres pgbackrest --type=full --stanza=main backup
 
-## commands
-* sudo -u postgres pgbackrest --stanza=main --log-level-console=info check
-* sudo -u postgres pgbackrest --type=full --stanza=main backup
+## crontab 
+* sudo su postgres
+* crontab -e
+* add contents of cron file
+* sudo apt install postfix
 
-## monitoring
-* send email on failed cron job:
-* MAILTO="foo@bar.com"
-  0 5 * * * /bin/some_script > /dev/null 

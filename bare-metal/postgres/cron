@@ -1,3 +1,0 @@
-MAILTO="ole.klokkhammer@outlook.com"
-0 2 * * 0 pgbackrest --type=full --stanza=main backup >> /dev/null
-0 2 * * 1-6 pgbackrest --type=diff --stanza=main backup >> /dev/null

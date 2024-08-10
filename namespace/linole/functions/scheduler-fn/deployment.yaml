@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: scheduler-fn
-          image: olklokk/scheduler:1.0.6
+          image: olklokk/scheduler:1.0.7
           env:
             - name: HOST
               value: "mosquitto-internal.linole"

@@ -1,14 +1,12 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: homeassistant-data
-  namespace: linole
-  labels:
-    app: homeassistant
+  name: foo-pv
+  namespace: longhorn-system
 spec:
   storageClassName: longhorn
   capacity:
-    storage: 500Mi
+    storage: 10Mi
   volumeMode: Filesystem
   accessModes:
     - ReadWriteOnce
@@ -16,20 +14,21 @@ spec:
   csi:
     driver: driver.longhorn.io
     fsType: ext4
-    volumeHandle: homeassistant-data
     volumeAttributes:
-      numberOfReplicas: "1"
+      numberOfReplicas: '1'
+      staleReplicaTimeout: '2880'
+    volumeHandle: foo-pv2
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: homeassistant-data
+  name: foo-pvc
   namespace: longhorn-system
 spec:
-  volumeName: homeassistant-data
+  volumeName: foo-pv
   storageClassName: longhorn
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 500Mi
+      storage: 10Mi

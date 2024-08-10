@@ -70,7 +70,7 @@ logging.basicConfig(
 logging.info("Scheduling jobs ...")
 
 schedule.every(15).minutes.do(airthings)
-schedule.every(1).minutes.do(oralb)
+# schedule.every(1).minutes.do(oralb)
 # schedule.every(5).minutes.do(paxcalima)
 
 while True:

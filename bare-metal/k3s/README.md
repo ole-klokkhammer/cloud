@@ -11,10 +11,6 @@
 ## Add shutdown script (optional)
 * alias killK3s="/usr/local/bin/k3s-killall.sh"
 
-## prepare database
-* sudo -u postgres psql -c "CREATE DATABASE k3s;"
-* sudo -u postgres psql -c "CREATE USER k3s WITH PASSWORD <input from keystore>;"
-* sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE k3s TO k3s;"
 
 ## Install 
 `curl -sfL https://get.k3s.io | K3S_TOKEN_FILE=~/.k3s/k3s-server-token INSTALL_K3S_EXEC="\
@@ -49,3 +45,9 @@ server \
  
 5. setup longhorn for block storage
    * cd ./databases/longhorn + follow readme
+
+## external database
+### prepare database
+* sudo -u postgres psql -c "CREATE DATABASE k3s;"
+* sudo -u postgres psql -c "CREATE USER k3s WITH PASSWORD <input from keystore>;"
+* sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE k3s TO k3s;"

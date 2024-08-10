@@ -1,2 +1,2 @@
-0 2 * * 0 pgbackrest --type=full --stanza=main backup | logger -t pgbackrest-full
-0 2 * * 1-6 pgbackrest --type=diff --stanza=main backup | logger -t pgbackrest-diff
+0 2 * * 0 pgbackrest --type=full --stanza=main --repo=1 backup | logger -t pgbackrest-full
+0 2 * * 1-6 pgbackrest --type=diff --stanza=main --repo=1 backup | logger -t pgbackrest-diff

@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: homeassistant
-          image: homeassistant/home-assistant:latest
+          image: ghcr.io/home-assistant/amd64-homeassistant:stable
           ports:
             - containerPort: 8123
           volumeMounts:

@@ -30,9 +30,31 @@ spec:
         name: homeassistant-data
         namespace: linole
       spec:
+        storageClassName: longhorn-single-replica
         accessModes:
           - ReadWriteOnce
-        storageClassName: longhorn-single-replica
         resources:
           requests:
             storage: 500Mi
+        volumeName: homeassistant-data
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: homeassistant-data
+  namespace: linole
+  labels:
+    app: homeassistant
+spec:
+  storageClassName: longhorn-single-replica
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 500Mi
+  volumeMode: Filesystem
+  csi:
+    driver: driver.longhorn.io
+    fsType: ext4
+    volumeHandle: homeassistant-data
+    volumeAttributes:
+      numberOfReplicas: "1"

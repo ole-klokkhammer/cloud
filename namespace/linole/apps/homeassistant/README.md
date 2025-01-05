@@ -12,4 +12,6 @@ https://github.com/freol35241/ltss
 
 
 # restore longhorn backup volume
-- kubectl apply -f pvc-claim.yaml
+- create the volume in longhorn
+- create a volume in kubernetes
+- select the volume in volumeClaimTemplates with volumeName: homeassistant-data

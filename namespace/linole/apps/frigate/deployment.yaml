@@ -25,16 +25,16 @@ spec:
           securityContext:
             privileged: true # use if coral
           env:
-            - name: REOLINK_USER
+            - name: FRIGATE_REOLINK_USER
               valueFrom:
                 secretKeyRef:
                   name: frigate-secrets
-                  key: REOLINK_USER
-            - name: REOLINK_PASSWORD
+                  key: FRIGATE_REOLINK_USER
+            - name: FRIGATE_REOLINK_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: frigate-secrets
-                  key: REOLINK_PASSWORD
+                  key: FRIGATE_REOLINK_PASSWORD
           ports:
             - name: http
               containerPort: 5000

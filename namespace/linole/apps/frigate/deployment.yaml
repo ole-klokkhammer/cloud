@@ -17,14 +17,22 @@ spec:
       labels:
         app: frigate
     spec:
+      runtimeClassName: nvidia
       containers:
         # https://docs.frigate.video/frigate/installation/
         # https://github.com/blakeblackshear/blakeshome-charts/tree/master/charts/frigate
         - name: frigate
           image: ghcr.io/blakeblackshear/frigate:stable
+          resources:
+            limits:
+              nvidia.com/gpu: 1
           securityContext:
             privileged: true # use if coral
           env:
+            - name: NVIDIA_DRIVER_CAPABILITIES
+              value: "all"
+            - name: NVIDIA_VISIBLE_DEVICES
+              value: "all"
             - name: FRIGATE_REOLINK_USER
               valueFrom:
                 secretKeyRef:
@@ -58,6 +66,8 @@ spec:
               name: frigate-config
             - mountPath: /media/frigate
               name: frigate-media
+            - name: dshm
+              mountPath: /dev/shm
       volumes:
         - name: coral-dev
           hostPath:
@@ -65,6 +75,10 @@ spec:
         - name: configmap
           configMap:
             name: frigate
+        - name: dshm
+          emptyDir:
+            medium: Memory
+            sizeLimit: 256Mi
   volumeClaimTemplates:
     - metadata:
         name: frigate-config

@@ -2,7 +2,10 @@
 - https://docs.frigate.video/frigate/installation/
 - https://github.com/blakeblackshear/blakeshome-charts/tree/master/charts/frigate
 
-## 
+## nvidia hardware acceleration
+- https://docs.k3s.io/advanced
+- https://docs.frigate.video/configuration/hardware_acceleration/
+- https://dev.to/mweibel/add-nvidia-gpu-support-to-k3s-with-containerd-4j17
 
 ### create secret
 * kubectl create secret generic -n linole  frigate-secrets --from-env-file=.env

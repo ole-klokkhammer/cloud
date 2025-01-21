@@ -40,7 +40,7 @@ ffmpeg:
 go2rtc:
   streams:
     entrance_roof: |
-      ffmpeg:http://192.168.10.154/flv?port=1935&app=bcs&stream=channel0_main.bcs&user={FRIGATE_REOLINK_USER}&password={FRIGATE_REOLINK_PASSWORD}#video=h264#audio=opus#raw=-filter_complex "[0:v]crop=450:350:1470:700,boxblur=10[mask];[0:v][mask]overlay=1470:700[v]" -map "[v]"
+      ffmpeg:http://192.168.10.154/flv?port=1935&app=bcs&stream=channel0_main.bcs&user={FRIGATE_REOLINK_USER}&password={FRIGATE_REOLINK_PASSWORD}#video=h264#audio=opus#raw=-filter_complex "[0:v]crop=450:400:1470:700,boxblur=30[mask];[0:v][mask]overlay=1470:700[v]" -map "[v]"
 
 cameras:
   # https://docs.frigate.video/configuration/camera_specific/

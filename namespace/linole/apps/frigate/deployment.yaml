@@ -72,9 +72,6 @@ spec:
         - name: coral-dev
           hostPath:
             path: /dev/bus/usb:/dev/bus/usb
-        - name: configmap
-          configMap:
-            name: frigate
         - name: dshm
           emptyDir:
             medium: Memory

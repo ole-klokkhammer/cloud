@@ -10,3 +10,19 @@ spec:
   ports:
     - port: 8971
       targetPort: 8971
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frigate-internal
+  namespace: linole
+  labels:
+    app: frigate
+spec:
+  type: NodePort
+  ports:
+    - port: 5000
+      targetPort: 5000
+      name: tcp
+  selector:
+    app: frigate

@@ -12,3 +12,8 @@
 
 # coral
 - https://coral.ai/docs/accelerator/get-started/#requirements
+
+# reolink
+- remove timestamp and logo
+- On, fluency first this sets the camera to CBR (constant bit rate)
+- Interframe Space 1x this sets the iframe interval to the same as the frame rate

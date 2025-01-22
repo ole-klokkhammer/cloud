@@ -9,58 +9,97 @@ logger:
   # Optional: module by module log level configuration
   logs:
     frigate.mqtt: error
-    frigate.event: debug
-    ffmpeg: debug
+    frigate.detectors: debug
 
 mqtt:
   host: mosquitto-internal.linole
   port: 1883
 
-detect:
-  fps: 5
-
-birdseye:
-  enabled: true
-  mode: continuous
-  restream: false
-  width: 1920
-  height: 1080
-  quality: 4
-
 detectors:
-  coral:
-    type: edgetpu
-    device: usb
+  tensorrt: # requires tensorrt image
+    type: tensorrt
+#  coral:
+#    type: edgetpu
+#    device: usb
+
+model:
+  path: /config/model_cache/tensorrt/yolov7-320.trt
+  input_tensor: nchw
+  input_pixel_format: rgb
+  width: 320
+  height: 320
 
 ffmpeg:
-  hwaccel_args: preset-nvidia-h264
-  global_args: -loglevel info -hide_banner
+  hwaccel_args: preset-nvidia
 
 # https://stackoverflow.com/questions/53518589/how-to-use-filtering-and-stream-copy-together-with-ffmpeg#53526514
+# https://docs.frigate.video/configuration/camera_specific/#reolink-cameras
 go2rtc:
   streams:
-    entrance_roof: |
-      ffmpeg:http://192.168.10.154/flv?port=1935&app=bcs&stream=channel0_main.bcs&user={FRIGATE_REOLINK_USER}&password={FRIGATE_REOLINK_PASSWORD}#video=h264#audio=opus#raw=-filter_complex "[0:v]crop=450:400:1470:700,boxblur=30[mask];[0:v][mask]overlay=1470:700[v]" -map "[v]"
-
-cameras:
-  # https://docs.frigate.video/configuration/camera_specific/
-  entrance_roof:
-    ffmpeg:
-      inputs:
-        - path: rtsp://127.0.0.1:8554/entrance_roof
-          input_args: preset-rtsp-restream
-          roles:
-            - detect
-            - record
-            - audio
+    entrance_roof:
+      - "ffmpeg:http://192.168.10.154/flv?port=1935&app=bcs&stream=channel0_main.bcs&user={FRIGATE_REOLINK_USER}&password={FRIGATE_REOLINK_PASSWORD}#video=copy#audio=copy#audio=opus"
+    entrance_roof_sub:
+      - "ffmpeg:http://192.168.10.154/flv?port=1935&app=bcs&stream=channel0_sub.bcs&user={FRIGATE_REOLINK_USER}&password={FRIGATE_REOLINK_PASSWORD}"
+  webrtc:
+    # Allow external access
+    listen: :8555
+    candidates:
+      - frigate-webrtc.linole:8555
 
 record:
-  enabled: true
+  enabled: True
   retain:
-    days: 3
+    days: 7
     mode: motion
   events:
     retain:
       default: 30
       mode: motion
+
+snapshots:
+  enabled: True
+  bounding_box: true
+  retain:
+    default: 30
+
+#video=h264#hardware#raw=-filter_complex "[0:v]crop=450:400:1470:700,boxblur=30[mask];[0:v][mask]overlay=1470:700[v]" -map "[v]"
+cameras:
+  # https://docs.frigate.video/configuration/camera_specific/
+  entrance_roof:
+    live:
+      stream_name: entrance_roof
+    detect:
+      fps: 5
+    ffmpeg:
+      output_args:
+        record: preset-record-generic-audio-copy
+      inputs:
+        - path: rtsp://127.0.0.1:8554/entrance_roof
+          input_args: preset-rtsp-restream
+          roles:
+            - record
+        - path: rtsp://127.0.0.1:8554/entrance_roof_sub
+          input_args: preset-rtsp-restream
+          roles:
+            - detect
+            - audio
+
+birdseye:
+  enabled: true
+  mode: continuous
+
+objects:
+  track:
+    - person
+    - cat
+
+review:
+  alerts:
+    labels:
+      - car
+      - cat
+      - dog
+      - person
+      - speech
+
 version: 0.14

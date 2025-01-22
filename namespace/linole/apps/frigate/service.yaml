@@ -26,3 +26,24 @@ spec:
       name: tcp
   selector:
     app: frigate
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frigate-webrtc
+  namespace: linole
+  labels:
+    app: frigate
+spec:
+  type: NodePort
+  ports:
+    - port: 8555
+      targetPort: 8555
+      name: tcp
+      protocol: TCP
+    - port: 8555
+      targetPort: 8555
+      name: udp
+      protocol: UDP
+  selector:
+    app: frigate

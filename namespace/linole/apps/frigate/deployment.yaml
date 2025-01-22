@@ -22,7 +22,7 @@ spec:
         # https://docs.frigate.video/frigate/installation/
         # https://github.com/blakeblackshear/blakeshome-charts/tree/master/charts/frigate
         - name: frigate
-          image: ghcr.io/blakeblackshear/frigate:stable
+          image: ghcr.io/blakeblackshear/frigate:stable-tensorrt # Frigate build specific for amd64 devices running an nvidia GPU
           resources:
             limits:
               nvidia.com/gpu: 1
@@ -57,11 +57,8 @@ spec:
               containerPort: 8554
               protocol: TCP
           volumeMounts:
-            - mountPath: /dev/bus/usb:/dev/bus/usb
+            - mountPath: /dev/bus/usb
               name: coral-dev
-            - mountPath: /config/config.yml
-              subPath: config.yml
-              name: configmap
             - mountPath: /config
               name: frigate-config
             - mountPath: /media/frigate
@@ -71,7 +68,7 @@ spec:
       volumes:
         - name: coral-dev
           hostPath:
-            path: /dev/bus/usb:/dev/bus/usb
+            path: /dev/bus/usb
         - name: dshm
           emptyDir:
             medium: Memory
@@ -86,7 +83,7 @@ spec:
           - ReadWriteOnce
         resources:
           requests:
-            storage: 100Mi
+            storage: 5Gi
         volumeName: frigate-config
     - metadata:
         name: frigate-media
@@ -112,7 +109,7 @@ spec:
   accessModes:
     - ReadWriteOnce
   capacity:
-    storage: 100Mi
+    storage: 5Gi
   volumeMode: Filesystem
   csi:
     driver: driver.longhorn.io

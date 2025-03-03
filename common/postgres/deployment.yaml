@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  namespace: postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+        name: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: timescale/timescaledb-ha:pg17
+          imagePullPolicy: Always
+          ports:
+            - name: postgres
+              containerPort: 5432
+          volumeMounts:
+            - name: postgres-pgsocket # use this with sidecar
+              mountPath: /var/run/postgresql
+            - name: postgres-data
+              mountPath: /home/postgres/pgdata/data
+            - name: postgres-config
+              subPath: pgbackrest.conf
+              mountPath: /home/postgres/pgdata/backup/pgbackrest.conf
+            - name: postgres-config
+              subPath: postgresql.conf
+              mountPath: /home/postgres/pgdata/data/postgresql.conf
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secrets
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secrets
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_HOST_AUTH_METHOD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secrets
+                  key: POSTGRES_HOST_AUTH_METHOD
+        - name: pgbackrest-sidecar
+          image: timescale/timescaledb-ha:pg17
+          command: ["/bin/sh", "-c", "exec python3 /scripts/pgbackrest-rest.py --stanza=poddb --loglevel=debug"]
+          volumeMounts:
+            - name: postgres-pgsocket # use this with sidecar
+              mountPath: /var/run/postgresql
+            - name: postgres-data
+              mountPath: /home/postgres/pgdata/data
+            - name: postgres-config
+              subPath: pgbackrest.conf
+              mountPath: /home/postgres/pgdata/backup/pgbackrest.conf
+      volumes:
+        - name: postgres-pgsocket
+          emptyDir: { }
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres-data
+        namespace: postgres
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: local-path
+        resources:
+          requests:
+            storage: 50Gi
+        volumeName: postgres-data
+    - metadata:
+        name:  postgres-config
+        namespace: postgres
+      spec:
+        storageClassName: longhorn-single-replica
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 500Mi
+        volumeName: postgres-config

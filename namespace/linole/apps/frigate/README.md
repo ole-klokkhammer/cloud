@@ -17,3 +17,8 @@
 - remove timestamp and logo
 - On, fluency first this sets the camera to CBR (constant bit rate)
 - Interframe Space 1x this sets the iframe interval to the same as the frame rate
+
+# frigate
+* kubectl apply -f ./config.yaml
+* kubectl apply -f ./deployment.yaml
+* kubectl apply -f ./service.yaml

@@ -10,3 +10,6 @@
 
 # nvidia gpu operator
 - git clone https://github.com/UntouchedWagons/K3S-NVidia.git
+
+# cuda?
+nvcc --version

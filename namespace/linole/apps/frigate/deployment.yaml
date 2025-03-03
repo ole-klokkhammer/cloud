@@ -33,6 +33,8 @@ spec:
               value: "all"
             - name: NVIDIA_VISIBLE_DEVICES
               value: "all"
+            - name: FRIGATE_ENTRANCE_ROOF_IP
+              value: "192.168.10.154"
             - name: FRIGATE_REOLINK_USER
               valueFrom:
                 secretKeyRef:
@@ -83,7 +85,7 @@ spec:
           - ReadWriteOnce
         resources:
           requests:
-            storage: 5Gi
+            storage: 1Gi
         volumeName: frigate-config
     - metadata:
         name: frigate-media
@@ -94,7 +96,7 @@ spec:
           - ReadWriteOnce
         resources:
           requests:
-            storage: 5Gi
+            storage: 50Gi
         volumeName: frigate-media
 ---
 apiVersion: v1
@@ -109,7 +111,7 @@ spec:
   accessModes:
     - ReadWriteOnce
   capacity:
-    storage: 5Gi
+    storage: 1Gi
   volumeMode: Filesystem
   csi:
     driver: driver.longhorn.io
@@ -130,7 +132,7 @@ spec:
   accessModes:
     - ReadWriteOnce
   capacity:
-    storage: 5Gi
+    storage: 50Gi
   volumeMode: Filesystem
   csi:
     driver: driver.longhorn.io

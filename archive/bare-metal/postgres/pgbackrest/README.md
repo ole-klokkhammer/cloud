@@ -36,3 +36,6 @@
 * add contents of cron file
 * sudo apt install postfix
 
+## Monitoring
+* sudo apt-get -y install check-pgbackrest
+* sudo check_pgbackrest --stanza=main --service=retention --retention-full=1 --output=human --retention-age=24h --retention-age-to-full=7d

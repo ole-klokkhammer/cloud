@@ -2,12 +2,15 @@
 https://metallb.universe.tf/installation/
 
 ## follow this: https://kavishgr.gitlab.io/2023/05/k3salpine/
-* kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.5/config/manifests/metallb-native.yaml
+* kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.9/config/manifests/metallb-native.yaml
 * kubectl apply -f address-pool.yaml
 * kubectl apply -f advertisement.yaml
+ 
+
+## FRR MODE???
 * kubectl apply -f peer.yaml
 *  kubectl describe -n metallb-system IPAddressPool first-pool | grep Addresses -A 2
-* FRR MODE???
+* 
 
 # pfsense 
 * https://blog.perfectra1n.com/setting-up-metallb-in-bgp-mode-with-pfsense/

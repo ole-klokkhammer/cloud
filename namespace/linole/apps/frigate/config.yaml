@@ -16,18 +16,18 @@ mqtt:
   port: 1883
 
 detectors:
-  tensorrt: # requires tensorrt image
-    type: tensorrt
-#  coral:
-#    type: edgetpu
-#    device: usb
+  #  tensorrt: # requires tensorrt image
+  #    type: tensorrt
+  coral:
+    type: edgetpu
+    device: usb
 
-model:
-  path: /config/model_cache/tensorrt/yolov7-320.trt
-  input_tensor: nchw
-  input_pixel_format: rgb
-  width: 320
-  height: 320
+#model:
+#  path: /config/model_cache/tensorrt/yolov7-320.trt
+#  input_tensor: nchw
+#  input_pixel_format: rgb
+#  width: 320
+#  height: 320
 
 ffmpeg:
   hwaccel_args: preset-nvidia
@@ -37,9 +37,9 @@ ffmpeg:
 go2rtc:
   streams:
     entrance_roof:
-      - "ffmpeg:http://192.168.10.154/flv?port=1935&app=bcs&stream=channel0_main.bcs&user={FRIGATE_REOLINK_USER}&password={FRIGATE_REOLINK_PASSWORD}#video=copy#audio=copy#audio=opus"
+      - "ffmpeg:http://{FRIGATE_ENTRANCE_ROOF_IP}/flv?port=1935&app=bcs&stream=channel0_main.bcs&user={FRIGATE_REOLINK_USER}&password={FRIGATE_REOLINK_PASSWORD}#video=copy#audio=copy#audio=opus"
     entrance_roof_sub:
-      - "ffmpeg:http://192.168.10.154/flv?port=1935&app=bcs&stream=channel0_sub.bcs&user={FRIGATE_REOLINK_USER}&password={FRIGATE_REOLINK_PASSWORD}"
+      - "ffmpeg:http://{FRIGATE_ENTRANCE_ROOF_IP}/flv?port=1935&app=bcs&stream=channel0_sub.bcs&user={FRIGATE_REOLINK_USER}&password={FRIGATE_REOLINK_PASSWORD}"
   webrtc:
     # Allow external access
     listen: :8555
@@ -51,14 +51,16 @@ record:
   retain:
     days: 7
     mode: motion
-  events:
+  alerts:
     retain:
-      default: 30
-      mode: motion
+      days: 30
+  detections:
+    retain:
+      days: 30
 
 snapshots:
   enabled: True
-  bounding_box: true
+  bounding_box: True
   retain:
     default: 30
 
@@ -85,21 +87,19 @@ cameras:
             - audio
 
 birdseye:
-  enabled: true
+  enabled: True
   mode: continuous
 
 objects:
   track:
     - person
     - cat
+    - car
 
 review:
   alerts:
     labels:
       - car
-      - cat
-      - dog
       - person
-      - speech
 
-version: 0.14
+version: 0.15-1

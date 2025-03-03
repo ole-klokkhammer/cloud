@@ -4,7 +4,7 @@
 - https://github.com/kubernetes/dashboard
 
 - helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
-- helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard --create-namespace --namespace kubernetes-dashboard
+- helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard --create-namespace --namespace kubernetes-dashboard --set kong.admin.tls.enabled=false
 
 ## docs:
 - https://github.com/kubernetes/dashboard/tree/master/docs

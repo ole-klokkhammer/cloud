@@ -1,7 +1,8 @@
 # master on x86_64 ubuntu server
 * https://docs.k3s.io/installation/requirements?os=debian 
+* https://metalcoder.dev/making-k3s-stop-hoarding-disk-space/
 
-## disable firewall
+``## disable firewall
 * ufw disable
 
 ## Define server token at ~/.k3s/k3s-server-token
@@ -21,13 +22,15 @@ server \
 'servicelb' \
 '--write-kubeconfig-mode' \
 '644' \
---datastore-endpoint \
-'postgres://username:password@hostname:port/k3s'
+--etcd-s3 \
+--etcd-s3-config-secret='etcd-s3-config' \
+--cluster-init
 "  sh -
 `
 
 ## on clients 
 * copy certificates: sudo cat /etc/rancher/k3s/k3s.yaml > ~/.kube/config
+* replace ip with actual
 
 ## system services
 
@@ -43,8 +46,11 @@ server \
 4. setup dashboard
    * cd ./kubernetes-dashboard + follow readme
  
-5. setup longhorn for block storage
-   * cd ./databases/longhorn + follow readme
+5. setup nvidia
+   * cd ./nvidia + follow readme
+ 
+6. setup longhorn
+   * cd ./longhorn + follow readme
 
 ## external database
 ### prepare database

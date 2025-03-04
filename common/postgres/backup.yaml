@@ -1,0 +1,19 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: postgres-backup
+  namespace: postgres
+spec:
+  schedule: "0 0 * * *" # Runs every day at midnight
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: curl-pgbackrest-sidecar
+              image: curlimages/curl:latest
+              args:
+                - /bin/sh
+                - -c
+                - curl -i -X POST http://postgres-internal.postgres:8081/backups
+          restartPolicy: OnFailure

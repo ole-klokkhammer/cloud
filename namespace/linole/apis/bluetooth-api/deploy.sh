@@ -3,8 +3,8 @@
 APP_NAME="bluetooth-api"
 
 # Step 1: Define the new version
-PREV_VERSION="1.0.3"
-NEW_VERSION="1.0.4"
+PREV_VERSION="1.0.9"
+NEW_VERSION="1.0.10"
 
 # Step 2: Update the Docker image version in the Kubernetes deployment configuration
 sed -i "s/olklokk\/$APP_NAME:$PREV_VERSION/olklokk\/$APP_NAME:$NEW_VERSION/g" deployment.yaml

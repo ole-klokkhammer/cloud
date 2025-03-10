@@ -8,6 +8,20 @@ spec:
   selector:
     app: bluetooth-api
   ports:
-    - port: 8000
-      targetPort: 8000
+    - port: 8080
+      targetPort: 8080
+      name: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bluetooth-api-external
+  namespace: linole
+spec:
+  type: LoadBalancer
+  selector:
+    app: bluetooth-api
+  ports:
+    - port: 8080
+      targetPort: 8080
       name: http

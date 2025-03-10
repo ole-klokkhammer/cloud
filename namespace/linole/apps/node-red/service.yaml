@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nodered
+  namespace: linole
+spec:
+  type: LoadBalancer
+  selector:
+    app: nodered
+  ports:
+    - port: 1880
+      targetPort: 1880
+      name: http

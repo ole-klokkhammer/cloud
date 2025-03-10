@@ -1,0 +1,15 @@
+services:
+  bluetooth-api:
+    build:
+        context: .
+        dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    environment:
+      - FLASK_ENV=production
+      - FLASK_PORT=8081
+    network_mode: "host"
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    restart: unless-stopped

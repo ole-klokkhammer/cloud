@@ -7,7 +7,6 @@ metadata:
     app: bluetooth-api
 spec:
   replicas: 1
-  revisionHistoryLimit: 0
   selector:
     matchLabels:
       app: bluetooth-api
@@ -28,7 +27,9 @@ spec:
                       - master0
       containers:
         - name: bluetooth-api
-          image: olklokk/bluetooth-api:1.0.4
+          image: olklokk/bluetooth-api:1.0.10
+          ports:
+            - containerPort: 8080
           securityContext:
             capabilities:
               add:

@@ -28,11 +28,8 @@ import logging
 # ===============================
 
 from bluepy.btle import UUID, Peripheral, Scanner, DefaultDelegate
-import sys
 import struct
 from flask_restful import Resource, reqparse
-
-SerialNumber = 2930018919
 
 
 # ====================================
@@ -59,7 +56,7 @@ def parseSerialNumber(ManuDataHexStr):
 # Class WavePlus
 # ===============================
 
-class WavePlus():
+class WavePlus:
 
     def __init__(self, SerialNumber):
         self.periph = None
@@ -70,34 +67,38 @@ class WavePlus():
 
     def connect(self):
         # Auto-discover device on first connection
-        if self.MacAddr is None:
-            scanner = Scanner().withDelegate(DefaultDelegate())
-            searchCount = 0
-            while self.MacAddr is None and searchCount < 50:
-                devices = scanner.scan(0.1)  # 0.1 seconds scan period
-                searchCount += 1
-                for dev in devices:
-                    ManuData = dev.getValueText(255)
-                    SN = parseSerialNumber(ManuData)
-                    if (SN == self.SN):
-                        self.MacAddr = dev.addr  # exits the while loop on next conditional check
-                        break  # exit for loop
-
+        try:
             if self.MacAddr is None:
-                logging.error( "ERROR: Could not find device.\nGUIDE: (1) Please verify the serial number.\n(2) Ensure that the device is advertising.\n(3) Retry connection.")
-                sys.exit(1)
+                scanner = Scanner().withDelegate(DefaultDelegate())
+                searchCount = 0
+                while self.MacAddr is None and searchCount < 50:
+                    devices = scanner.scan(0.1)  # 0.1 seconds scan period
+                    searchCount += 1
+                    for dev in devices:
+                        ManuData = dev.getValueText(255)
+                        SN = parseSerialNumber(ManuData)
+                        if (SN == self.SN):
+                            self.MacAddr = dev.addr  # exits the while loop on next conditional check
+                            break  # exit for loop
 
-        # Connect to device
-        if self.periph is None:
-            self.periph = Peripheral(self.MacAddr)
+                if self.MacAddr is None:
+                    raise Exception("ERROR: Could not find device.\nGUIDE: (1) Please verify the serial number.\n(2) Ensure that the device is advertising.\n(3) Retry connection.")
 
-        if self.curr_val_char is None:
-            self.curr_val_char = self.periph.getCharacteristics(uuid=self.uuid)[0]
+            # Connect to device
+            if self.periph is None:
+                self.periph = Peripheral(self.MacAddr)
+                logging.info("Connected to: %s" % self.MacAddr)
+            if self.curr_val_char is None:
+                self.curr_val_char = self.periph.getCharacteristics(uuid=self.uuid)[0]
+
+        except Exception as e:
+            logging.error(e)
+            raise e
 
     def read(self):
         if self.curr_val_char is None:
-            logging.error("ERROR: Devices are not connected.")
-            sys.exit(1)
+            raise Exception("ERROR: Device not connected.\nGUIDE: Please connect to device.")
+
         rawdata = self.curr_val_char.read()
         rawdata = struct.unpack('<BBBBHHHHHHHH', rawdata)
         sensors = Sensors()
@@ -125,7 +126,7 @@ SENSOR_IDX_CO2_LVL = 5
 SENSOR_IDX_VOC_LVL = 6
 
 
-class Sensors():
+class Sensors:
     def __init__(self):
         self.sensor_version = None
         self.sensor_data = [None] * NUMBER_OF_SENSORS
@@ -142,8 +143,7 @@ class Sensors():
             self.sensor_data[SENSOR_IDX_CO2_LVL] = rawData[8] * 1.0
             self.sensor_data[SENSOR_IDX_VOC_LVL] = rawData[9] * 1.0
         else:
-            logging.error( "ERROR: Unknown sensor version.\nGUIDE: Contact Airthings for support.\n")
-            sys.exit(1)
+            raise Exception("ERROR: Unknown sensor version.\nGUIDE: Contact Airthings for support.\n")
 
     def conv2radon(self, radon_raw):
         radon = "N/A"  # Either invalid measurement, or not available
@@ -159,50 +159,53 @@ class Sensors():
 
 
 def read_values(pin):
-    try:
-        # ---- Initialize ----#
-        waveplus = WavePlus(pin)
 
-        logging.info("Device serial number: %s" % pin)
-        header = ['Humidity', 'Radon ST avg', 'Radon LT avg', 'Temperature', 'Pressure', 'CO2 level', 'VOC level']
+    # ---- Initialize ----#
+    waveplus = WavePlus(pin)
 
-        waveplus.connect()
+    logging.info("Device serial number: %s" % pin)
+    header = ['Humidity', 'Radon ST avg', 'Radon LT avg', 'Temperature', 'Pressure', 'CO2 level', 'VOC level']
 
-        # read values
-        sensors = waveplus.read()
+    waveplus.connect()
 
-        # extract
-        humidity = str(sensors.getValue(SENSOR_IDX_HUMIDITY))
-        radon_st_avg = str(sensors.getValue(SENSOR_IDX_RADON_SHORT_TERM_AVG))
-        radon_lt_avg = str(sensors.getValue(SENSOR_IDX_RADON_LONG_TERM_AVG))
-        temperature = str(sensors.getValue(SENSOR_IDX_TEMPERATURE))
-        pressure = str(sensors.getValue(SENSOR_IDX_REL_ATM_PRESSURE))
-        CO2_lvl = str(sensors.getValue(SENSOR_IDX_CO2_LVL))
-        VOC_lvl = str(sensors.getValue(SENSOR_IDX_VOC_LVL))
+    # read values
+    sensors = waveplus.read()
 
-        waveplus.disconnect()
+    # extract
+    humidity = str(sensors.getValue(SENSOR_IDX_HUMIDITY))
+    radon_st_avg = str(sensors.getValue(SENSOR_IDX_RADON_SHORT_TERM_AVG))
+    radon_lt_avg = str(sensors.getValue(SENSOR_IDX_RADON_LONG_TERM_AVG))
+    temperature = str(sensors.getValue(SENSOR_IDX_TEMPERATURE))
+    pressure = str(sensors.getValue(SENSOR_IDX_REL_ATM_PRESSURE))
+    CO2_lvl = str(sensors.getValue(SENSOR_IDX_CO2_LVL))
+    VOC_lvl = str(sensors.getValue(SENSOR_IDX_VOC_LVL))
 
-        return {
-            'humidity': humidity,
-            'radon_st_avg': radon_st_avg,
-            'radon_lt_avg': radon_lt_avg,
-            'temperature': temperature,
-            'pressure': pressure,
-            'co2': CO2_lvl,
-            'voc': VOC_lvl
-        }
+    waveplus.disconnect()
 
-    except Exception as e:
-        print(e)
-        return
-
+    return {
+        'humidity': humidity,
+        'radon_st_avg': radon_st_avg,
+        'radon_lt_avg': radon_lt_avg,
+        'temperature': temperature,
+        'pressure': pressure,
+        'co2': CO2_lvl,
+        'voc': VOC_lvl
+    }
 
 class Airthings(Resource):
     def __init__(self):
-        self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('pin', type=int)
+        self.parser = reqparse.RequestParser()
+        self.parser.add_argument(
+            'pin',
+            type=int,
+            location='args',
+            required=True,
+            help='Pin is required and should be an integer'
+        )
 
     def get(self):
-        args = self.reqparse.parse_args()
-        logging.info(args)
-        return read_values(args['pin'])
+        args = self.parser.parse_args()
+        pin = args.get('pin')
+        if pin is None:
+            return {'message': 'Pin parameter is missing or invalid'}, 400
+        return read_values(pin)

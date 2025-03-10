@@ -77,10 +77,29 @@ def read_values(mac, pin):
 class PaxCalima(Resource):
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('mac', type=str)
-        self.reqparse.add_argument('pin', type=int)
+        self.parser.add_argument(
+            'mac',
+            type=str,
+            location='args',
+            required=True,
+            help='mac is required'
+        )
+        self.parser.add_argument(
+            'pin',
+            type=int,
+            location='args',
+            required=True,
+            help='pin is required and should be an integer'
+        )
 
     def get(self):
         args = self.reqparse.parse_args()
-        logging.info(args)
-        return read_values(args['mac'], args['pin'])
+        mac = args.get('mac')
+        pin = args.get('pin')
+        if mac is None:
+            return {'message': 'mac parameter is missing or invalid'}, 400
+        if pin is None:
+            return {'message': 'Pin parameter is missing or invalid'}, 400
+
+        return read_values(mac, pin)
+

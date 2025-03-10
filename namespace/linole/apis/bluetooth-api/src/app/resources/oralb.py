@@ -48,9 +48,17 @@ def read_values(mac):
 class OralB(Resource):
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('mac', type=str)
+        self.parser.add_argument(
+            'mac',
+            type=str,
+            location='args',
+            required=True,
+            help='mac is required'
+        )
 
     def get(self):
         args = self.reqparse.parse_args()
-        logging.info(args)
-        return read_values(args['mac'])
+        mac = args.get('mac')
+        if mac is None:
+            return {'message': 'mac parameter is missing or invalid'}, 400
+        return read_values(mac)

@@ -1,0 +1,72 @@
+receivers:
+
+  otlp:
+    protocols:
+      grpc:
+      http:
+
+#  kubeletstats:
+#    collection_interval: 10s
+#    auth_type: 'serviceAccount'
+#    endpoint: 'master0:10250'
+#    insecure_skip_verify: true
+#    metric_groups:
+#      - node
+#      - pod
+#      - container
+
+  k8s_cluster:
+    auth_type: serviceAccount
+    node_conditions_to_report:
+      - Ready
+      - MemoryPressure
+    allocatable_types_to_report:
+      - cpu
+      - memory
+
+  hostmetrics:
+    collection_interval: 30s
+    scrapers:
+      cpu:
+      load:
+      memory:
+      disk:
+      filesystem:
+      network:
+
+  filelog:
+    include:
+      - /var/log/pods/*/*/*.log
+    exclude:
+      # Exclude logs from all containers named otel-collector
+      - /var/log/pods/*/otel-collector/*.log
+    start_at: end
+    include_file_path: true
+    include_file_name: false
+    operators:
+      # parse container logs
+      - type: container
+        id: container-parser
+
+processors:
+  batch:
+
+extensions:
+  health_check:
+  pprof:
+  zpages:
+
+exporters:
+  debug:
+
+service:
+  extensions: [health_check, pprof, zpages]
+  pipelines:
+    metrics:
+      receivers: [ hostmetrics, k8s_cluster ]
+      processors: [ batch ]
+      exporters: [ debug ]
+    logs:
+      receivers: [ filelog ]
+      processors: [ batch ]
+      exporters: [ debug ]

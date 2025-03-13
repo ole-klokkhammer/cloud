@@ -1,0 +1,45 @@
+# Configure a default setup of Home Assistant (frontend, api, etc)
+default_config:
+
+
+#recorder:
+#  db_url: !secret db_url
+#  purge_keep_days: 2
+#  commit_interval: 30
+#  auto_purge: true
+
+#ltss:
+#    db_url:
+#    chunk_time_interval: 2592000000000
+#    include:
+#      domains:
+#        - sun
+#        - weather
+#        - climate
+#        - media_player
+#        - person
+#        - remote
+#
+#homeassistant:
+#  auth_mfa_modules:
+#    - type: totp
+
+mqtt_statestream:
+  base_topic: homeassistant
+  publish_attributes: true
+  publish_timestamps: true
+  include:
+    domains:
+      - sun
+      - weather
+      - climate
+      - media_player
+      - person
+      - remote
+    entities:
+      - sensor.moon
+
+
+shopping_list:
+
+sensor: !include ./sensors.yaml

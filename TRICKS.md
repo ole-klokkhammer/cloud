@@ -8,3 +8,9 @@
 #      volumeMounts:
 #        - name: kerberos-agent-hallway-data
 #          mountPath: /tmp
+
+
+# bluetooth fix ubuntu
+sudo rmmod btusb btintel
+sudo modprobe btusb btintel
+sudo service bluetooth restart

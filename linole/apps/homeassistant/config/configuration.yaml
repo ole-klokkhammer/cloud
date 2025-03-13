@@ -24,6 +24,9 @@ default_config:
 #  auth_mfa_modules:
 #    - type: totp
 
+
+mqtt: !include ./mqtt-sensors.yaml
+
 mqtt_statestream:
   base_topic: homeassistant
   publish_attributes: true
@@ -42,4 +45,4 @@ mqtt_statestream:
 
 shopping_list:
 
-sensor: !include ./sensors.yaml
+

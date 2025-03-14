@@ -50,7 +50,7 @@ spec:
                   key: POSTGRES_HOST_AUTH_METHOD
         - name: pgbackrest-sidecar
           image: timescale/timescaledb-ha:pg17
-          command: ["/bin/sh", "-c", "exec python3 /scripts/pgbackrest-rest.py --stanza=poddb --loglevel=debug"]
+          command: ["/bin/sh", "-c", "/scripts/start_pgbackrest_api.sh"]
           volumeMounts:
             - name: postgres-pgsocket # use this with sidecar
               mountPath: /var/run/postgresql
@@ -59,6 +59,9 @@ spec:
             - name: postgres-config
               subPath: pgbackrest.conf
               mountPath: /home/postgres/pgdata/backup/pgbackrest.conf
+            - name: postgres-config
+              subPath: start_pgbackrest_api.sh
+              mountPath: /scripts/start_pgbackrest_api.sh
       volumes:
         - name: postgres-pgsocket
           emptyDir: { }

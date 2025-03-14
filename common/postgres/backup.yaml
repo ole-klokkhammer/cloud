@@ -5,8 +5,11 @@ metadata:
   namespace: postgres
 spec:
   schedule: "0 0 * * *" # Runs every day at midnight
+  successfulJobsHistoryLimit: 0
+  failedJobsHistoryLimit: 2
   jobTemplate:
     spec:
+      backoffLimit: 0
       template:
         spec:
           containers:
@@ -15,5 +18,14 @@ spec:
               args:
                 - /bin/sh
                 - -c
-                - curl -i -X POST http://postgres-internal.postgres:8081/backups
+                - |
+                  response=$(curl -s -o /dev/null -w "%{http_code}" -X POST http://postgres-internal.postgres:8081/backups?type=full)
+                  echo "Backup response: $response"
+                  if [ "$response" -ge 200 ] && [ "$response" -lt 300 ]; then
+                    echo "Backup succeeded"
+                    exit 0
+                  else
+                    echo "Backup failed with status code $response"
+                    exit 1
+                  fi
           restartPolicy: Never

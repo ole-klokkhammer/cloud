@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: ollama
+  namespace: linole
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ollama
+  template:
+    metadata:
+      labels:
+        app: ollama
+        name: ollama
+    spec:
+      runtimeClassName: nvidia
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - master0
+      containers:
+        - name: ollama
+          image: ollama/ollama
+          imagePullPolicy: Always
+          securityContext:
+            privileged: true
+          resources:
+            limits:
+              nvidia.com/gpu: 3
+          env:
+            - name: NVIDIA_DRIVER_CAPABILITIES
+              value: "all"
+            - name: NVIDIA_VISIBLE_DEVICES
+              value: "all"
+          ports:
+            - name: ollama
+              containerPort: 11434
+          volumeMounts:
+            - name: ollama-data
+              mountPath: /root/.ollama
+  volumeClaimTemplates:
+    - metadata:
+        name: ollama-data
+        namespace: linole
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: local-path
+        resources:
+          requests:
+            storage: 50Gi
+        volumeName: ollama-data

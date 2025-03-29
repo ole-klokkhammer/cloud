@@ -18,6 +18,15 @@ spec:
         app: frigate
     spec:
       runtimeClassName: nvidia
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - master0
       containers:
         # https://docs.frigate.video/frigate/installation/
         # https://github.com/blakeblackshear/blakeshome-charts/tree/master/charts/frigate

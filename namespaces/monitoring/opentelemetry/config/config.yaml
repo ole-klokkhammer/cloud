@@ -58,6 +58,14 @@ extensions:
 
 exporters:
   debug:
+  rabbitmq:
+    connection:
+      endpoint: amqp://localhost:5672
+      auth:
+        plain:
+          username: user
+          password: pass
+    encoding_extension: otlp_encoding/rabbitmq
 
 service:
   extensions: [health_check, pprof, zpages]

@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: ollama
-  namespace: llm-services
+  namespace: llm-agents
 spec:
   replicas: 1
   selector:
@@ -47,7 +47,7 @@ spec:
   volumeClaimTemplates:
     - metadata:
         name: ollama-data
-        namespace: llm-services
+        namespace: llm-agents
       spec:
         accessModes:
           - ReadWriteOnce

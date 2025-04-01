@@ -11,4 +11,7 @@
 * kubectl create -f service.yaml
 * 
 # update configmap
-* kubectl create configmap otel-collector-config --from-file=./config -n monitoring --dry-run=client -o yaml | kubectl apply -f -
+* kubectl create configmap otel-collector-config --from-file=config.yaml -n monitoring --dry-run=client -o yaml | kubectl apply -f -
+
+# kafka exporter
+* https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/exporter/kafkaexporter/README.md

@@ -36,10 +36,11 @@ receivers:
 
   filelog:
     include:
-      - /var/log/pods/*/*/*.log
+      - /var/log/pods/**/*.log
     exclude:
       # Exclude logs from all containers named otel-collector
-      - /var/log/pods/*/otel-collector/*.log
+      - /var/log/pods/otel-collector*/**/*.log
+      - /var/log/pods/kubernetes-dashboard*/**/*.log
     start_at: end
     include_file_path: true
     include_file_name: false
@@ -57,15 +58,12 @@ extensions:
   zpages:
 
 exporters:
-  debug:
-  rabbitmq:
-    connection:
-      endpoint: amqp://localhost:5672
-      auth:
-        plain:
-          username: user
-          password: pass
-    encoding_extension: otlp_encoding/rabbitmq
+  kafka:
+    encoding: otlp_json
+    brokers:
+      - kafka-kafka-bootstrap.kafka:9091
+      - kafka-kafka-bootstrap.kafka:9092
+      - kafka-kafka-bootstrap.kafka:9093
 
 service:
   extensions: [health_check, pprof, zpages]
@@ -73,8 +71,8 @@ service:
     metrics:
       receivers: [ hostmetrics, k8s_cluster ]
       processors: [ batch ]
-      exporters: [ debug ]
+      exporters: [ kafka ]
     logs:
       receivers: [ filelog ]
       processors: [ batch ]
-      exporters: [ debug ]
+      exporters: [ kafka ]

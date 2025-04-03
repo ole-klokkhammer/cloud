@@ -13,3 +13,18 @@ spec:
   selector:
     app: hivemq
 ---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hivemq-internal
+  namespace: hivemq
+  labels:
+    app: hivemq
+spec:
+  type: NodePort
+  ports:
+    - port: 1883
+      targetPort: 1883
+      name: tcp
+  selector:
+    app: hivemq

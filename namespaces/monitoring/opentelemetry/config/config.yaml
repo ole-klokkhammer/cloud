@@ -1,38 +1,38 @@
 receivers:
 
-  otlp:
-    protocols:
-      grpc:
-      http:
+#  otlp:
+#    protocols:
+#      grpc:
+#      http:
 
-#  kubeletstats:
-#    collection_interval: 10s
-#    auth_type: 'serviceAccount'
-#    endpoint: 'master0:10250'
-#    insecure_skip_verify: true
-#    metric_groups:
-#      - node
-#      - pod
-#      - container
-
-  k8s_cluster:
+  kubeletstats:
+    collection_interval: 10s
     auth_type: serviceAccount
-    node_conditions_to_report:
-      - Ready
-      - MemoryPressure
-    allocatable_types_to_report:
-      - cpu
-      - memory
+    endpoint: 'master0:10250'
+    insecure_skip_verify: true
+    metric_groups:
+      - node
+      - pod
+      - container
 
-  hostmetrics:
-    collection_interval: 30s
-    scrapers:
-      cpu:
-      load:
-      memory:
-      disk:
-      filesystem:
-      network:
+#  k8s_cluster:
+#    auth_type: serviceAccount
+#    node_conditions_to_report:
+#      - Ready
+#      - MemoryPressure
+#    allocatable_types_to_report:
+#      - cpu
+#      - memory
+#
+#  hostmetrics:
+#    collection_interval: 30s
+#    scrapers:
+#      cpu:
+#      load:
+#      memory:
+#      disk:
+#      filesystem:
+#      network:
 
   filelog:
     include:
@@ -60,6 +60,8 @@ extensions:
 exporters:
   kafka:
     encoding: otlp_json
+    producer:
+      compression: gzip
     brokers:
       - kafka-kafka-bootstrap.kafka:9091
       - kafka-kafka-bootstrap.kafka:9092
@@ -69,7 +71,7 @@ service:
   extensions: [health_check, pprof, zpages]
   pipelines:
     metrics:
-      receivers: [ hostmetrics, k8s_cluster ]
+      receivers: [ kubeletstats ]
       processors: [ batch ]
       exporters: [ kafka ]
     logs:

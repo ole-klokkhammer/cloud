@@ -31,7 +31,7 @@ spec:
         # https://docs.frigate.video/frigate/installation/
         # https://github.com/blakeblackshear/blakeshome-charts/tree/master/charts/frigate
         - name: frigate
-          image: ghcr.io/blakeblackshear/frigate:stable-tensorrt # Frigate build specific for amd64 devices running an nvidia GPU
+          image: ghcr.io/blakeblackshear/frigate:stable # -tensorrt Frigate build specific for amd64 devices running an nvidia GPU
           resources:
             limits:
               nvidia.com/gpu: 1

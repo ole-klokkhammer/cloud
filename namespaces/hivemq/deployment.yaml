@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: hivemq
+  namespace: hivemq
+  labels:
+    app: hivemq
+spec:
+  replicas: 1
+  serviceName: hivemq
+  selector:
+    matchLabels:
+      app: hivemq
+  template:
+    metadata:
+      labels:
+        app: hivemq
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - master0
+      containers:
+        - name: hivemq
+          image: hivemq/hivemq-ce:latest
+          env:
+            - name: HIVEMQ_PERSISTENCE_MODE
+              value: "in-memory"
+          ports:
+            - containerPort: 1883
+              name: mqtt
+          volumeMounts:
+            - name: hivemq-extensions
+              mountPath: /opt/hivemq/extensions
+            - name: hivemq-config
+              subPath: config.xml
+              mountPath: /opt/hivemq/conf/config.xml
+      volumes:
+        - name: hivemq-config
+          configMap:
+            name: hivemq-config
+  volumeClaimTemplates:
+    - metadata:
+        name: hivemq-extensions
+        namespace: hivemq
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: local-path
+        resources:
+          requests:
+            storage: 500Mi
+        volumeName: hivemq-extensions

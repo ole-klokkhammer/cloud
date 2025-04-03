@@ -1,4 +1,19 @@
 apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaNodePool
+metadata:
+  name: dual-role
+  namespace: kafka
+  labels:
+    strimzi.io/cluster: kafka
+spec:
+  replicas: 1
+  roles:
+    - controller
+    - broker
+  storage:
+    type: ephemeral
+---
+apiVersion: kafka.strimzi.io/v1beta2
 kind: Kafka
 metadata:
   name: kafka
@@ -28,19 +43,3 @@ spec:
   entityOperator:
     topicOperator: {}
     userOperator: {}
----
-apiVersion: kafka.strimzi.io/v1beta2
-kind: KafkaNodePool
-metadata:
-  name: dual-role
-  namespace: kafka
-  labels:
-    strimzi.io/cluster: kafka
-spec:
-  replicas: 1
-  roles:
-    - controller
-    - broker
-  storage:
-    type: ephemeral
----

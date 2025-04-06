@@ -4,4 +4,6 @@ WORKDIR /app
 ADD ./app /app
 RUN pip install --no-cache-dir -r requirements.txt
 
-CMD ["python", "app.py"]
+ENV API_PORT=8080
+
+CMD uvicorn app:app --port $API_PORT

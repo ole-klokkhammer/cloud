@@ -1,22 +1,37 @@
 #!/usr/bin/python3
 
-import waitress
 import logging
-import os
-from flask import Flask, request
-from flask_restful import Resource, Api
-from resources.airthings import Airthings
-from resources.paxcalima import PaxCalima
-from resources.oralb import OralB
+from quart import Quart, jsonify, request
 
-logging.basicConfig(level=logging.DEBUG)
+import resources.bluetooth as bluetooth
+import resources.airthings as airthings
+
+logging.basicConfig(level=logging.INFO)
 logging.info("Starting Bluetooth API")
-app = Flask(__name__)
-api = Api(app)
+app = Quart(__name__)
 
-api.add_resource(Airthings, '/airthings')
-api.add_resource(PaxCalima, '/paxcalima')
-api.add_resource(OralB, '/oralb')
 
-if __name__ == '__main__':
-    waitress.serve(app, port=int(os.getenv('FLASK_PORT', 8080)))
+@app.route('/bluetooth/scan')
+async def bluetooth_scan():
+    timeout = request.args.get('timeout', default=5, type=int)
+    device_list = await bluetooth.scan(timeout)
+    return jsonify(device_list)
+
+
+@app.route('/bluetooth/<address>', methods=['GET'])
+async def bluetooth_connect(address: str):
+    device_list = await bluetooth.connect(address)
+    return jsonify(device_list)
+
+
+@app.route('/airthings/manufacturer/<manufacturer_id>', methods=['GET'])
+async def airthings_parse_manufacturer_id(manufacturer_id: str):
+    return jsonify(airthings.airthings_manufacturer_id(manufacturer_id))
+
+
+@app.route('/airthings/sensor/<sensor_data>', methods=['GET'])
+async def airthings_parse_sensor(sensor_data: str):
+    return jsonify(airthings.sensor_data(bytearray.fromhex(sensor_data)))
+
+
+app.run()

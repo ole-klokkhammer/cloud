@@ -1,8 +1,8 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: bluetooth-api
-  namespace: linole
+  namespace: bluetooth
   labels:
     app: bluetooth-api
 spec:
@@ -15,7 +15,6 @@ spec:
       labels:
         app: bluetooth-api
     spec:
-      hostNetwork: true
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -27,11 +26,26 @@ spec:
                       - master0
       containers:
         - name: bluetooth-api
-          image: olklokk/bluetooth-api:1.0.10
+          image: olklokk/bluetooth-api:1.1.1
           ports:
             - containerPort: 8080
+          env:
+            - name: LOG_LEVEL
+              value: "info"
+            - name: API_PORT
+              value: "8080"
           securityContext:
             capabilities:
               add:
                 - NET_ADMIN
                 - NET_RAW
+            appArmorProfile:
+              type: Unconfined
+          volumeMounts:
+            - mountPath: /var/run/dbus
+              name: dbus-socket
+      volumes:
+        - name: dbus-socket
+          hostPath:
+            path: /var/run/dbus
+            type: Directory

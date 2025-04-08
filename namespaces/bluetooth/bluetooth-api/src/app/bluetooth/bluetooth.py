@@ -5,7 +5,7 @@ import uuid
 from dataclasses import field, dataclass
 from typing import Any, Optional, Dict
 
-import resources.utils as utils
+from common import utils
 from bleak import BleakScanner, AdvertisementData, BLEDevice, BleakClient, BleakError
 
 
@@ -54,7 +54,7 @@ async def scan(timeout: int):
             "address": device.address,
             "rssi": ad_data.rssi,
             "manufacturer_data": {
-                k: utils.hex_bytes_as_str(v)
+                k: utils.bytes_as_str(v)
                 for k, v in ad_data.manufacturer_data.items()
             },
         }
@@ -78,7 +78,7 @@ async def connect(address: str) -> BLEDeviceResponse:
                     if "read" in characteristic.properties:
                         gatt_value = await client.read_gatt_char(characteristic.uuid)
                         char_value.value = Value(
-                            hex=utils.hex_bytes_as_str(gatt_value),
+                            hex=utils.bytes_as_str(gatt_value),
                             utf8=gatt_value.decode("utf-8", errors="ignore")
                         )
                     else:
@@ -92,7 +92,7 @@ async def connect(address: str) -> BLEDeviceResponse:
                     try:
                         desc_data = await client.read_gatt_descriptor(descriptor.handle)
                         desc_value.value = Value(
-                            hex=utils.hex_bytes_as_str(desc_data),
+                            hex=utils.bytes_as_str(desc_data),
                             utf8=desc_data.decode("utf-8", errors="ignore")
                         )
                     except BleakError as e:

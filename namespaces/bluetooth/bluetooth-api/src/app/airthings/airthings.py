@@ -3,7 +3,10 @@ import binascii
 import logging
 import struct
 from typing import Optional
-from resources import bluetooth
+from uuid import UUID
+
+from airthings.models import BatteryStatus, SensorData
+from bluetooth import bluetooth
 
 # https://github.com/Airthings/airthings-ble/blob/main/airthings_ble/const.py
 
@@ -11,39 +14,17 @@ wave_plus_command_format_type = "<L2BH2B9H"
 wave_plus_connect_format_type = "<4B8H"
 
 
-async def wave_plus_read_sensor_data(address: str):
+async def read_wave_plus_read_sensor_data(address: str) -> Optional[SensorData]:
     response = await bluetooth.connect(address=address)
     service = response.services["b42e1c08-ade7-11e4-89d3-123b93f75cba"]
     characteristic = service.characteristics["b42e2a68-ade7-11e4-89d3-123b93f75cba"]
-    return wave_plus_sensor_data(bytearray.fromhex(characteristic.value.hex))
+    return parse_wave_plus_sensor_data(bytearray.fromhex(characteristic.value.hex))
 
 
-def wave_plus_manufacturer_data(value: bytearray) -> Optional[int]:
-    if not value or value == "None":
-        return None
-    return value[0] | (value[1] << 8) | (value[2] << 16) | (value[3] << 24)
-
-
-def wave_plus_sensor_data(raw_data: bytearray) -> dict[str, float | None | str]:
-    val = struct.unpack(wave_plus_connect_format_type, raw_data)
-    return {
-        "humidity": val[1] / 2.0,
-        "illuminance": int(val[2] / 255 * 100),
-        "radon_1day_avg": val[4],
-        "radon_longterm_avg": val[5],
-        "temperature": val[6] / 100.0,
-        "pressure": val[7] / 50.0,
-        "co2": val[8] * 1.0,
-        "voc": val[9] * 1.0,
-        # "extra1": val[10] * 1.0,
-        # "extra2": val[11] * 1.0
-    }
-
-
-async def read_wave_plus_battery(address: str) -> Optional[float]:
+async def read_wave_plus_battery(address: str) -> Optional[BatteryStatus]:
     response = await bluetooth.send_command(
         address=address,
-        characteristic="b42e2d06-ade7-11e4-89d3-123b93f75cba",
+        characteristic=UUID("b42e2d06-ade7-11e4-89d3-123b93f75cba"),
         command=bytearray(b"\x6D"),
         format_type=wave_plus_command_format_type,
     )
@@ -56,7 +37,32 @@ async def read_wave_plus_battery(address: str) -> Optional[float]:
 
     battery_volt = float(data[13] / 1000.0)
     bat_per = battery_percentage(battery_volt)
-    return bat_per if bat_per else None
+    return BatteryStatus(
+        voltage=battery_volt,
+        percentage=bat_per,
+    )
+
+
+def parse_pin_from_manufacturer_data(value: bytearray) -> Optional[int]:
+    if not value or value == "None":
+        return None
+    return value[0] | (value[1] << 8) | (value[2] << 16) | (value[3] << 24)
+
+
+def parse_wave_plus_sensor_data(raw_data: bytearray) -> SensorData:
+    val = struct.unpack(wave_plus_connect_format_type, raw_data)
+    return SensorData(
+        humidity=val[1] / 2.0,
+        illuminance=int(val[2] / 255 * 100),
+        radon_1day_avg=val[4],
+        radon_longterm_avg=val[5],
+        temperature=val[6] / 100.0,
+        pressure=val[7] / 50.0,
+        co2=val[8] * 1.0,
+        voc=val[9] * 1.0,
+        # extra1=val[10] * 1.0,
+        # extra2=val[11] * 1.0
+    )
 
 
 def battery_percentage(voltage: float) -> int:

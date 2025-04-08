@@ -1,15 +1,17 @@
 #!/usr/bin/python3
 
 import logging
+import os
 import uuid
 
 from quart import Quart, jsonify, request
 
-import resources.bluetooth as bluetooth
-import resources.airthings as airthings
-from resources import utils
+from bluetooth import bluetooth
+from airthings import airthings
+from common import utils
 
-logging.basicConfig(level=logging.INFO)
+log_level = os.getenv("LOG_LEVEL", "INFO").upper()
+logging.basicConfig(level=getattr(logging, log_level, logging.INFO))
 logging.info("Starting Bluetooth API")
 app = Quart(__name__)
 
@@ -37,31 +39,28 @@ async def bluetooth_read_characteristics(address: str, characteristic: uuid.UUID
         command=bytearray.fromhex(command_hex),
         format_type=format_type,
     )
-    return jsonify(utils.hex_bytes_as_str(response))
+    return jsonify(utils.bytes_as_str(response))
 
 
 @app.route('/airthings/<address>', methods=['GET'])
-async def airthings_waveplus_read_sensor_data(address: str):
-    response = await airthings.wave_plus_read_sensor_data(address)
+async def airthings_read_sensor_data(address: str):
+    response = await airthings.read_wave_plus_read_sensor_data(address)
     return jsonify(response)
 
 
 @app.route('/airthings/<address>/battery', methods=['GET'])
-async def airthings_waveplus_read_battery(address: str):
+async def airthings_read_battery(address: str):
     value = await airthings.read_wave_plus_battery(address)
     return jsonify(value)
 
 
 @app.route('/airthings/parse/manufacturer-data', methods=['GET'])
-async def airthings_waveplus_parse_pin_from_manufacturer_data():
+async def airthings_parse_pin_from_manufacturer_data():
     hex_value = request.args.get('hex_value', type=str)
-    return jsonify(airthings.wave_plus_manufacturer_data(bytearray.fromhex(hex_value)))
+    return jsonify(airthings.parse_pin_from_manufacturer_data(bytearray.fromhex(hex_value)))
 
 
 @app.route('/airthings/parse/sensor-data', methods=['GET'])
-async def airthings_waveplus_parse_sensor_data():
+async def airthings_parse_sensor_data():
     hex_value = request.args.get('hex_value', type=str)
-    return jsonify(airthings.wave_plus_sensor_data(bytearray.fromhex(hex_value)))
-
-
-app.run()
+    return jsonify(airthings.parse_wave_plus_sensor_data(bytearray.fromhex(hex_value)))

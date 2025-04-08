@@ -16,6 +16,11 @@ spec:
       containers:
         - name: kafka-ui
           image: provectuslabs/kafka-ui:latest
+          resources:
+            limits:
+              memory: "512Mi"
+            requests:
+              memory: "256Mi"
           ports:
             - containerPort: 8080
           env:

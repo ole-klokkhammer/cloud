@@ -57,3 +57,7 @@ server \
 * sudo -u postgres psql -c "CREATE DATABASE k3s;"
 * sudo -u postgres psql -c "CREATE USER k3s WITH PASSWORD <input from keystore>;"
 * sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE k3s TO k3s;"
+
+## clients
+* copy /etc/rancher/k3s/k3s.yaml from the master node to local ~/.kube/config
+* replace the master node ip with the actual ip

@@ -12,7 +12,7 @@ logger:
     frigate.detectors: debug
 
 mqtt:
-  host: mosquitto-internal.linole
+  host: hivemq-internal.hivemq
   port: 1883
 
 detectors:

@@ -10,6 +10,10 @@ spec:
   ports:
     - port: 1883
       targetPort: 1883
+      name: mqtt
+    - port: 8000
+      targetPort: 8000
+      name: wss
   selector:
     app: hivemq
 ---
@@ -26,5 +30,8 @@ spec:
     - port: 1883
       targetPort: 1883
       name: tcp
+    - port: 8000
+      targetPort: 8000
+      name: wss
   selector:
     app: hivemq

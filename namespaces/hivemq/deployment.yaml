@@ -31,9 +31,17 @@ spec:
           env:
             - name: HIVEMQ_PERSISTENCE_MODE
               value: "in-memory"
+            - name: HIVEMQ_WEBSOCKET_ENABLED
+              value: "true"
+            - name: HIVEMQ_WEBSOCKET_PORT
+              value: "8000"
+            - name: HIVEMQ_WEBSOCKET_PATH
+              value: "/mqtt"
           ports:
             - containerPort: 1883
               name: mqtt
+            - containerPort: 8000
+              name: websocket
           volumeMounts:
             - name: hivemq-extensions
               mountPath: /opt/hivemq/extensions

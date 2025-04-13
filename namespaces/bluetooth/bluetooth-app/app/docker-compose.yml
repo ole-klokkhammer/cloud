@@ -1,0 +1,11 @@
+services:
+  bluetooth-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # image: olklokk/bluetooth-app:1.0.0
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    environment:
+      - MQTT_SERVER=ws://hivemq-internal.hivemq:8000/mqtt

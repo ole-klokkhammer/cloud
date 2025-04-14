@@ -8,4 +8,4 @@ services:
       - "3000:3000"
     restart: unless-stopped
     environment:
-      - MQTT_SERVER=ws://hivemq-internal.hivemq:8000/mqtt
+      - MQTT_SERVER=ws://192.168.10.207:8000/mqtt

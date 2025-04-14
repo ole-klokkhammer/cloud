@@ -31,4 +31,4 @@ spec:
             - containerPort: 3000
           env: 
             - name: MQTT_SERVER
-              value: "ws://hivemq-internal.hivemq:8000/mqtt"
+              value: ws://192.168.10.207:8000/mqtt

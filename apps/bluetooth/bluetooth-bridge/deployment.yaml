@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: bluetooth-bridge
+  namespace: bluetooth
+  labels:
+    app: bluetooth-bridge
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bluetooth-bridge
+  template:
+    metadata:
+      labels:
+        app: bluetooth-bridge
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - master0
+      containers:
+        - name: bluetooth-bridge
+          image: olklokk/bluetooth-bridge:1.0.11
+          env:
+            - name: LOG_LEVEL
+              value: "info"
+            - name: MQTT_BROKER
+              value: "hivemq-internal.hivemq"
+            - name: MQTT_PORT
+              value: "1883"
+            - name: MQTT_CLIENT_ID
+              value: "bluetooth_bridge"
+            - name: GENERIC_BLE_SCAN_CRON
+              value: "*/5 * * * *"
+            - name: AIRTHINGS_WAVE_PLUS_SENSOR_DATA_CRON
+              value: "*/15 * * * *"
+            - name: AIRTHINGS_WAVE_PLUS_BASEMENT
+              value: "F4:60:77:6D:33:C0"
+            - name: AIRTHINGS_WAVE_PLUS_LIVING_ROOM
+              value: "F4:60:77:70:58:EA"
+            - name: AIRTHINGS_WAVE_PLUS_BEDROOM
+              value: "A4:DA:32:28:C4:2F"
+          securityContext:
+            capabilities:
+              add:
+                - NET_ADMIN
+                - NET_RAW
+            appArmorProfile:
+              type: Unconfined
+          volumeMounts:
+            - mountPath: /var/run/dbus
+              name: dbus-socket
+      volumes:
+        - name: dbus-socket
+          hostPath:
+            path: /var/run/dbus
+            type: Directory

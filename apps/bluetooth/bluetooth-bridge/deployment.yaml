@@ -26,7 +26,7 @@ spec:
                       - master0
       containers:
         - name: bluetooth-bridge
-          image: olklokk/bluetooth-bridge:1.0.11
+          image: olklokk/bluetooth-bridge:1.0.12
           env:
             - name: LOG_LEVEL
               value: "info"
@@ -36,10 +36,12 @@ spec:
               value: "1883"
             - name: MQTT_CLIENT_ID
               value: "bluetooth_bridge"
-            - name: GENERIC_BLE_SCAN_CRON
+            - name: CRON_GENERIC_BLE_SCAN
               value: "*/5 * * * *"
-            - name: AIRTHINGS_WAVE_PLUS_SENSOR_DATA_CRON
+            - name: CRON_AIRTHINGS_WAVE_PLUS_SENSOR_DATA
               value: "*/15 * * * *"
+            - name: CRON_AIRTHINGS_WAVE_PLUS_BATTERY
+              value: "0 1 * * *"
             - name: AIRTHINGS_WAVE_PLUS_BASEMENT
               value: "F4:60:77:6D:33:C0"
             - name: AIRTHINGS_WAVE_PLUS_LIVING_ROOM

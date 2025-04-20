@@ -7,22 +7,22 @@ import airthings
 
 
 def schedule(scheduler, mac, sensor_name):
-    async def sensor_task():
-        await airthings.utils.update_sensor_data(mac, sensor_name)
+    def sensor_task():
+        task_queue.add_task(lambda: airthings.utils.update_sensor_data(mac, "bluetooth/airthings/" + sensor_name)) 
 
-    async def battery_task():
-        await airthings.utils.update_wave_plus_battery(mac, sensor_name)
+    def battery_task():
+        task_queue.add_task(lambda: airthings.utils.update_wave_plus_battery(mac, "bluetooth/airthings/" + sensor_name + "/battery")) 
 
     scheduler.add_job(
-        lambda: task_queue.add_task(sensor_task), 
+        sensor_task, 
         trigger=CronTrigger.from_crontab(env.airthings_wave_plus_sensor_data_cron), 
-        name=f"airthings_wave_plus_sensor_data_{sensor_name}_task"
+        name=f"airthings_wave_plus_{sensor_name}_sensor_data_task"
     )
 
     scheduler.add_job(
-        lambda: task_queue.add_task(battery_task), 
+        battery_task, 
         trigger=CronTrigger.from_crontab(env.airthings_wave_plus_battery_cron), 
-        name=f"airthings_wave_plus_battery_{sensor_name}_task"
+        name=f"airthings_wave_plus_{sensor_name}_battery_task"
     )
 
 

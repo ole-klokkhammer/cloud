@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: neo-app
+  namespace: neo
+  labels:
+    app: neo-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: neo-app
+  template:
+    metadata:
+      labels:
+        app: neo-app
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - master0
+      containers:
+        - name: neo-app
+          image: olklokk/neo-app:0.9.14
+          ports:
+            - containerPort: 3000
+          env: 
+            - name: MQTT_SERVER
+              value: ws://hivemq-internal.hivemq:8000/mqtt

@@ -17,10 +17,11 @@ async def scan_task():
         logging.error(f"Unexpected error while scanning ble: {e}")
 
 def schedule_scan(scheduler):  
-    async def task():
-        await scan_task() 
+    def task():
+        task_queue.add_task(lambda: scan_task()) 
+
     scheduler.add_job(
-        lambda: task_queue.add_task(task), 
+        task, 
         trigger=CronTrigger.from_crontab(env.generic_ble_scan_cron), 
         name="bluetooth_scan_task"
     ) 

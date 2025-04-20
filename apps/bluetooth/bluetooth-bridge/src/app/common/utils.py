@@ -1,6 +1,5 @@
 #!/usr/bin/python3
-import binascii
-import json
+import binascii 
 import logging
 from paho.mqtt import MQTTException, publish
 import env 
@@ -21,5 +20,7 @@ def publish_payload(topic, payload: str):
         ) 
     except MQTTException as e:
         logging.error(f"Failed to publish to MQTT: {e}")
+        raise
     except Exception as e:
         logging.error(f"Unexpected error publishing to MQTT: {e}")
+        raise

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-APP_NAME="neo-app"
+APP_NAME="neo-web"
 
 # Step 1: Auto-bump the patch version
 PREV_VERSION=$(grep -oP 'olklokk/'"$APP_NAME"':\K[0-9]+\.[0-9]+\.[0-9]+' deployment.yaml)

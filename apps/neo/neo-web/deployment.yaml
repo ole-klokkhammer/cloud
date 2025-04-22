@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: neo-app
+  name: neo-web
   namespace: neo
   labels:
-    app: neo-app
+    app: neo-web
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: neo-app
+      app: neo-web
   template:
     metadata:
       labels:
-        app: neo-app
+        app: neo-web
     spec:
       affinity:
         nodeAffinity:
@@ -25,8 +25,8 @@ spec:
                     values:
                       - master0
       containers:
-        - name: neo-app
-          image: olklokk/neo-app:0.9.14
+        - name: neo-web
+          image: olklokk/neo-web:0.9.14
           ports:
             - containerPort: 3000
           env: 

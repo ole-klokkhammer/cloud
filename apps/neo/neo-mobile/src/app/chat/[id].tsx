@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, FlatList, Text, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
-import { styles } from './styles';
+import { FlatList, KeyboardAvoidingView, Platform } from 'react-native';
+import { useChatStyles } from './styles';
+import { ThemedView } from '@/components/ui/theme/ThemedView';
+import { ThemedText } from '@/components/ui/theme/ThemedText';
+import { ThemedInput } from '@/components/ui/theme/ThemedInput';
+import { ThemedButton } from '@/components/ui/theme/ThemedButton';
 
 type Message = {
   id: string;
@@ -24,6 +28,8 @@ export default function ChatScreen() {
     setInput('');
   };
 
+  const styles = useChatStyles();
+
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -34,26 +40,26 @@ export default function ChatScreen() {
         data={messages}
         keyExtractor={item => item.id}
         renderItem={({ item }) => (
-          <View
+          <ThemedView
             style={[
               styles.message,
               item.sender === 'me' ? styles.myMessage : styles.otherMessage,
             ]}
           >
-            <Text style={styles.messageText}>{item.text}</Text>
-          </View>
+            <ThemedText style={styles.messageText}>{item.text}</ThemedText>
+          </ThemedView>
         )}
         contentContainerStyle={styles.messagesContainer}
       />
-      <View style={styles.inputContainer}>
-        <TextInput
+      <ThemedView style={styles.inputContainer}>
+        <ThemedInput
           style={styles.input}
           value={input}
           onChangeText={setInput}
           placeholder="Type a message..."
         />
-        <Button title="Send" onPress={sendMessage} />
-      </View>
+        <ThemedButton title="Send" onPress={sendMessage} />
+      </ThemedView>
     </KeyboardAvoidingView>
   );
 }

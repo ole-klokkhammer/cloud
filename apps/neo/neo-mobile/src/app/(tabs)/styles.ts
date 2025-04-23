@@ -3,10 +3,10 @@ import { StyleSheet } from 'react-native';
 export const styles = StyleSheet.create({
     pageHeaderLogo: {
         width: '100%',
-        height: 250,
+        height: 300,
         resizeMode: 'cover',
         alignSelf: 'center',
-        marginBottom: 16,
+        marginBottom: 8,
     },
     chatListContainer: {
         marginTop: 20,

@@ -19,7 +19,10 @@ export default function HomeScreen() {
       data={chats}
       keyExtractor={item => item.id}
       ListHeaderComponent={
-        <MatrixBackground />
+        <Image
+          source={require('@/assets/images/neo/neo_v2.png')}
+          style={styles.pageHeaderLogo}
+        />
       }
       contentContainerStyle={styles.chatListContainer}
       renderItem={({ item }) => (

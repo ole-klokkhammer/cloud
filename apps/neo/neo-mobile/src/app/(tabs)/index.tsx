@@ -1,7 +1,9 @@
 import { FlatList, Image, TouchableOpacity, View } from 'react-native';
-import { ThemedText } from '@/components/ui/theme/ThemedText';
+import { ThemedText } from '@/components/ui/text/ThemedText';
 import { useRouter } from 'expo-router';
 import { styles } from './styles';
+import { ThemedView } from '@/components/ui/view/ThemedView';
+import MatrixBackground from '@/components/ui/background/MatrixBackground';
 
 const chats = [
   { id: '1', name: 'Alice', lastMessage: 'Hey, how are you?' },
@@ -17,10 +19,7 @@ export default function HomeScreen() {
       data={chats}
       keyExtractor={item => item.id}
       ListHeaderComponent={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.pageHeaderLogo}
-        />
+        <MatrixBackground />
       }
       contentContainerStyle={styles.chatListContainer}
       renderItem={({ item }) => (
@@ -32,10 +31,10 @@ export default function HomeScreen() {
             source={require('@/assets/images/favicon.png')}
             style={styles.chatAvatar}
           />
-          <View style={styles.chatTextContainer}>
+          <ThemedView style={styles.chatTextContainer}>
             <ThemedText style={styles.chatName}>{item.name}</ThemedText>
             <ThemedText style={styles.chatLastMessage}>{item.lastMessage}</ThemedText>
-          </View>
+          </ThemedView>
         </TouchableOpacity>
       )}
     />

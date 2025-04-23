@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FlatList, KeyboardAvoidingView, Platform } from 'react-native';
 import { useChatStyles } from './styles';
-import { ThemedView } from '@/components/ui/theme/ThemedView';
-import { ThemedText } from '@/components/ui/theme/ThemedText';
-import { ThemedInput } from '@/components/ui/theme/ThemedInput';
-import { ThemedButton } from '@/components/ui/theme/ThemedButton';
+import { ThemedView } from '@/components/ui/view/ThemedView';
+import { ThemedText } from '@/components/ui/text/ThemedText';
+import { ThemedInput } from '@/components/ui/input/ThemedInput';
+import { ThemedButton } from '@/components/ui/button/ThemedButton';
+import { useNavigation } from 'expo-router';
 
 type Message = {
   id: string;
@@ -27,6 +28,11 @@ export default function ChatScreen() {
     ]);
     setInput('');
   };
+
+  const navigation = useNavigation();
+  useEffect(() => {
+    navigation.setOptions({ title: `Chat with test` });
+  }, [navigation]);
 
   const styles = useChatStyles();
 

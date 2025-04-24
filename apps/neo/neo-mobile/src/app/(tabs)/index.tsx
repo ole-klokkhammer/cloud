@@ -3,12 +3,11 @@ import { ThemedText } from '@/components/ui/text/ThemedText';
 import { useRouter } from 'expo-router';
 import { styles } from './styles';
 import { ThemedView } from '@/components/ui/view/ThemedView';
-import MatrixBackground from '@/components/ui/background/MatrixBackground';
 
 const chats = [
-  { id: '1', name: 'Alice', lastMessage: 'Hey, how are you?' },
-  { id: '2', name: 'Bob', lastMessage: 'Let\'s catch up tomorrow.' },
-  { id: '3', name: 'Charlie', lastMessage: 'See you at the meeting.' },
+  { id: '1', name: 'Default Mode', lastMessage: 'Error in bluetooth-bridge' },
+  { id: '2', name: 'Homeassistant', lastMessage: 'Frigate says theres a cat in the hallway' },
+  { id: '3', name: 'Sensors', lastMessage: 'High co2 in the livingroom.' },
 ];
 
 export default function HomeScreen() {

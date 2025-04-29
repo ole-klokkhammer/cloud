@@ -1,12 +1,12 @@
 import { FlatList, Image, TouchableOpacity, View } from 'react-native';
-import { ThemedText } from '@/components/ui/text/ThemedText';
+import { ThemedText } from '@/components/text/ThemedText';
 import { useRouter } from 'expo-router';
 import { styles } from './styles';
-import { ThemedView } from '@/components/ui/view/ThemedView';
+import { ThemedView } from '@/components/view/ThemedView';
 
 const chats = [
-  { id: '1', name: 'Default Mode', lastMessage: 'Error in bluetooth-bridge' },
-  { id: '2', name: 'Homeassistant', lastMessage: 'Frigate says theres a cat in the hallway' },
+  { id: '1', name: 'Kubernetes', lastMessage: 'Error in bluetooth-bridge' },
+  { id: '2', name: 'Frigate', lastMessage: 'Theres a cat in the hallway' },
   { id: '3', name: 'Sensors', lastMessage: 'High co2 in the livingroom.' },
 ];
 

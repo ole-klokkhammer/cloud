@@ -1,29 +1,18 @@
+import { v4 as uuidv4 } from 'uuid';
 import React, { useEffect, useState } from 'react';
-import { FlatList, KeyboardAvoidingView, Platform } from 'react-native';
-import { useChatStyles } from '../../screens/chat/chat.screen.styles';
-import { ThemedView } from '@/components/view/ThemedView';
-import { ThemedText } from '@/components/text/ThemedText';
-import { ThemedInput } from '@/components/input/ThemedInput';
-import { ThemedButton } from '@/components/button/ThemedButton';
 import { useNavigation } from 'expo-router';
-import { Client, Message as MqttMessage } from 'paho-mqtt';
+import mqtt from 'mqtt';
+import ChatScreen, { ChatMessage } from '@/screens/chat/chat.screen';
 
-const messageData: Message[] = [
+const messageData: ChatMessage[] = [
   { id: '1', text: 'Hello!', sender: 'other' },
   { id: '2', text: 'Hi there!', sender: 'me' },
 ]
 
-type Message = {
-  id: string;
-  text: string;
-  sender: 'me' | 'other';
-};
-
-export default function ChatScreen() {
+export default function Chat() {
   const navigation = useNavigation();
-  const styles = useChatStyles();
 
-  const [messages, setMessages] = useState<Message[]>(messageData);
+  const [messages, setMessages] = useState<ChatMessage[]>(messageData);
   const [input, setInput] = useState('');
 
   const sendMessage = () => {
@@ -41,72 +30,47 @@ export default function ChatScreen() {
   }, [navigation]);
 
   useEffect(() => {
-    const useSSL = false;
-    const client = new Client(
-      'ws://192.168.10.207:8000/mqtt',
-      'clientId-222'
+    const client = mqtt.connect('ws://192.168.10.207:8000/mqtt',
+      { clientId: 'clientId-222', reconnectPeriod: 2000 }
     );
 
-    client.onConnectionLost = (responseObject) => {
-      if (responseObject.errorCode !== 0) {
-        console.log('Connection lost:', responseObject.errorMessage);
-      }
-    };
-
-    client.onMessageArrived = (message: MqttMessage) => {
-      console.log(message.destinationName, message.payloadString);
-    };
-
-    client.connect({
-      onSuccess: () => {
-        console.log('Connected!');
-        client.subscribe('frigate/#');
-        const msg = new MqttMessage('Hello from React Native!');
-        msg.destinationName = 'test/topic';
-        client.send(msg);
-      },
-      useSSL,
-      timeout: 3,
-      onFailure: (err) => {
-        console.log('Connection failed:', err);
-      },
+    client.on('connect', () => {
+      console.log('Connected to MQTT broker');
     });
 
+    client.on('close', () => {
+      console.log('MQTT connection closed');
+    });
+
+    client.on('offline', () => {
+      console.log('MQTT client is offline');
+    });
+
+    client.on('error', (err) => {
+      console.log('MQTT error:', err);
+    });
+
+    client.on('message', (topic, message) => {
+      const newMessage: ChatMessage = {
+        id: uuidv4(),
+        text: message.toString(),
+        sender: 'other',
+      };
+      setMessages((prevMessages) => [...prevMessages, newMessage]);
+    });
+
+    client.subscribe('neo/stream/kubernetes');
+
     return () => {
-      client.disconnect();
+      client.end();
     };
   }, []);
 
-  return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      keyboardVerticalOffset={80}
-    >
-      <FlatList
-        data={messages}
-        keyExtractor={item => item.id}
-        renderItem={({ item }) => (
-          <ThemedView
-            style={[
-              styles.message,
-              item.sender === 'me' ? styles.myMessage : styles.otherMessage,
-            ]}
-          >
-            <ThemedText style={styles.messageText}>{item.text}</ThemedText>
-          </ThemedView>
-        )}
-        contentContainerStyle={styles.messagesContainer}
-      />
-      <ThemedView style={styles.inputContainer}>
-        <ThemedInput
-          style={styles.input}
-          value={input}
-          onChangeText={setInput}
-          placeholder="Type a message..."
-        />
-        <ThemedButton title="Send" onPress={sendMessage} />
-      </ThemedView>
-    </KeyboardAvoidingView>
-  );
+
+  return <ChatScreen
+    messages={messages}
+    input={input}
+    setInput={setInput}
+    sendMessage={sendMessage}
+  />;
 }

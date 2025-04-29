@@ -25,13 +25,7 @@
     },
     "plugins": [
       [
-        "expo-router",
-        {
-          "unstable_exclude": [
-            "**/__tests__/**",
-            "**/*.test.tsx"
-          ]
-        }
+        "expo-router"
       ],
       [
         "expo-splash-screen",

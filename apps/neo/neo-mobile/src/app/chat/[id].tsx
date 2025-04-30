@@ -2,7 +2,8 @@ import { v4 as uuidv4 } from 'uuid';
 import React, { useEffect, useState } from 'react';
 import { useNavigation } from 'expo-router';
 import mqtt from 'mqtt';
-import ChatScreen, { ChatMessage } from '@/screens/chat/chat.screen';
+import ChatScreen, { ChatMessage } from '@/views/screens/chat/chat.screen';
+import { useMqttSubscription } from '@/hooks/mqtt/useMqttSubscription';
 
 const messageData: ChatMessage[] = [
   { id: '1', text: 'Hello!', sender: 'other' },
@@ -11,17 +12,19 @@ const messageData: ChatMessage[] = [
 
 export default function Chat() {
   const navigation = useNavigation();
-
   const [messages, setMessages] = useState<ChatMessage[]>(messageData);
   const [input, setInput] = useState('');
 
-  const sendMessage = () => {
+  const clearInput = () => onInputChange('');
+  const onInputChange = (text: string) => setInput(text);
+
+  const onSendMessage = () => {
     if (input.trim().length > 0) {
       setMessages([
         ...messages,
         { id: Date.now().toString(), text: input, sender: 'me' },
       ]);
-      setInput('');
+      clearInput();
     }
   };
 
@@ -29,48 +32,21 @@ export default function Chat() {
     navigation.setOptions({ title: `Chat with test` });
   }, [navigation]);
 
-  useEffect(() => {
-    const client = mqtt.connect('ws://192.168.10.207:8000/mqtt',
-      { clientId: 'clientId-222', reconnectPeriod: 2000 }
-    );
 
-    client.on('connect', () => {
-      console.log('Connected to MQTT broker');
-    });
-
-    client.on('close', () => {
-      console.log('MQTT connection closed');
-    });
-
-    client.on('offline', () => {
-      console.log('MQTT client is offline');
-    });
-
-    client.on('error', (err) => {
-      console.log('MQTT error:', err);
-    });
-
-    client.on('message', (topic, message) => {
-      const newMessage: ChatMessage = {
-        id: uuidv4(),
-        text: message.toString(),
-        sender: 'other',
-      };
-      setMessages((prevMessages) => [...prevMessages, newMessage]);
-    });
-
-    client.subscribe('neo/stream/kubernetes');
-
-    return () => {
-      client.end();
+  useMqttSubscription('neo/stream/kubernetes', (_, message) => {
+    const newMessage: ChatMessage = {
+      id: uuidv4(),
+      text: message.toString(),
+      sender: 'other',
     };
-  }, []);
+    setMessages((prevMessages) => [...prevMessages, newMessage]);
+  });
 
 
   return <ChatScreen
     messages={messages}
     input={input}
-    setInput={setInput}
-    sendMessage={sendMessage}
+    onInputChange={onInputChange}
+    onSendMessage={onSendMessage}
   />;
 }

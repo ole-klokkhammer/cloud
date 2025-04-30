@@ -1,5 +1,5 @@
+import { HomeScreen } from '@/views/screens/home/home.screen';
 import { useRouter } from 'expo-router';
-import { HomeScreen } from '@/screens/home/home.screen';
 
 const streams = [
   { id: '1', name: 'Kubernetes', lastMessage: 'Error in bluetooth-bridge' },

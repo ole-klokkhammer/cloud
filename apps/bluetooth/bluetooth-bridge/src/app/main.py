@@ -24,4 +24,3 @@ except (KeyboardInterrupt, SystemExit):
     task_queue.stop_queue_worker()
     scheduler.shutdown()
     logging.info("Scheduler stopped.")
-    logging.info("Scheduler stopped.")

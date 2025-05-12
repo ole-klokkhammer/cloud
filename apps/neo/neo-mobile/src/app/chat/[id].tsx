@@ -1,7 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import React, { useEffect, useState } from 'react';
 import { useNavigation } from 'expo-router';
-import mqtt from 'mqtt';
 import ChatScreen, { ChatMessage } from '@/views/screens/chat/chat.screen';
 import { useMqttSubscription } from '@/hooks/mqtt/useMqttSubscription';
 

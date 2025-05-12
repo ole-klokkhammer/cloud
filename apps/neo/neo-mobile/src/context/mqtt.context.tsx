@@ -16,7 +16,6 @@ export const MqttClientProvider: React.FC<MqttClientProviderProps> = (props) => 
         const mqttClient = mqtt.connect(environment.getMqttBrokerUrl(), {
             clientId: 'neo-mobile',
             reconnectPeriod: 2000,
-            clean: true,
         });
 
         mqttClient.on('connect', () => {

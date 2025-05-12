@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigation } from 'expo-router';
 import ChatScreen, { ChatMessage } from '@/views/screens/chat/chat.screen';
 import { useMqttSubscription } from '@/hooks/mqtt/useMqttSubscription';
+import { useLocalSearchParams } from 'expo-router/build/hooks';
 
 const messageData: ChatMessage[] = [
   { id: '1', text: 'Hello!', sender: 'other' },
@@ -11,6 +12,7 @@ const messageData: ChatMessage[] = [
 
 export default function Chat() {
   const navigation = useNavigation();
+  const { id } = useLocalSearchParams<{ id: string }>();
   const [messages, setMessages] = useState<ChatMessage[]>(messageData);
   const [input, setInput] = useState('');
 
@@ -32,7 +34,7 @@ export default function Chat() {
   }, [navigation]);
 
 
-  useMqttSubscription('neo/stream/kubernetes', (_, message) => {
+  useMqttSubscription('neo/stream/' + id, (_, message) => {
     const newMessage: ChatMessage = {
       id: uuidv4(),
       text: message.toString(),
@@ -43,6 +45,7 @@ export default function Chat() {
 
 
   return <ChatScreen
+    autoscroll={true}
     messages={messages}
     input={input}
     onInputChange={onInputChange}

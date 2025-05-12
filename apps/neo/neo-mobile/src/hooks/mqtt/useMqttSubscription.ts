@@ -21,6 +21,7 @@ export function useMqttSubscription(topic: string, onMessage: (topic: string, me
         return () => {
             client.off('message', onMessageHandler);
             client.unsubscribe(topic);
+            console.log('Unsubscribed from topic:', topic);
         };
     }, [topic]);
 }

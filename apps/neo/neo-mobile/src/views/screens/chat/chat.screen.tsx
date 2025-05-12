@@ -25,7 +25,7 @@ export default function ChatScreen(props: ChatScreenProps) {
     const styles = useChatStyles();
     const flatListRef = React.useRef<FlatList<ChatMessage>>(null);
 
-    if (props.autoscroll) {
+    if (props.autoscroll ? true : false) {
         React.useEffect(() => {
             if (flatListRef?.current && messages.length > 0) {
                 setTimeout(() => {

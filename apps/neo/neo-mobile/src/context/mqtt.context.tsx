@@ -14,7 +14,7 @@ export const MqttClientProvider: React.FC<MqttClientProviderProps> = (props) => 
 
     useEffect(() => {
         const mqttClient = mqtt.connect(environment.getMqttBrokerUrl(), {
-            clientId: 'neo-mobile',
+            clientId: environment.mqttClientId,
             reconnectPeriod: 2000,
         });
 
@@ -34,6 +34,7 @@ export const MqttClientProvider: React.FC<MqttClientProviderProps> = (props) => 
             console.log('MQTT error:', err);
         });
 
+        console.log('Creating MQTT client');
         setClient(mqttClient);
 
         return () => {

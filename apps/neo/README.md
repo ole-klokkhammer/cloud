@@ -17,3 +17,4 @@
 
 * <https://github.com/openlit/openlit>
 * <https://hiddenlayer.com/innovation-hub/novel-universal-bypass-for-all-major-llms/>
+* <https://www.kdnuggets.com/10-github-repositories-to-master-large-language-models>

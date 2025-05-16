@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import mqtt, { MqttClient } from 'mqtt';
 import { environment } from '@/constants/environment';
+import Loading from '@/components/loading/Loading';
 
 const MqttClientContext = createContext<MqttClient | null>(null);
 
@@ -13,9 +14,10 @@ export const MqttClientProvider: React.FC<MqttClientProviderProps> = (props) => 
     const [client, setClient] = useState<MqttClient | null>(null);
 
     useEffect(() => {
-        const mqttClient = mqtt.connect(environment.getMqttBrokerUrl(), {
-            clientId: environment.mqttClientId,
-            reconnectPeriod: 2000,
+        const mqttClient = mqtt.connect(environment.mqtt.getBrokerUrl(), {
+            clientId: environment.mqtt.clientId,
+            reconnectPeriod: environment.mqtt.reconnectPeriod,
+            keepalive: environment.mqtt.keepalive,
         });
 
         mqttClient.on('connect', () => {
@@ -34,23 +36,26 @@ export const MqttClientProvider: React.FC<MqttClientProviderProps> = (props) => 
             console.log('MQTT error:', err);
         });
 
-        console.log('Creating MQTT client');
         setClient(mqttClient);
 
         return () => {
             console.log("Cleaning up MQTT client");
-            mqttClient?.end();
+            mqttClient.end();
         };
     }, []);
 
-    return (
-        <MqttClientContext.Provider value={client}>
-            {children}
-        </MqttClientContext.Provider>
-    );
+    if (client == null) {
+        return <Loading />;
+    } else {
+        return (
+            <MqttClientContext.Provider value={client}>
+                {children}
+            </MqttClientContext.Provider>
+        );
+    }
 };
 
-export function useMqttClient() {
+export function useMqttClient(): MqttClient {
     const client = useContext(MqttClientContext);
     if (!client) {
         throw new Error('useMqttClient must be used within MqttClientProvider');

@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import React, { useEffect, useState } from 'react';
 import { useNavigation } from 'expo-router';
-import ChatScreen, { ChatMessage } from '@/views/screens/chat/chat.screen';
+import ChatScreen, { ChatMessage } from '@/screens/chat/chat.screen';
 import { useMqttSubscription } from '@/hooks/mqtt/useMqttSubscription';
 import { useLocalSearchParams } from 'expo-router/build/hooks';
 

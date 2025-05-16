@@ -1,4 +1,4 @@
-import { AccountScreen } from "@/views/screens/account/account.screen";
+import { AccountScreen } from "@/screens/account/account.screen";
 
 export default function Account() {
   return <AccountScreen />;

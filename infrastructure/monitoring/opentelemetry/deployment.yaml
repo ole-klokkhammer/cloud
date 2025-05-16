@@ -13,7 +13,7 @@ spec:
       component: otel-collector
   template:
     metadata:
-      labels:
+      labels: 
         app: opentelemetry
         component: otel-collector
     spec:

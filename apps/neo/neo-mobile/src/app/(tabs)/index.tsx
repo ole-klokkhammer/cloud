@@ -1,4 +1,4 @@
-import { HomeScreen } from '@/views/screens/home/home.screen';
+import { HomeScreen } from '@/screens/home/home.screen';
 import { useRouter } from 'expo-router';
 
 const streams = [

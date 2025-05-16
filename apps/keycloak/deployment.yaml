@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+  namespace: keycloak
+  labels:
+    app: keycloak
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keycloak
+  template:
+    metadata:
+      labels:
+        app: keycloak
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - master0
+      containers:
+      - name: keycloak
+        image: quay.io/keycloak/keycloak:latest
+        args: ["start", "--proxy-headers", "xforwarded"]
+        ports:
+        - containerPort: 8080
+        env:
+        - name: KC_PROXY
+          value: "edge"
+        - name: KC_HOSTNAME_STRICT
+          value: "false"
+        - name: KC_HTTP_ENABLED
+          value: "true"
+        - name: KC_HOSTNAME
+          valueFrom:
+            secretKeyRef:
+              name: keycloak-config
+              key: KC_HOSTNAME
+        - name: KC_BOOTSTRAP_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: keycloak-config
+              key: KC_BOOTSTRAP_ADMIN_PASSWORD
+        - name: KC_BOOTSTRAP_ADMIN_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: keycloak-config
+              key: KC_BOOTSTRAP_ADMIN_USERNAME
+        - name: KC_DB
+          valueFrom:
+            secretKeyRef:
+              name: keycloak-config
+              key: KC_DB
+        - name: KC_DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: keycloak-config
+              key: KC_DB_PASSWORD
+        - name: KC_DB_URL_HOST
+          valueFrom:
+            secretKeyRef:
+              name: keycloak-config
+              key: KC_DB_URL_HOST
+        - name: KC_DB_URL_PORT
+          valueFrom:
+            secretKeyRef:
+              name: keycloak-config
+              key: KC_DB_URL_PORT
+        - name: KC_DB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: keycloak-config
+              key: KC_DB_USERNAME 

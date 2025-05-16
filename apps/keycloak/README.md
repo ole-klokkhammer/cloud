@@ -25,14 +25,16 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE O
 
 ## ssl termination behind proxy
 
-### pfsense
+### pfsense haproxy set headers
 
 * X-Forwarded-For:%ci
 * X-Forwarded-Host:%[ssl_fc_sni]
 
 ### keycloak
 
+args: ["start", "--proxy-headers", "xforwarded"]
 env:
+
 * name: KC_PROXY
   value: "edge"
 * name: KC_HOSTNAME
@@ -42,3 +44,6 @@ env:
       key: KC_HOSTNAME
 * name: KC_HTTP_ENABLED
   value: "true"
+
+## setting up OTP
+<https://medium.com/@bkamaraj/keycloak-mfa-using-mobile-authenticator-setup-572e9f31f36d>

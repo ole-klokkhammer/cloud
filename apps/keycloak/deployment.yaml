@@ -27,9 +27,9 @@ spec:
       containers:
       - name: keycloak
         image: quay.io/keycloak/keycloak:latest
-        args: ["start", "--proxy-headers", "xforwarded"]
         ports:
         - containerPort: 8080
+        args: ["start", "--proxy-headers", "xforwarded"]
         env:
         - name: KC_PROXY
           value: "edge"

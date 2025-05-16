@@ -11,6 +11,8 @@ NEW_VERSION="$major.$minor.$((patch + 1))"
 sed -i "s/olklokk\/$APP_NAME:$PREV_VERSION/olklokk\/$APP_NAME:$NEW_VERSION/g" deployment.yaml
 
 # Step 3: Build and push the new Docker image
-cd src && docker buildx build --push --platform linux/amd64 -t "olklokk/$APP_NAME:$NEW_VERSION" .
+cd src 
+docker buildx build --platform linux/amd64 -t "olklokk/$APP_NAME:$NEW_VERSION" .
+docker push "olklokk/$APP_NAME:$NEW_VERSION"
 
 cd .. && kubectl apply -f deployment.yaml

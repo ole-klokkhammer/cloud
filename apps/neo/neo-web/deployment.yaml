@@ -26,7 +26,7 @@ spec:
                       - master0
       containers:
         - name: neo-web
-          image: olklokk/neo-web:0.9.14
+          image: olklokk/neo-app:0.9.14
           ports:
             - containerPort: 3000
           env: 

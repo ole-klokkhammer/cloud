@@ -5,10 +5,10 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { MyDarkTheme, MyLightTheme } from '@/constants/Theme';
-import { ThemedView } from '@/components/view/ThemedView';
-import { MqttClientProvider } from '@/context/mqtt.context';
+import { useColorScheme } from '@/common/hooks/theme/useColorScheme';
+import { MyDarkTheme, MyLightTheme } from '@/common/constants/Theme';
+import { ThemedView } from '@/common/components/view/ThemedView';
+import { MqttClientProvider } from '@/common/context/mqtt.context';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();

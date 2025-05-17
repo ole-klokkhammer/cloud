@@ -1,10 +1,10 @@
 import { Link, Stack } from 'expo-router';
 import { StyleSheet } from 'react-native';
 
-import { ThemedText } from '@/components/text/ThemedText';
-import { ThemedView } from '@/components/view/ThemedView';
+import { ThemedText } from '@/common/components/text/ThemedText';
+import { ThemedView } from '@/common/components/view/ThemedView';
 
-export default function NotFoundScreen() {
+export default function NotFound() {
   return (
     <>
       <Stack.Screen options={{ title: 'Oops!' }} />

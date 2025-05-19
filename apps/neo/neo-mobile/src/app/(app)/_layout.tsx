@@ -34,9 +34,9 @@ export default function RootLayout() {
       <ThemeProvider value={colorScheme === 'dark' ? MyDarkTheme : MyLightTheme}>
         <ThemedView style={{ flex: 1 }}>
           <Stack>
-            <Stack.Screen name="(app)/(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="(app)/chat/[id]" options={{ headerShown: true }} />
-            <Stack.Screen name="(app)/+not-found" />
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="chat/[id]" options={{ headerShown: true }} />
+            <Stack.Screen name="+not-found" />
           </Stack>
           <StatusBar style="auto" />
         </ThemedView>

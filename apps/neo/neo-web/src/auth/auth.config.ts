@@ -1,8 +1,12 @@
+import { environment } from '@/config/environment';
 import type { NextAuthConfig } from 'next-auth';
 
 export const authConfig = {
     pages: {
         signIn: '/login',
+    },
+    session: {
+        strategy: 'jwt',
     },
     callbacks: {
         authorized({ auth, request: { nextUrl } }) {

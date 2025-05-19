@@ -26,9 +26,34 @@ spec:
                       - master0
       containers:
         - name: neo-web
-          image: olklokk/neo-app:0.9.14
+          image: olklokk/neo-web:0.9.17
           ports:
             - containerPort: 3000
           env: 
-            - name: MQTT_SERVER
-              value: ws://hivemq-internal.hivemq:8000/mqtt
+            - name: AUTH_TRUST_HOST
+              value: "true"
+            - name: AUTH_URL
+              valueFrom:
+                secretKeyRef:
+                  name: neo-config
+                  key: AUTH_URL
+            - name: AUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: neo-config
+                  key: AUTH_SECRET
+            - name: KEYCLOAK_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: neo-config
+                  key: KEYCLOAK_CLIENT_ID
+            - name: KEYCLOAK_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: neo-config
+                  key: KEYCLOAK_CLIENT_SECRET
+            - name: KEYCLOAK_ISSUER
+              valueFrom:
+                secretKeyRef:
+                  name: neo-config
+                  key: KEYCLOAK_ISSUER

@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import mqtt, { MqttClient } from 'mqtt';
-import { environment } from '@/constants/environment';
-import Loading from '@/components/loading/Loading';
+import { environment } from '@/common/constants/environment';
+import Loading from '@/common/components/loading/Loading';
 
 const MqttClientContext = createContext<MqttClient | null>(null);
 

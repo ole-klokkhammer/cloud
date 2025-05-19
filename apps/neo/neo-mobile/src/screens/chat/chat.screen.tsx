@@ -1,10 +1,18 @@
+import { v4 as uuidv4 } from 'uuid';
 import { FlatList, KeyboardAvoidingView, Platform } from "react-native";
 import { useChatStyles } from "./chat.screen.styles"
-import { ThemedView } from "@/components/view/ThemedView";
-import { ThemedText } from "@/components/text/ThemedText";
-import { ThemedInput } from "@/components/input/ThemedInput";
-import { ThemedButton } from "@/components/button/ThemedButton";
-import React from "react";
+import { ThemedView } from "@/common/components/view/ThemedView";
+import { ThemedText } from "@/common/components/text/ThemedText";
+import { ThemedInput } from "@/common/components/input/ThemedInput";
+import { ThemedButton } from "@/common/components/button/ThemedButton";
+import React, { useEffect, useState } from "react";
+import { useLocalSearchParams, useNavigation } from "expo-router";
+import { useMqttSubscription } from "@/common/hooks/mqtt/useMqttSubscription";
+
+const messageData: ChatMessage[] = [
+    { id: '1', text: 'Hello!', sender: 'other' },
+    { id: '2', text: 'Hi there!', sender: 'me' },
+]
 
 export type ChatMessage = {
     id: string;
@@ -12,28 +20,49 @@ export type ChatMessage = {
     sender: 'me' | 'other';
 };
 
-export type ChatScreenProps = {
-    messages: ChatMessage[];
-    input: string;
-    onInputChange: (text: string) => void;
-    onSendMessage: () => void;
-    autoscroll?: boolean
-};
 
-export default function ChatScreen(props: ChatScreenProps) {
-    const { messages, input, onInputChange, onSendMessage } = props;
+export default function ChatScreen() {
     const styles = useChatStyles();
+    const navigation = useNavigation();
+    const { id } = useLocalSearchParams<{ id: string }>();
+    const [messages, setMessages] = useState<ChatMessage[]>(messageData);
+    const [input, setInput] = useState('');
     const flatListRef = React.useRef<FlatList<ChatMessage>>(null);
 
-    if (props.autoscroll ? true : false) {
-        React.useEffect(() => {
-            if (flatListRef?.current && messages.length > 0) {
-                setTimeout(() => {
-                    flatListRef.current?.scrollToEnd({ animated: false });
-                }, 0);
-            }
-        }, [messages]);
-    }
+    const clearInput = () => onInputChange('');
+    const onInputChange = (text: string) => setInput(text);
+
+    const onSendMessage = () => {
+        if (input.trim().length > 0) {
+            setMessages([
+                ...messages,
+                { id: Date.now().toString(), text: input, sender: 'me' },
+            ]);
+            clearInput();
+        }
+    };
+
+    useEffect(() => {
+        navigation.setOptions({ title: `Chat with test` });
+    }, [navigation]);
+
+
+    useMqttSubscription('neo/stream/' + id, (_, message) => {
+        const newMessage: ChatMessage = {
+            id: uuidv4(),
+            text: message.toString(),
+            sender: 'other',
+        };
+        setMessages((prevMessages) => [...prevMessages, newMessage]);
+    });
+
+    React.useEffect(() => {
+        if (flatListRef?.current && messages.length > 0) {
+            setTimeout(() => {
+                flatListRef.current?.scrollToEnd({ animated: false });
+            }, 0);
+        }
+    }, [messages]);
 
     return (
         <KeyboardAvoidingView

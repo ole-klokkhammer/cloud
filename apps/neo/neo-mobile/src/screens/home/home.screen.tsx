@@ -1,19 +1,21 @@
-import { ThemedText } from '@/components/text/ThemedText';
-import { ThemedView } from '@/components/view/ThemedView';
+import { ThemedText } from '@/common/components/text/ThemedText';
+import { ThemedView } from '@/common/components/view/ThemedView';
 import { FlatList, Image, TouchableOpacity } from 'react-native';
+import { useRouter } from 'expo-router';
 import { styles } from './home.screen.styles';
 
-export type HomeScreenProps = {
-    chats: {
-        id: string;
-        name: string;
-        lastMessage: string;
-    }[];
-    onPressChat: (id: string) => void;
-}
+const chats = [
+    { id: 'kubernetes', name: 'Kubernetes', lastMessage: 'Error in bluetooth-bridge' },
+    { id: 'frigate', name: 'Frigate', lastMessage: 'Theres a cat in the hallway' },
+    { id: 'sensors', name: 'Sensors', lastMessage: 'High co2 in the livingroom.' },
+];
 
-export const HomeScreen = (props: HomeScreenProps) => {
-    const { chats, onPressChat } = props;
+export const HomeScreen = () => {
+    const router = useRouter();
+
+    const onPressChat = (id: string) => {
+        router.push(`/chat/${id}`);
+    }
 
     return <FlatList
         data={chats}
@@ -22,6 +24,7 @@ export const HomeScreen = (props: HomeScreenProps) => {
             <Image
                 source={require('@/assets/images/neo/neo_v2.png')}
                 style={styles.pageHeaderLogo}
+                resizeMode="cover"
             />
         }
         contentContainerStyle={styles.chatListContainer}

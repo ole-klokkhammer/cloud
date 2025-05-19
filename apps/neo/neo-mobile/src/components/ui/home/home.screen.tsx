@@ -1,5 +1,5 @@
-import { ThemedText } from '@/common/components/text/ThemedText';
-import { ThemedView } from '@/common/components/view/ThemedView';
+import { ThemedText } from '@/components/ui/text/ThemedText';
+import { ThemedView } from '@/components/ui/view/ThemedView';
 import { FlatList, Image, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { styles } from './home.screen.styles';

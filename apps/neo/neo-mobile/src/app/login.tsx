@@ -1,4 +1,4 @@
-import { LoginScreen } from '@/screens/login/login.screen';
+import { LoginScreen } from '@/components/ui/login/login.screen';
 
 export default function Login() {
   return <LoginScreen />;

@@ -1,6 +1,6 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, ViewStyle, TextStyle, GestureResponderEvent } from 'react-native';
-import { useThemeColor } from '@/common/hooks/theme/useThemeColor';
+import { useThemeColor } from '@/hooks/theme/useThemeColor';
 
 type ThemedButtonProps = {
     title: string;

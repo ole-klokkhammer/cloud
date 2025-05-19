@@ -1,13 +1,13 @@
 import { v4 as uuidv4 } from 'uuid';
 import { FlatList, KeyboardAvoidingView, Platform } from "react-native";
 import { useChatStyles } from "./chat.screen.styles"
-import { ThemedView } from "@/common/components/view/ThemedView";
-import { ThemedText } from "@/common/components/text/ThemedText";
-import { ThemedInput } from "@/common/components/input/ThemedInput";
-import { ThemedButton } from "@/common/components/button/ThemedButton";
+import { ThemedView } from "@/components/ui/view/ThemedView";
+import { ThemedText } from "@/components/ui/text/ThemedText";
+import { ThemedInput } from "@/components/ui/input/ThemedInput";
+import { ThemedButton } from "@/components/ui/button/ThemedButton";
 import React, { useEffect, useState } from "react";
 import { useLocalSearchParams, useNavigation } from "expo-router";
-import { useMqttSubscription } from "@/common/hooks/mqtt/useMqttSubscription";
+import { useMqttSubscription } from "@/hooks/mqtt/useMqttSubscription";
 
 const messageData: ChatMessage[] = [
     { id: '1', text: 'Hello!', sender: 'other' },

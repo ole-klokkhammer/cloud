@@ -1,6 +1,6 @@
 
 import React from 'react';
-import ChatScreen from '@/screens/chat/chat.screen';
+import ChatScreen from '@/components/ui/chat/chat.screen';
 
 
 export default function Chat() {

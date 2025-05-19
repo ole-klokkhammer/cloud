@@ -1,8 +1,8 @@
 import { useNavigation } from "expo-router";
 import { styles } from "./login.screen.styles";
-import { ThemedView } from "@/common/components/view/ThemedView";
+import { ThemedView } from "@/components/ui/view/ThemedView";
 import { Image } from 'react-native';
-import { ThemedText } from "@/common/components/text/ThemedText";
+import { ThemedText } from "@/components/ui/text/ThemedText";
 
 export function LoginScreen() {
     const navigation = useNavigation();

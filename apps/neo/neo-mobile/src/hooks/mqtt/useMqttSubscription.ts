@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useMqttClient } from '@/common/context/mqtt/context';
+import { useMqttClient } from '@/context/mqtt/context';
 
 export function useMqttSubscription(topic: string, onMessage: (topic: string, message: Buffer) => void) {
     const client = useMqttClient();

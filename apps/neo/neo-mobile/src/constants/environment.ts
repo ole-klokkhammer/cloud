@@ -4,7 +4,7 @@ export const environment = {
     keycloak: {
         clientId: 'neo-mobile-dev',
         issuer: 'https://auth.linole.org/realms/neo',
-        redirectUrl: 'com.olklokk.neomobile://oauthredirect',
+        redirectUrl: 'com.olklokk.neomobile://*',
         scopes: ['openid', 'profile'],
     },
     mqtt: {

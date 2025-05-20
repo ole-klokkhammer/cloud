@@ -1,47 +1,39 @@
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import * as WebBrowser from 'expo-web-browser';
 import { makeRedirectUri, useAuthRequest, useAutoDiscovery } from 'expo-auth-session';
 import { Button } from 'react-native';
-import { ThemedButton } from "@/components/ui/button/ThemedButton";
 import { environment } from '@/constants/environment';
-import React from 'react';
-
 
 WebBrowser.maybeCompleteAuthSession();
 
-
 export default function LoginButton() {
-    // Endpoint
-    const discovery = useAutoDiscovery('https://auth.linole.org/oauth2/default');
-    // Request
+    const discovery = useAutoDiscovery(environment.keycloak.issuer);
+ 
     const [request, response, promptAsync] = useAuthRequest(
         {
             clientId: environment.keycloak.clientId,
-            scopes: ['openid', 'profile'],
+            scopes: environment.keycloak.scopes,
             redirectUri: makeRedirectUri({
-                native: 'com.okta.auth.linole.org:/callback',
+                scheme: environment.keycloak.redirectUrl,
             }),
         },
         discovery
     );
 
+    // Handle the authentication response
     useEffect(() => {
         if (response?.type === 'success') {
             const { code } = response.params;
+            console.log('Authorization code:', code);
         }
     }, [response]);
 
-
-    <ThemedButton disabled={!request}
-    title="Login"
-    onPress={() => {
-        promptAsync();
-    }} />
     return (
         <Button
             disabled={!request}
             title="Login"
             onPress={() => {
+                console.log('Request:', request);
                 promptAsync();
             }}
         />

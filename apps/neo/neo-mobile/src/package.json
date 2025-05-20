@@ -3,10 +3,11 @@
   "main": "expo-router/entry",
   "scripts": {
     "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web",
     "expo:clear": "expo start --clear",
+    "expo:prebuild": "expo prebuild",
     "test": "jest --watchAll",
     "lint": "expo lint"
   },
@@ -20,8 +21,10 @@
     "@react-navigation/native": "^7.0.14",
     "axios": "^1.9.0",
     "expo": "~52.0.46",
+    "expo-auth-session": "^6.1.5",
     "expo-blur": "~14.0.3",
     "expo-constants": "~17.0.8",
+    "expo-crypto": "^14.1.4",
     "expo-dev-client": "~5.0.20",
     "expo-font": "~13.0.4",
     "expo-haptics": "~14.0.1",
@@ -56,5 +59,6 @@
     "react-test-renderer": "18.3.1",
     "typescript": "^5.3.3"
   },
-  "private": true
+  "private": true,
+  "version": "1.0.0"
 }

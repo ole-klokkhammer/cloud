@@ -3,8 +3,9 @@ import { useNavigation } from "expo-router";
 import { styles } from "./login.screen.styles";
 import { ThemedView } from "@/components/ui/view/ThemedView";
 import { ThemedText } from "@/components/ui/text/ThemedText";
-import { TextInput, Button, Alert } from "react-native";
+import { Button } from "react-native";
 import { ThemedInput } from "@/components/ui/input/ThemedInput";
+import { environment } from "@/constants/environment";
 
 export function LoginScreen() {
     const navigation = useNavigation();
@@ -14,8 +15,19 @@ export function LoginScreen() {
 
     const handleLogin = async () => {
         setLoading(true);
-
-        setLoading(false);
+        try {
+            // const result = await authorize({
+            //     clientId: environment.keycloak.clientId,
+            //     issuer: environment.keycloak.issuer,
+            //     redirectUrl: environment.keycloak.redirectUrl,
+            //     scopes: environment.keycloak.scopes
+            // });
+            // console.log(result);
+        } catch (error) {
+            console.log(error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (

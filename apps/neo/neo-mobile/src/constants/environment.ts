@@ -1,8 +1,8 @@
+import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
 
 export const environment = {
     keycloak: {
-        clientId: 'neo-mobile-dev',
         authorizeEndpoint: 'https://neo.linole.org/api/auth/mobile',//'http://localhost:3000/api/auth/mobile',
         tokenEndpoint: 'https://neo.linole.org/api/auth/mobile',//'http://localhost:3000/api/auth/mobile',
         redirectUrl: 'com.olklokk.neomobile://*',

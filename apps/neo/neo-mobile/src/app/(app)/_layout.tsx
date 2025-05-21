@@ -9,6 +9,7 @@ import { useColorScheme } from '@/hooks/theme/useColorScheme';
 import { MyDarkTheme, MyLightTheme } from '@/constants/Theme';
 import { ThemedView } from '@/components/ui/view/ThemedView';
 import { MqttClientProvider } from '@/context/mqtt/context';
+import * as NavigationBar from 'expo-navigation-bar';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -22,6 +23,7 @@ export default function RootLayout() {
   useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();
+      NavigationBar.setStyle('auto');
     }
   }, [loaded]);
 
@@ -38,7 +40,7 @@ export default function RootLayout() {
             <Stack.Screen name="chat/[id]" options={{ headerShown: true }} />
             <Stack.Screen name="+not-found" />
           </Stack>
-          <StatusBar style="auto" />
+          <StatusBar style="dark" />
         </ThemedView>
       </ThemeProvider>
     </MqttClientProvider>

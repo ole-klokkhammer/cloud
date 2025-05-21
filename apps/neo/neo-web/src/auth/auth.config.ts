@@ -21,6 +21,12 @@ export const authConfig = {
                 return true;
             }
         },
+        async jwt({ token, account }) {
+            if (account) {
+                token.accessToken = account.access_token;
+            }
+            return token;
+        }
     },
     providers: [], // Add providers with an empty array for now
 } satisfies NextAuthConfig;

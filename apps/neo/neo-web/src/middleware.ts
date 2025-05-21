@@ -14,12 +14,12 @@ function combineMiddleware(...middlewares: Function[]) {
     };
 }
 
-async function logRequest(req: NextRequest, res: NextResponse) {
-    console.log(`My Request URL: ${req.url}`); 
+async function extraMiddleware(req: NextRequest, res: NextResponse) {
+    console.log(`My Request URL: ${req.url}`);
     return NextResponse.next();
 }
 
-export default NextAuth(authConfig).auth(logRequest as any);
+export default NextAuth(authConfig).auth(extraMiddleware as any);
 
 export const config = {
     // https://nextjs.org/docs/app/building-your-application/routing/middleware#matcher

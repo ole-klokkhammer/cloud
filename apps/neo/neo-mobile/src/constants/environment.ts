@@ -3,7 +3,8 @@ import { v4 as uuidv4 } from 'uuid';
 export const environment = {
     keycloak: {
         clientId: 'neo-mobile-dev',
-        issuer: 'https://auth.linole.org/realms/neo',
+        authorizeEndpoint: 'http://localhost:3000/api/auth/mobile',
+        tokenEndpoint: 'http://localhost:3000/api/auth/mobile',
         redirectUrl: 'com.olklokk.neomobile://*',
         scopes: ['openid', 'profile'],
     },

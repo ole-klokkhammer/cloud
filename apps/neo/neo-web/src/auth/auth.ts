@@ -7,11 +7,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     ...authConfig,
     providers: [
         Keycloak({
-            clientId: environment.keycloakClientId,
-            clientSecret: environment.keycloakClientSecret,
-            issuer: environment.keycloakIssuer,
+            clientId: environment.keycloak.web.clientId,
+            clientSecret: environment.keycloak.web.clientSecret,
+            issuer: environment.keycloak.web.issuer,
         }),
     ],
-    secret: environment.authSecret,
+    secret: environment.keycloak.web.authSecret,
     trustHost: true
 });

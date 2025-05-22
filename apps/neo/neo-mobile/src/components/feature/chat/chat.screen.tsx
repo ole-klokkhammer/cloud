@@ -7,12 +7,7 @@ import { ThemedInput } from "@/components/ui/input/ThemedInput";
 import { ThemedButton } from "@/components/ui/button/ThemedButton";
 import React, { useEffect, useState } from "react";
 import { useLocalSearchParams, useNavigation } from "expo-router";
-import { useMqttSubscription } from "@/hooks/mqtt/useMqttSubscription";
-
-const messageData: ChatMessage[] = [
-    { id: '1', text: 'Hello!', sender: 'other' },
-    { id: '2', text: 'Hi there!', sender: 'me' },
-]
+import { useMqttSubscription } from "@/hooks/mqtt/useMqttSubscription"; 
 
 export type ChatMessage = {
     id: string;
@@ -20,12 +15,11 @@ export type ChatMessage = {
     sender: 'me' | 'other';
 };
 
-
 export default function ChatScreen() {
     const styles = useChatStyles();
     const navigation = useNavigation();
     const { id } = useLocalSearchParams<{ id: string }>();
-    const [messages, setMessages] = useState<ChatMessage[]>(messageData);
+    const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [input, setInput] = useState('');
     const flatListRef = React.useRef<FlatList<ChatMessage>>(null);
 
@@ -47,7 +41,7 @@ export default function ChatScreen() {
     }, [navigation]);
 
 
-    useMqttSubscription('neo/stream/' + id, (_, message) => {
+    useMqttSubscription('neo/stream/error/' + id, (_, message) => {
         const newMessage: ChatMessage = {
             id: uuidv4(),
             text: message.toString(),

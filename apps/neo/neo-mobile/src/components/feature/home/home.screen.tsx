@@ -3,22 +3,43 @@ import { ThemedView } from '@/components/ui/view/ThemedView';
 import { FlatList, Image, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { styles } from './home.screen.styles';
+import { useMqttSubscription } from '@/hooks/mqtt/useMqttSubscription';
+import React from 'react';
 
-const chats = [
-    { id: 'kubernetes', name: 'Kubernetes', lastMessage: 'Error in bluetooth-bridge' },
-    { id: 'frigate', name: 'Frigate', lastMessage: 'Theres a cat in the hallway' },
-    { id: 'sensors', name: 'Sensors', lastMessage: 'High co2 in the livingroom.' },
-];
+type App = {
+    id: string;
+    name: string;
+    lastMessage: string;
+}
 
 export const HomeScreen = () => {
     const router = useRouter();
+    const [apps, setApps] = React.useState<App[]>([]);
 
     const onPressChat = (id: string) => {
         router.push(`/chat/${id}`);
     }
 
+    useMqttSubscription('neo/stream/error/#', (topic, _) => {
+        console.log('Received message:', topic);
+        const header = topic.split('/')[3];
+
+        // Check if the app with the same id already exists
+        setApps((prevApps) => {
+            if (prevApps.some(app => app.id === header)) {
+                return prevApps; // app is already there
+            } else {
+                return [...prevApps, {
+                    id: header,
+                    name: header,
+                    lastMessage: 'Error in app',
+                }];
+            }
+        });
+    });
+
     return <FlatList
-        data={chats}
+        data={apps}
         keyExtractor={item => item.id}
         ListHeaderComponent={
             <Image

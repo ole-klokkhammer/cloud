@@ -8,8 +8,7 @@ import 'react-native-reanimated';
 import { useColorScheme } from '@/hooks/theme/useColorScheme';
 import { MyDarkTheme, MyLightTheme } from '@/constants/Theme';
 import { ThemedView } from '@/components/ui/view/ThemedView';
-import { MqttClientProvider } from '@/context/mqtt/context';
-import * as NavigationBar from 'expo-navigation-bar';
+import { MqttClientProvider } from '@/context/mqtt/context'; 
 import { AuthGuard } from '@/components/feature/auth/authguard';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.

@@ -1,0 +1,51 @@
+apiVersion: flink.apache.org/v1beta1
+kind: FlinkDeployment
+metadata:
+  name: flink-jobs
+  namespace: flink
+spec:
+  image: flink:1.20
+  flinkVersion: v1_20
+  flinkConfiguration:
+    taskmanager.numberOfTaskSlots: "1"
+  serviceAccount: flink 
+  podTemplate:
+    spec:
+      containers:
+        # Do not change the main container name
+        - name: flink-main-container
+          volumeMounts:
+            - name: flink-jobs
+              mountPath: /opt/flink/jobs
+      volumes:
+        - name: flink-jobs
+          hostPath:
+            path: /var/lib/flink
+            type: Directory
+  jobManager:
+    replicas: 1
+    resource:
+      memory: "1024m"
+      cpu: 1
+  taskManager:
+    replicas: 1
+    resource:
+      memory: "1024m"
+      cpu: 1
+  job:
+    jarURI: local:///opt/flink/examples/streaming/StateMachineExample.jar
+    parallelism: 1
+    upgradeMode: stateless
+--- 
+# Job 2
+apiVersion: flink.apache.org/v1beta1
+kind: FlinkSessionJob
+metadata:
+  name: basic-session-job-example
+  namespace: flink
+spec:
+  deploymentName: basic-session-cluster
+  job:
+    jarURI: https://repo1.maven.org/maven2/org/apache/flink/flink-examples-streaming_2.12/1.16.1/flink-examples-streaming_2.12-1.16.1-TopSpeedWindowing.jar
+    parallelism: 4
+    upgradeMode: stateless

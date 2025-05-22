@@ -5,7 +5,7 @@ import { useThemeColor } from '@/hooks/theme/useThemeColor';
 export type ThemedInputProps = TextInputProps;
 
 export function ThemedInput({
-    style,
+    style, 
     ...rest
 }: ThemedInputProps) {
     const backgroundColor = useThemeColor('inputBackground');

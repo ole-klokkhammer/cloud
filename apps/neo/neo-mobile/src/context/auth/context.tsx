@@ -18,6 +18,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [initializing, setInitializing] = useState(true);
 
     const login = () => {
+        console.log('login');
         handleLogin().finally(() => {
             refreshAuthState();
         });

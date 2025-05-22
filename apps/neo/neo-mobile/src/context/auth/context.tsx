@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
 import { handleLogin, handleLogout } from '@/services/auth/authentication';
-import { isTokenExpired } from '@/services/auth/token';
+import { isTokenExpired, TokenKey } from '@/services/auth/token';
 
 interface AuthContextType {
     initializing: boolean;
@@ -17,25 +17,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // used to check if the app is still loading - to prevent redirecting before the app is ready
     const [initializing, setInitializing] = useState(true);
 
-    const login = () => handleLogin().finally(() => {
-        checkAuth();
-    });
+    const login = () => {
+        handleLogin().finally(() => {
+            refreshAuthState();
+        });
+    }
 
-    const logout = () => handleLogout().finally(() => {
-        checkAuth();
-    });
+    const logout = () => {
+        handleLogout().finally(() => {
+            refreshAuthState();
+        });
+    }
 
-    const checkAuth = async () => {
-        console.log('isAuthenticated', 'checking');
+    const refreshAuthState = async () => {
         const isExpired = await isTokenExpired();
-        console.log('isExpired', isExpired);
         setAuthenticated(!isExpired);
         setInitializing(false);
     };
 
     useEffect(() => {
-        checkAuth();
+        refreshAuthState();
     }, []);
+
+    // TODO handle changes in localstorage?
 
     return (
         <AuthContext.Provider value={{ initializing, authenticated, login, logout }}>

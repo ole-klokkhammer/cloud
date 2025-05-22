@@ -36,6 +36,7 @@
     "expo-status-bar": "~2.2.3",
     "expo-symbols": "~0.4.4",
     "expo-web-browser": "~14.1.6",
+    "jwt-decode": "^4.0.0",
     "mqtt": "^5.13.0",
     "react": "19.0.0",
     "react-dom": "19.0.0",

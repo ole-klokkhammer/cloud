@@ -1,7 +1,8 @@
 import { environment } from "@/constants/environment";
 import { CodeChallengeMethod, makeRedirectUri } from "expo-auth-session";
 import * as WebBrowser from 'expo-web-browser';
-import { saveToken, TokenKey } from "./token";
+import { saveItem, TokenKey } from "./token";
+import * as jwt from 'jwt-decode'
 
 export const handleLogin = async () => {
     const codeVerifier = generateCodeVerifier();
@@ -18,10 +19,16 @@ export const handleLogin = async () => {
     if (result.type === 'success') {
         const params = new URLSearchParams(result.url.split('?')[1]);
         const code = params.get('code');
-        handleToken(code!, codeVerifier!);
+
+        // FIXME, if we dont await here, the app might not redirect to the right page after login
+        await handleToken(code!, codeVerifier!);
     } else {
         console.error('Login failed:', result);
     }
+}
+
+export const handleLogout = async () => {
+    console.error('Logout not implemented');
 }
 
 const handleToken = async (code: string, code_verifier: string) => {
@@ -40,10 +47,14 @@ const handleToken = async (code: string, code_verifier: string) => {
     });
 
     const data = await response.json();
-    saveToken(TokenKey.AccessToken, data.access_token);
-    saveToken(TokenKey.RefreshToken, data.refresh_token);
-    saveToken(TokenKey.IdToken, data.id_token);
-    saveToken(TokenKey.ExpiresIn, data.expires_in);
+
+    // FIXME, if we dont await here, the app might not redirect to the right page after login
+    await saveItem(TokenKey.AccessToken, data.access_token);
+    await saveItem(TokenKey.RefreshToken, data.refresh_token);
+    await saveItem(TokenKey.IdToken, data.id_token);
+
+    const parsedToken = jwt.jwtDecode(data.access_token);
+    await saveItem(TokenKey.ExpiryTime, String(Number(parsedToken.exp) * 1000));
 }
 
 function generateCodeVerifier() {

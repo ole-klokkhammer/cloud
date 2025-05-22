@@ -40,7 +40,7 @@ export default function ChatScreen() {
         navigation.setOptions({ title: `${id}` });
     }, [navigation]);
 
-    useMqttSubscription('neo/stream/error/' + id, (_, message) => {
+    useMqttSubscription('logs/kubernetes/errors/' + id, (_, message) => {
         const newMessage: ChatMessage = {
             id: uuidv4(),
             text: message.toString(),

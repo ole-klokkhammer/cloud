@@ -20,7 +20,7 @@ export const HomeScreen = () => {
         router.push(`/chat/${id}`);
     }
 
-    useMqttSubscription('neo/stream/error/#', (topic, _) => {
+    useMqttSubscription('logs/kubernetes/errors/#', (topic, _) => {
         console.log('Received message:', topic);
         const header = topic.split('/')[3];
 

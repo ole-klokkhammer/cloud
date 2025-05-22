@@ -11,7 +11,7 @@ KAFKA_TOPIC = "otlp_logs"
 # MQTT configuration
 MQTT_BROKER = "hivemq-internal.hivemq"
 MQTT_PORT = 1883
-MQTT_TOPIC = "neo/stream"
+MQTT_TOPIC = "logs/kubernetes/errors/"
 
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s') 
@@ -76,7 +76,7 @@ def consume_from_kafka():
                             }
 
                             if "error" in body:  
-                                mqtt_client.publish(MQTT_TOPIC + "/error/" + container_name, json.dumps(body), qos=1, retain=True) 
+                                mqtt_client.publish(MQTT_TOPIC + container_name, json.dumps(body), qos=1, retain=True) 
 
             except json.JSONDecodeError as e:
                 logging.error(f"Failed to decode JSON: {e}")

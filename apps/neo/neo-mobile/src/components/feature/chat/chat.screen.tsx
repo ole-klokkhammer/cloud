@@ -37,9 +37,8 @@ export default function ChatScreen() {
     };
 
     useEffect(() => {
-        navigation.setOptions({ title: `Chat with test` });
+        navigation.setOptions({ title: `${id}` });
     }, [navigation]);
-
 
     useMqttSubscription('neo/stream/error/' + id, (_, message) => {
         const newMessage: ChatMessage = {

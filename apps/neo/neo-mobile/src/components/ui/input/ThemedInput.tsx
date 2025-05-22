@@ -2,28 +2,15 @@ import React from 'react';
 import { TextInput, TextInputProps, StyleSheet } from 'react-native';
 import { useThemeColor } from '@/hooks/theme/useThemeColor';
 
-export type ThemedInputProps = TextInputProps & {
-    lightBackgroundColor?: string;
-    darkBackgroundColor?: string;
-    lightBorderColor?: string;
-    darkBorderColor?: string;
-    lightTextColor?: string;
-    darkTextColor?: string;
-};
+export type ThemedInputProps = TextInputProps;
 
 export function ThemedInput({
     style,
-    lightBackgroundColor,
-    darkBackgroundColor,
-    lightBorderColor,
-    darkBorderColor,
-    lightTextColor,
-    darkTextColor,
     ...rest
 }: ThemedInputProps) {
-    const backgroundColor = useThemeColor({ light: lightBackgroundColor, dark: darkBackgroundColor }, 'inputBackground');
-    const borderColor = useThemeColor({ light: lightBorderColor, dark: darkBorderColor }, 'inputBorder');
-    const color = useThemeColor({ light: lightTextColor, dark: darkTextColor }, 'text');
+    const backgroundColor = useThemeColor('inputBackground');
+    const borderColor = useThemeColor('inputBorder');
+    const color = useThemeColor('text');
 
     return (
         <TextInput

@@ -8,12 +8,6 @@ type ThemedButtonProps = {
     style?: ViewStyle;
     textStyle?: TextStyle;
     disabled?: boolean;
-    lightColor?: string;
-    darkColor?: string;
-    lightDisabledColor?: string;
-    darkDisabledColor?: string;
-    lightBgColor?: string;
-    darkBgColor?: string;
 };
 
 export function ThemedButton(
@@ -23,16 +17,10 @@ export function ThemedButton(
         style,
         textStyle,
         disabled,
-        lightColor,
-        darkColor,
-        lightBgColor,
-        darkBgColor,
-        lightDisabledColor,
-        darkDisabledColor,
     }: ThemedButtonProps) {
-    const backgroundColor = useThemeColor({ light: lightBgColor, dark: darkBgColor }, 'button');
-    const color = useThemeColor({ light: lightColor, dark: darkColor }, 'buttonText');
-    const disabledBg = useThemeColor({ light: lightDisabledColor, dark: darkDisabledColor }, 'buttonDisabled');
+    const backgroundColor = useThemeColor('button');
+    const color = useThemeColor('buttonText');
+    const disabledBg = useThemeColor('buttonDisabled');
 
     return (
         <TouchableOpacity

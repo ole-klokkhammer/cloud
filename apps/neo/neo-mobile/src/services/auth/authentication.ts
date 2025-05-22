@@ -6,11 +6,8 @@ import * as jwt from 'jwt-decode'
 import CryptoJS from "crypto-js";
 
 export const handleLogin = async () => {
-    console.log('before 1');
     const codeVerifier = generateCodeVerifier();
-    console.log('before 2');
     const codeChallenge = await generateCodeChallenge(codeVerifier);
-    console.log('before 3');
 
     let url = environment.keycloak.authorizeEndpoint;
     url += '?redirect_uri=' + encodeURIComponent(makeRedirectUri({
@@ -19,9 +16,7 @@ export const handleLogin = async () => {
     url += '&code_challenge=' + encodeURIComponent(codeChallenge);
     url += '&code_challenge_method=' + encodeURIComponent(CodeChallengeMethod.S256);
 
-    console.log('before 4');
     const result = await WebBrowser.openAuthSessionAsync(url);
-    console.log('result', result);
     if (result.type === 'success') {
         const params = new URLSearchParams(result.url.split('?')[1]);
         const code = params.get('code');

@@ -21,7 +21,6 @@ export const HomeScreen = () => {
     }
 
     useMqttSubscription('logs/kubernetes/errors/#', (topic, _) => {
-        console.log('Received message:', topic);
         const header = topic.split('/')[3];
 
         // Check if the app with the same id already exists

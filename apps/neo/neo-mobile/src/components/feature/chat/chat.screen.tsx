@@ -7,7 +7,7 @@ import { ThemedInput } from "@/components/ui/input/ThemedInput";
 import { ThemedButton } from "@/components/ui/button/ThemedButton";
 import React, { useEffect, useState } from "react";
 import { useLocalSearchParams, useNavigation } from "expo-router";
-import { useMqttSubscription } from "@/hooks/mqtt/useMqttSubscription"; 
+import { useMqttSubscription } from "@/hooks/mqtt/useMqttSubscription";
 
 export type ChatMessage = {
     id: string;
@@ -40,7 +40,7 @@ export default function ChatScreen() {
         navigation.setOptions({ title: `${id}` });
     }, [navigation]);
 
-    useMqttSubscription('logs/kubernetes/errors/' + id, (_, message) => {
+    useMqttSubscription(`logs/kubernetes/errors/${id}`, (_, message) => {
         const newMessage: ChatMessage = {
             id: uuidv4(),
             text: message.toString(),

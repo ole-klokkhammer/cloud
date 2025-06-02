@@ -24,8 +24,7 @@ DB_PASSWORD = environment.db_password
 DB_NAME = environment.db_name
 
 def main(): 
-    kafka_consumer = KafkaConsumer(
-        KAFKA_TOPIC,
+    kafka_consumer = KafkaConsumer( 
         bootstrap_servers=[KAFKA_BROKER],
         auto_offset_reset='earliest',
     ) 
@@ -39,6 +38,11 @@ def main():
                     logging.info(f"Subscribed to Kafka topic: {KAFKA_TOPIC}")
                     for msg in kafka_consumer:
                         try:
+                            # Check if message key exists and starts with 'bluetooth'
+                            if not msg.key or not msg.key.decode('utf-8').startswith('bluetooth'):
+                                logging.debug(f"Skipping message with key: {msg.key} from topic: {msg.topic}")
+                                continue
+
                             raw_value = msg.value.decode('utf-8')
                             if not raw_value.strip():
                                 logging.error("Received empty message from Kafka, skipping.")
@@ -48,7 +52,7 @@ def main():
                                 [raw_value]
                             )
                             conn.commit()
-                            logging.info("Inserted message into sensordb")
+                            logging.debug("Inserted message into sensordb")
                         except Exception as db_err:
                             logging.error(f"Database error: {db_err}")
                             conn.rollback()

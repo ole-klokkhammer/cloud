@@ -19,6 +19,7 @@ export const MqttClientProvider: React.FC<MqttClientProviderProps> = (props) => 
             reconnectPeriod: environment.mqtt.reconnectPeriod,
             keepalive: environment.mqtt.keepalive,
         });
+        console.log('Connecting to MQTT broker:', environment.mqtt.getBrokerUrl());
 
         mqttClient.on('connect', () => {
             console.log('Connected to MQTT broker');

@@ -35,7 +35,7 @@ export function useMqttSubscription(topic: string, onMessage: (topic: string, me
             if (err) {
                 console.error('Failed to subscribe to topic:', topic, err);
             } else {
-                console.debug('Subscribed to topic:', topic);
+                console.log('Subscribed to topic:', topic);
             }
         });
         return () => {

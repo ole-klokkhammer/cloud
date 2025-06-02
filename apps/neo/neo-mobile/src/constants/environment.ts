@@ -5,15 +5,15 @@ export const environment = {
     keycloak: {
         authorizeEndpoint: 'https://neo.linole.org/api/auth/mobile',//'http://localhost:3000/api/auth/mobile',
         tokenEndpoint: 'https://neo.linole.org/api/auth/mobile',//'http://localhost:3000/api/auth/mobile',
-        redirectUrl: 'com.olklokk.neomobile://*',
+        scheme: 'com.olklokk.neomobile://*',
         scopes: ['openid', 'profile'],
     },
     mqtt: {
         host: 'broker.linole.org', // '192.168.10.207',
-        protocol: 'wss',
-        port: 443,
+        protocol: 'wss', // ws
+        port: 443, // 8000
         path: 'mqtt',
-        clientId: 'client-' + uuidv4(), // todo
+        clientId: 'client-' + uuidv4(), // TODO
         reconnectPeriod: 2000,
         getBrokerUrl: () => `${environment.mqtt.protocol}://${environment.mqtt.host}:${environment.mqtt.port}/${environment.mqtt.path}`,
         keepalive: 20,

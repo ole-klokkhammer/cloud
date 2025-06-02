@@ -11,7 +11,7 @@ export const handleLogin = async () => {
 
     let url = environment.keycloak.authorizeEndpoint;
     url += '?redirect_uri=' + encodeURIComponent(makeRedirectUri({
-        scheme: environment.keycloak.redirectUrl,
+        scheme: environment.keycloak.scheme,
     }));
     url += '&code_challenge=' + encodeURIComponent(codeChallenge);
     url += '&code_challenge_method=' + encodeURIComponent(CodeChallengeMethod.S256);
@@ -42,7 +42,7 @@ const handleToken = async (code: string, code_verifier: string) => {
             code,
             code_verifier,
             redirect_uri: makeRedirectUri({
-                scheme: environment.keycloak.redirectUrl,
+                scheme: environment.keycloak.scheme,
             }),
         }),
     });

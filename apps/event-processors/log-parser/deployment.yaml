@@ -2,10 +2,11 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: log-parser
-  namespace: stream-processing
+  namespace: event-processors
   labels:
     app: log-parser
 spec: 
+  revisionHistoryLimit: 0
   selector:
     matchLabels:
       app: log-parser

@@ -37,6 +37,8 @@ spec:
               value: "8000"
             - name: HIVEMQ_WEBSOCKET_PATH
               value: "/mqtt"
+            - name: KAFKA_TOPIC
+              value: "hivemq"
           ports:
             - containerPort: 1883
               name: mqtt

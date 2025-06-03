@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 import os
    
+log_level = os.getenv("LOG_LEVEL")     
+
 kafka_broker = os.getenv("KAFKA_BROKER")     
 kafka_topic = os.getenv("KAFKA_TOPIC")      
 

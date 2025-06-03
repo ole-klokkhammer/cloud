@@ -13,10 +13,9 @@ KAFKA_TOPIC = environment.kafka_topic
 MQTT_BROKER = environment.mqtt_broker
 MQTT_PORT = environment.mqtt_port
 MQTT_TOPIC = environment.mqtt_topic
-
-
-logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s') 
  
+logging.basicConfig(level=getattr(logging, environment.log_level, logging.INFO), format='%(asctime)s %(levelname)s %(message)s')
+
 def consume_from_kafka():
     """Consume messages from Kafka and publish to MQTT."""
 

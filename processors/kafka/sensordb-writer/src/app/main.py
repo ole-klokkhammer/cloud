@@ -14,28 +14,26 @@ missing = [var for var in required_env if not os.environ.get(var)]
 if missing:
     logging.error(f"Missing required environment variables: {', '.join(missing)}")
     exit(1)
-
-KAFKA_BROKER = environment.kafka_broker
-KAFKA_TOPIC = environment.kafka_topic
-DB_HOST = environment.db_host
-DB_PORT = environment.db_port
-DB_USER = environment.db_user
-DB_PASSWORD = environment.db_password
-DB_NAME = environment.db_name
+ 
+KAFKA_TOPICS = [environment.kafka_topic]
 
 def main(): 
     kafka_consumer = KafkaConsumer( 
-        bootstrap_servers=[KAFKA_BROKER],
+        bootstrap_servers=[environment.kafka_broker],
         auto_offset_reset='earliest',
     ) 
 
     try:
         with psycopg2.connect(
-            host=DB_HOST, port=DB_PORT, user=DB_USER, password=DB_PASSWORD, dbname=DB_NAME
+            host=environment.db_host, 
+            port=environment.db_port, 
+            user=environment.db_user, 
+            password=environment.db_password, 
+            dbname=environment.db_name
         ) as conn:
             with conn.cursor() as cur:
-                    kafka_consumer.subscribe([KAFKA_TOPIC])
-                    logging.info(f"Subscribed to Kafka topic: {KAFKA_TOPIC}")
+                    kafka_consumer.subscribe(KAFKA_TOPICS)
+                    logging.info(f"Subscribed to Kafka topic: {KAFKA_TOPICS}")
                     for msg in kafka_consumer:
                         try:
                             # Check if message key exists and starts with 'bluetooth'

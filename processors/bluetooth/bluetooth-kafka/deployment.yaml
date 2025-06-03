@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: bluetooth-mqtt
+  name: bluetooth-kafka
   namespace: bluetooth-processors
   labels:
     app: bluetooth-mqtt
@@ -9,11 +9,11 @@ spec:
   revisionHistoryLimit: 0
   selector:
     matchLabels:
-      app: bluetooth-mqtt
+      app: bluetooth-kafka
   template:
     metadata:
       labels:
-        app: bluetooth-mqtt
+        app: bluetooth-kafka
     spec:
       affinity:
         nodeAffinity:
@@ -25,29 +25,25 @@ spec:
                     values:
                       - master0
       containers:
-        - name: bluetooth-mqtt
-          image: olklokk/bluetooth-mqtt:1.0.7
+        - name: bluetooth-kafka
+          image: olklokk/bluetooth-kafka:1.0.30
           env:
             - name: LOG_LEVEL
               value: "info"
-            - name: MQTT_BROKER
-              value: "hivemq-internal.hivemq"
-            - name: MQTT_PORT
-              value: "1883"
-            - name: MQTT_CLIENT_ID
-              value: "bluetooth_mqtt"
+            - name: KAFKA_BROKER
+              value: "kafka-kafka-bootstrap.kafka:9092"
             - name: CRON_GENERIC_BLE_SCAN
-              value: "*/5 * * * *"
+              value: "*/5 * * * *" 
             - name: CRON_AIRTHINGS_WAVE_PLUS_SENSOR_DATA
               value: "*/15 * * * *"
             - name: CRON_AIRTHINGS_WAVE_PLUS_BATTERY
-              value: "0 1 * * *"
-            - name: AIRTHINGS_WAVE_PLUS_BASEMENT
-              value: "F4:60:77:6D:33:C0"
-            - name: AIRTHINGS_WAVE_PLUS_LIVING_ROOM
-              value: "F4:60:77:70:58:EA"
-            - name: AIRTHINGS_WAVE_PLUS_BEDROOM
-              value: "A4:DA:32:28:C4:2F"
+              value: "0 1 * * *" 
+            # - name: AIRTHINGS_WAVE_PLUS_BASEMENT
+            #   value: "F4:60:77:6D:33:C0"
+            # - name: AIRTHINGS_WAVE_PLUS_LIVING_ROOM
+            #   value: "F4:60:77:70:58:EA"
+            # - name: AIRTHINGS_WAVE_PLUS_BEDROOM
+            #   value: "A4:DA:32:28:C4:2F"
           securityContext:
             capabilities:
               add:

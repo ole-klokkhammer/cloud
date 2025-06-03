@@ -1,0 +1,4 @@
+APScheduler 
+bleak
+paho-mqtt
+kafka-python

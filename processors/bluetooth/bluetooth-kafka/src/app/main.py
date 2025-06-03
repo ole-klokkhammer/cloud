@@ -1,12 +1,10 @@
 #!/usr/bin/python3
  
-import logging 
-import airthings.tasks
+import logging  
 from apscheduler.schedulers.blocking import BlockingScheduler
 import bluetooth.tasks
 from common import task_queue  
-import bluetooth
-import airthings 
+import bluetooth 
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s') 
 
@@ -15,10 +13,11 @@ scheduler = BlockingScheduler()
 
 try:
     task_queue.start_queue_worker() 
+
     bluetooth.tasks.schedule_scan(scheduler) 
-    airthings.tasks.schedule_basement(scheduler)
-    airthings.tasks.schedule_living_room(scheduler)
-    airthings.tasks.schedule_bedroom(scheduler)
+    bluetooth.tasks.schedule_connect(scheduler) 
+    bluetooth.tasks.schedule_commands(scheduler) 
+    
     scheduler.start() 
 except (KeyboardInterrupt, SystemExit):
     task_queue.stop_queue_worker()

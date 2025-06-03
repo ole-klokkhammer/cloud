@@ -1,6 +1,6 @@
 #!/bin/bash
 
-APP_NAME="bluetooth-mqtt"
+APP_NAME="bluetooth-kafka"
 
 # Step 1: Auto-bump the patch version
 PREV_VERSION=$(grep -oP 'olklokk/'"$APP_NAME"':\K[0-9]+\.[0-9]+\.[0-9]+' deployment.yaml)

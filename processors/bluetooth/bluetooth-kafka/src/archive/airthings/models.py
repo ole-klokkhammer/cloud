@@ -18,7 +18,7 @@ class SensorData:
     temperature: float
     pressure: float
     co2: float
-    voc: float
+    voc: float 
     # Uncomment the following lines if extra fields are needed
     # extra1: float = None
     # extra2: float = None

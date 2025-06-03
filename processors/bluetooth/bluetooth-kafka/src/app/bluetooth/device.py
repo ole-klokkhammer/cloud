@@ -72,7 +72,7 @@ async def connect(address: str) -> BLEDeviceResponse:
         raise
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
-        raise
+        raise 
     return result
 
 async def send_command(

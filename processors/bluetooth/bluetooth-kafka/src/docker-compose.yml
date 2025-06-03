@@ -1,5 +1,5 @@
 services:
-  bluetooth-bridge:
+  bluetooth-kafka:
     build:
       context: .
       dockerfile: Dockerfile   

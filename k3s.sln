@@ -1,0 +1,35 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "processors", "processors", "{427C77E5-EDFA-0E90-E843-FC904B49A820}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "kafka", "kafka", "{7EA6FB2A-9CAE-F74C-3D5D-0330F9BFB741}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sensor-processor", "sensor-processor", "{36AF9FFE-5E35-E0FD-8DE9-3758DFE1FB50}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SensorProcessor", "processors\kafka\sensor-processor\app\SensorProcessor.csproj", "{DA326A7C-A79F-16BE-7710-99BFC50D91CB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DA326A7C-A79F-16BE-7710-99BFC50D91CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA326A7C-A79F-16BE-7710-99BFC50D91CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA326A7C-A79F-16BE-7710-99BFC50D91CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA326A7C-A79F-16BE-7710-99BFC50D91CB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{7EA6FB2A-9CAE-F74C-3D5D-0330F9BFB741} = {427C77E5-EDFA-0E90-E843-FC904B49A820}
+		{36AF9FFE-5E35-E0FD-8DE9-3758DFE1FB50} = {7EA6FB2A-9CAE-F74C-3D5D-0330F9BFB741}
+		{DA326A7C-A79F-16BE-7710-99BFC50D91CB} = {36AF9FFE-5E35-E0FD-8DE9-3758DFE1FB50}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6356D464-6658-4C49-B71B-0124EB40AE20}
+	EndGlobalSection
+EndGlobal

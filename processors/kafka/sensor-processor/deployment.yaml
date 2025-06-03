@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sensor-processor
+  namespace: kafka-processors
+  labels:
+    app: sensor-processor
+spec:
+  revisionHistoryLimit: 0
+  selector:
+    matchLabels:
+      app: sensor-processor
+  template:
+    metadata:
+      labels:
+        app: sensor-processor
+    spec:
+      containers:
+        - name: sensor-processor
+          image: olklokk/sensor-processor:1.0.42
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: LOG_LEVEL
+              value: "info" 
+            - name: KAFKA_BROKER
+              value: "kafka-kafka-bootstrap.kafka:9092"
+            - name: KAFKA_TOPIC
+              value: "hivemq"
+            - name: DB_HOST
+              value: "postgres-internal.postgres"
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              value: "sensordb"
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: sensor-processor-config
+                  key: DB_USER
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: sensor-processor-config
+                  key: DB_PASSWORD 

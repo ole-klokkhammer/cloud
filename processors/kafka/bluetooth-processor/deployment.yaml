@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: bluetooth-processor
-          image: olklokk/bluetooth-processor:1.0.3
+          image: olklokk/bluetooth-processor:1.0.10
           imagePullPolicy: IfNotPresent
           env:
             - name: LOG_LEVEL

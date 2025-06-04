@@ -53,10 +53,18 @@ public class PostgresService
     public async Task InsertDataAsync(string command, Dictionary<string, object> data)
     {
         await using var conn = dataSource.CreateConnection();
+        await conn.OpenAsync();
         await using var cmd = new NpgsqlCommand(command, conn);
         foreach (var kvp in data)
         {
-            cmd.Parameters.AddWithValue(kvp.Key, kvp.Value);
+            if (kvp.Value is NpgsqlParameter param)
+            {
+                cmd.Parameters.Add(param);
+            }
+            else
+            {
+                cmd.Parameters.AddWithValue(kvp.Key, kvp.Value);
+            }
         }
         await cmd.ExecuteNonQueryAsync();
     }

@@ -33,7 +33,7 @@ spec:
             - name: KAFKA_BROKER
               value: "kafka-kafka-bootstrap.kafka:9092"
             - name: CRON_GENERIC_BLE_SCAN
-              value: "*/5 * * * *" 
+              value: "0 * * * *" 
             - name: CRON_AIRTHINGS_WAVE_PLUS_SENSOR_DATA
               value: "*/15 * * * *"
             - name: CRON_AIRTHINGS_WAVE_PLUS_BATTERY

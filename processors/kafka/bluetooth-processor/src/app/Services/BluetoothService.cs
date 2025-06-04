@@ -42,12 +42,19 @@ class BluetoothService
                     { "name", scan.name ?? (object)DBNull.Value },
                     { "address", scan.address ?? (object)DBNull.Value },
                     { "rssi", scan.rssi },
-                    { "manufacturer_data", scan.manufacturer_data != null ? JsonSerializer.Serialize(scan.manufacturer_data) : "{}" }
+                    { "manufacturer_data", new Npgsql.NpgsqlParameter
+                        {
+                            ParameterName = "manufacturer_data",
+                            NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Jsonb,
+                            Value = scan.manufacturer_data != null ?
+                                JsonSerializer.Serialize(scan.manufacturer_data) 
+                                : "{}"
+                        }
+                    }
                 }
             );
         }
         logger.LogInformation($"Inserted {scans.Count} bluetooth scan(s).");
-
     }
 
     public async Task HandleConnect(string key, string payload)
@@ -56,7 +63,7 @@ class BluetoothService
         if (key.Contains("airthings"))
         {
             logger.LogDebug($"Processing airthings connect: key: {key}");
-            await airthingsService.OnConnect(payload);
+            await airthingsService.HandleConnectPayload(payload);
         }
         else
         {

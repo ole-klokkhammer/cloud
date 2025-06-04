@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: bluetooth-processor
-          image: olklokk/bluetooth-processor:1.0.20
+          image: olklokk/bluetooth-processor:1.0.22
           imagePullPolicy: IfNotPresent
           env:
             - name: LOG_LEVEL
@@ -26,6 +26,12 @@ spec:
               value: "kafka-kafka-bootstrap.kafka:9092"
             - name: KAFKA_TOPIC
               value: "bluetooth"
+            - name: MQTT_BROKER
+              value: "hivemq-internal.hivemq"
+            - name: MQTT_PORT
+              value: "1883"
+            - name: MQTT_CLIENT_ID
+              value: "bluetooth-processor"
             - name: DB_HOST
               value: "postgres-internal.postgres"
             - name: DB_PORT

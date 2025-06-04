@@ -42,6 +42,10 @@
               "target": "Package",
               "version": "[2.10.0, )"
             },
+            "MQTTnet": {
+              "target": "Package",
+              "version": "[4.3.7.1207, )"
+            },
             "Microsoft.Extensions.DependencyInjection": {
               "target": "Package",
               "version": "[9.0.5, )"

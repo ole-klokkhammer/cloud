@@ -6,14 +6,17 @@ class AirthingsService
 {
     private readonly ILogger<AirthingsService> logger;
     private readonly PostgresService postgresService;
+    private readonly MqttService mqttService;
 
     public AirthingsService(
         ILogger<AirthingsService> logger,
-        PostgresService postgresService
+        PostgresService postgresService,
+        MqttService mqttService
     )
     {
         this.logger = logger;
         this.postgresService = postgresService;
+        this.mqttService = mqttService;
     }
 
     public async Task HandleCommandPayload(string kafkaKey, byte[] payload)
@@ -66,6 +69,24 @@ class AirthingsService
                 { "voltage", batteryVolt }
             }
         );
+
+        try
+        {
+            await mqttService.PublishAsync(
+                $"bluetooth/airthings/{mac}/battery",
+                JsonSerializer.Serialize(new
+                {
+                    serial,
+                    batteryLevel,
+                    voltage = batteryVolt
+                })
+            );
+            logger.LogInformation($"Published battery data to MQTT for device {mac}");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to publish battery data to MQTT");
+        }
     }
 
     public async Task HandleConnectPayload(string kafkaKey, string payload)
@@ -140,6 +161,32 @@ class AirthingsService
                 { "radon_long_term_average", airthingsSensorData.RadonLongTermAverage ?? (object)DBNull.Value }
             }
         );
+
+        try
+        {
+            await mqttService.PublishAsync(
+                $"bluetooth/airthings/{mac}/data",
+                JsonSerializer.Serialize(airthingsSensorData)
+            );
+            logger.LogInformation($"Published sensor data to MQTT for device {mac}");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to publish sensor data to MQTT");
+        }
+
+        try
+        {
+            await mqttService.PublishAsync(
+                $"bluetooth/airthings/{mac}/device",
+                JsonSerializer.Serialize(airthingsDevice)
+            );
+            logger.LogInformation($"Published device data to MQTT for device {mac}");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to publish device data to MQTT");
+        }
     }
 
     private AirthingsSensorData? ParseSensorData(GattRoot data, int serial, string? LocationId)

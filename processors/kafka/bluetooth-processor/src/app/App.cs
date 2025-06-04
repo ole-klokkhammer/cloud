@@ -19,6 +19,7 @@ public class App
         });
 
         services.AddSingleton<BluetoothWorker>();
+        services.AddSingleton<MqttService>();
         services.AddSingleton<AirthingsService>();
         services.AddSingleton<BluetoothService>();
         services.AddSingleton<PostgresService>();
@@ -26,6 +27,7 @@ public class App
         using var provider = services.BuildServiceProvider();
         var bluetoothWorker = provider.GetRequiredService<BluetoothWorker>();
         var postgresService = provider.GetRequiredService<PostgresService>();
+        var mqttService = provider.GetRequiredService<MqttService>();
 
         var cts = new CancellationTokenSource();
         Console.CancelKeyPress += (_, e) => { e.Cancel = true; cts.Cancel(); };
@@ -34,6 +36,7 @@ public class App
         try
         {
             postgresService.Initialize();
+            await mqttService.Initialize();
 
             await Task.WhenAll(
                 bluetoothWorker.DoWork(cts.Token)
@@ -42,6 +45,7 @@ public class App
         finally
         {
             // Ensure graceful shutdown 
+            await mqttService.Shutdown();
             await postgresService.Shutdown();
         }
     }

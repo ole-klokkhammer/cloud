@@ -22,4 +22,12 @@ public static class AppEnvironment
 
     public static string DbName =>
         Environment.GetEnvironmentVariable("DB_NAME") ?? throw new InvalidOperationException("DB_NAME is not set.");
+    public static string MqttBroker =>
+        Environment.GetEnvironmentVariable("MQTT_BROKER") ?? throw new InvalidOperationException("MQTT_BROKER is not set.");
+    public static string MqttPort =>
+           Environment.GetEnvironmentVariable("MQTT_PORT") ?? throw new InvalidOperationException("MQTT_PORT is not set.");
+
+    public static string MqttClientId =>
+        Environment.GetEnvironmentVariable("MQTT_CLIENT_ID") ?? throw new InvalidOperationException("MQTT_CLIENT_ID is not set.");
+
 }

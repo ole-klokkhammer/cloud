@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "1A6w9QKG+1sDD2u+umf9JZpwzPNPjRtlHapiOYwlkiUaHrr1xfXYKA1myfRc+/8PiPeaxZLTy4hybVAa7sfPpQ==",
+  "dgSpecHash": "vAIrZYvHZz+3vz/VNl09orntxeWPT9wx4QT/dtG3hmGH9C7TR+LpUNSCT6nAMAZFbnfTTDXgwtu+5unb5qQuzQ==",
   "success": true,
   "projectFilePath": "/home/ole/workspace/oleklokkhammer/projects/k3s/processors/kafka/bluetooth-processor/src/app/SensorProcessor.csproj",
   "expectedPackageFiles": [
@@ -19,6 +19,7 @@
     "/home/ole/.nuget/packages/microsoft.extensions.options/9.0.5/microsoft.extensions.options.9.0.5.nupkg.sha512",
     "/home/ole/.nuget/packages/microsoft.extensions.options.configurationextensions/9.0.5/microsoft.extensions.options.configurationextensions.9.0.5.nupkg.sha512",
     "/home/ole/.nuget/packages/microsoft.extensions.primitives/9.0.5/microsoft.extensions.primitives.9.0.5.nupkg.sha512",
+    "/home/ole/.nuget/packages/mqttnet/4.3.7.1207/mqttnet.4.3.7.1207.nupkg.sha512",
     "/home/ole/.nuget/packages/npgsql/9.0.3/npgsql.9.0.3.nupkg.sha512",
     "/home/ole/.nuget/packages/system.buffers/4.5.1/system.buffers.4.5.1.nupkg.sha512",
     "/home/ole/.nuget/packages/system.componentmodel.annotations/5.0.0/system.componentmodel.annotations.5.0.0.nupkg.sha512",

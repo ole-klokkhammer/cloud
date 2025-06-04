@@ -15,15 +15,15 @@ async def scan_and_publish(timeout: int = 5):
     except Exception as e:
         logging.error(f"Unexpected error while scanning ble: {e}")
 
-async def connect_and_publish(address: str):
+async def connect_and_publish(device_type: str, address: str):
     try:
         response = await bluetooth.device.connect(address)
         payload = json.dumps(dataclasses.asdict(response))
-        kafka.produce("connect/" + address, payload.encode('utf-8'))
+        kafka.produce("connect/" + device_type  + "/" + address, payload.encode('utf-8'))
     except Exception as e:
         logging.error(f"Unexpected error while connecting to {address}: {e}")
 
-async def send_command_and_publish(address: str, characteristic: str, command: str, format_type: str):
+async def send_command_and_publish(device_type: str, address: str, characteristic: str, command: str, format_type: str):
     try:
         response = await bluetooth.device.send_command(
             address=address,
@@ -34,7 +34,7 @@ async def send_command_and_publish(address: str, characteristic: str, command: s
         if not response:
             logging.warning(f"No response received from {address} for command {command}.")
         else: 
-            kafka.produce("command/" + address + "/" + str(characteristic), response)
+            kafka.produce("command/" + device_type + "/" + address + "/" + str(characteristic), response)
     except Exception as e:
         logging.error(f"Unexpected error while sending command to {address}: {e}")
 

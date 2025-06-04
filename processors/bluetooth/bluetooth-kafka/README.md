@@ -14,3 +14,4 @@
 * https://github.com/hbldh/bleak
 * https://pypi.org/project/bleparser/
 * https://github.com/custom-components/ble_monitor
+* https://bitbucket.org/bluetooth-SIG/public/src/main/assigned_numbers/

@@ -1,7 +1,6 @@
 from kafka import KafkaProducer
 import logging
-import env
-import json
+import env 
 
 producer = KafkaProducer(
     bootstrap_servers=env.kafka_broker

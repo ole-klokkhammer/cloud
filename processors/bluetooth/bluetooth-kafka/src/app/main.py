@@ -2,6 +2,7 @@
  
 import logging  
 from apscheduler.schedulers.blocking import BlockingScheduler
+import bluetooth.schedules
 import bluetooth.tasks
 from common import task_queue  
 import bluetooth 
@@ -14,9 +15,9 @@ scheduler = BlockingScheduler()
 try:
     task_queue.start_queue_worker() 
 
-    bluetooth.tasks.schedule_scan(scheduler) 
-    bluetooth.tasks.schedule_connect(scheduler) 
-    bluetooth.tasks.schedule_commands(scheduler) 
+    bluetooth.schedules.schedule_scan(scheduler) 
+    bluetooth.schedules.schedule_connect(scheduler) 
+    bluetooth.schedules.schedule_commands(scheduler) 
     
     scheduler.start() 
 except (KeyboardInterrupt, SystemExit):

@@ -20,7 +20,7 @@ class BluetoothWorker
         {
             BootstrapServers = AppEnvironment.KafkaBroker,
             AutoOffsetReset = AutoOffsetReset.Earliest,
-            GroupId = "sensor-processor",
+            GroupId = "bluetooth-processor",
             EnableAutoCommit = false
         };
     }
@@ -28,9 +28,9 @@ class BluetoothWorker
     public async Task DoWork(CancellationToken token)
     {
         using (
-            var kafkaConsumer = new ConsumerBuilder<string, string>(kafkaConsumerConfig)
+            var kafkaConsumer = new ConsumerBuilder<string, byte[]>(kafkaConsumerConfig)
                 .SetKeyDeserializer(Deserializers.Utf8)
-                .SetValueDeserializer(Deserializers.Utf8)
+                .SetValueDeserializer(Deserializers.ByteArray)
                 .Build()
         )
         {
@@ -56,7 +56,7 @@ class BluetoothWorker
         }
     }
 
-    async Task KafkaConsumeLoop(IConsumer<string, string> kafkaConsumer, CancellationToken token)
+    async Task KafkaConsumeLoop(IConsumer<string, byte[]> kafkaConsumer, CancellationToken token)
     {
         while (!token.IsCancellationRequested)
         {
@@ -64,7 +64,7 @@ class BluetoothWorker
             {
                 var cr = kafkaConsumer.Consume(token);
                 var key = cr.Message.Key;
-                var value = cr.Message.Value;
+                var value = cr.Message.Value; 
 
                 if (string.IsNullOrEmpty(key))
                 {
@@ -72,24 +72,31 @@ class BluetoothWorker
                     continue;
                 }
 
-                if (string.IsNullOrWhiteSpace(value))
+                if (value == null || value.Length == 0)
                 {
-                    logger.LogDebug("Received empty message from Kafka, skipping.");
+                    logger.LogDebug($"Skipping message with empty value for key: {key}");
                     continue;
-                }
+                } 
 
                 if (key.StartsWith("scan"))
                 {
 
-                    logger.LogDebug($"Processing bluetooth scan: key: {key}");
-                    await bluetoothService.HandleScan(value);
+                    logger.LogDebug($"Processing bluetooth scan: key: {key}"); 
+                    await bluetoothService.HandleScan(System.Text.Encoding.UTF8.GetString(value));
                     kafkaConsumer.Commit(cr);
                 }
 
                 if (key.StartsWith("connect"))
                 {
                     logger.LogDebug($"Processing bluetooth connect: key: {key}");
-                    await bluetoothService.HandleConnect(key, value);
+                    await bluetoothService.HandleConnect(key, System.Text.Encoding.UTF8.GetString(value));
+                    kafkaConsumer.Commit(cr);
+                }
+
+                if (key.StartsWith("command"))
+                {
+                    logger.LogDebug($"Processing bluetooth command: key: {key}");
+                    await bluetoothService.HandleCommand(key, value);
                     kafkaConsumer.Commit(cr);
                 }
             }

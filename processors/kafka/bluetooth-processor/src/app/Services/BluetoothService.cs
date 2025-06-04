@@ -47,7 +47,7 @@ class BluetoothService
                             ParameterName = "manufacturer_data",
                             NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Jsonb,
                             Value = scan.manufacturer_data != null ?
-                                JsonSerializer.Serialize(scan.manufacturer_data) 
+                                JsonSerializer.Serialize(scan.manufacturer_data)
                                 : "{}"
                         }
                     }
@@ -63,11 +63,24 @@ class BluetoothService
         if (key.Contains("airthings"))
         {
             logger.LogDebug($"Processing airthings connect: key: {key}");
-            await airthingsService.HandleConnectPayload(payload);
+            await airthingsService.HandleConnectPayload(key, payload);
         }
         else
         {
             logger.LogWarning($"Unknown bluetooth connect key: {key}");
+        }
+    }
+
+    public async Task HandleCommand(string key, byte[] payload)
+    {
+        if (key.Contains("airthings"))
+        {
+            logger.LogDebug($"Processing airthings command: key: {key}");
+            await airthingsService.HandleCommandPayload(key, payload);
+        }
+        else
+        {
+            logger.LogWarning($"Unknown bluetooth command key: {key}");
         }
     }
 }

@@ -10,7 +10,11 @@ public class App
 
         services.AddLogging(builder =>
         {
-            builder.AddConsole();
+            builder.AddSimpleConsole(options =>
+            {
+                options.TimestampFormat = "[yyyy-MM-dd HH:mm:ss] ";
+                options.IncludeScopes = false;
+            });
             builder.SetMinimumLevel(LogLevel.Information);
         });
 

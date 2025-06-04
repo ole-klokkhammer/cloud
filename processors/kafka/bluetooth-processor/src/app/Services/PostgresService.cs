@@ -1,3 +1,4 @@
+using System.Data;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 
@@ -34,20 +35,32 @@ public class PostgresService
             await dataSource.DisposeAsync();
     }
 
-    public async Task<List<string>> GetDataAsync(string command)
+    public async Task<List<T>> GetDataAsync<T>(string commandString, Dictionary<string, object> parameters)
     {
-        var result = new List<string>();
         await using var conn = dataSource.CreateConnection();
-        await using (var cmd = new NpgsqlCommand(command, conn))
-        await using (var reader = await cmd.ExecuteReaderAsync())
+        await conn.OpenAsync();
+        await using var cmd = new NpgsqlCommand(commandString, conn);
+
+        foreach (var kvp in parameters)
         {
-            while (await reader.ReadAsync())
+            if (kvp.Value is NpgsqlParameter param)
             {
-                result.Add(reader.GetString(0));
+                cmd.Parameters.Add(param);
+            }
+            else
+            {
+                cmd.Parameters.AddWithValue(kvp.Key, kvp.Value);
             }
         }
 
-        return result;
+        var results = new List<T>();
+        await using var reader = await cmd.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            
+            results.Add(reader.GetFieldValue<T>(0)); // Assuming single column result
+        }
+        return results;
     }
 
     public async Task InsertDataAsync(string command, Dictionary<string, object> data)
@@ -67,27 +80,5 @@ public class PostgresService
             }
         }
         await cmd.ExecuteNonQueryAsync();
-    }
-
-    public async Task InsertDataTransactional(string command, Dictionary<string, string> data)
-    {
-        await using var conn = dataSource.CreateConnection();
-        await using var transaction = await conn.BeginTransactionAsync();
-        try
-        {
-            await using var cmd = new NpgsqlCommand(command, conn, transaction);
-            foreach (var kvp in data)
-            {
-                cmd.Parameters.AddWithValue(kvp.Key, kvp.Value);
-            }
-            await cmd.ExecuteNonQueryAsync();
-            await transaction.CommitAsync();
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Failed to insert data into PostgreSQL database.");
-            await transaction.RollbackAsync();
-            throw;
-        }
     }
 }

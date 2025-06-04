@@ -1,3 +1,4 @@
+import logging
 from common.kafka import produce
 from common import task_queue
 import bluetooth
@@ -22,18 +23,18 @@ def schedule_connect(scheduler):
     device_type_airthings_wave_plus = "airthings_wave_plus"
     tasks = [
         {
-            "device_type": device_type_airthings_wave_plus,
             "cron": env.airthings_wave_plus_sensor_data_cron,
+            "device_type": device_type_airthings_wave_plus,
             "address": env.airthings_wave_plus_basement,
         },
         {
-            "device_type": device_type_airthings_wave_plus,
             "cron": env.airthings_wave_plus_sensor_data_cron,
+            "device_type": device_type_airthings_wave_plus,
             "address": env.airthings_wave_plus_living_room,
         },
         {
-            "device_type": device_type_airthings_wave_plus,
             "cron": env.airthings_wave_plus_sensor_data_cron,
+            "device_type": device_type_airthings_wave_plus,
             "address": env.airthings_wave_plus_bedroom,
         },
     ]
@@ -45,6 +46,9 @@ def schedule_connect(scheduler):
         name = f"{device_type}_{address.replace(':', '').lower()}_sensor_data_task"
 
         # Pass the parameters to the lambda function to avoid late binding issues
+        logging.debug(
+            f"Scheduling connect task for {device_type} at {address} with cron {cron}"
+        )
         scheduler.add_job(
             lambda address=address, device_type=device_type: task_queue.add_task(
                 lambda: bluetooth.tasks.connect_and_publish(
@@ -65,24 +69,24 @@ def schedule_commands(scheduler):
     wave_plus_command_characteristic = "b42e2d06-ade7-11e4-89d3-123b93f75cba"
     tasks = [
         {
-            "device_type": device_type_airthings_wave_plus,
             "cron": env.airthings_wave_plus_battery_cron,
+            "device_type": device_type_airthings_wave_plus,
             "address": env.airthings_wave_plus_basement,
             "characteristic": wave_plus_command_characteristic,
             "command": wave_plus_command_battery,
             "format_type": wave_plus_command_format_type,
         },
         {
-            "device_type": device_type_airthings_wave_plus,
             "cron": env.airthings_wave_plus_battery_cron,
+            "device_type": device_type_airthings_wave_plus,
             "address": env.airthings_wave_plus_living_room,
             "characteristic": wave_plus_command_characteristic,
             "command": wave_plus_command_battery,
             "format_type": wave_plus_command_format_type,
         },
         {
-            "device_type": device_type_airthings_wave_plus,
             "cron": env.airthings_wave_plus_battery_cron,
+            "device_type": device_type_airthings_wave_plus,
             "address": env.airthings_wave_plus_bedroom,
             "characteristic": wave_plus_command_characteristic,
             "command": wave_plus_command_battery,
@@ -100,6 +104,9 @@ def schedule_commands(scheduler):
         name = f"{device_type}_{address.replace(':', '').lower()}_sensor_battery_task"
 
         # Pass the parameters to the lambda function to avoid late binding issues
+        logging.debug(
+            f"Scheduling command task for {device_type} at {address} with cron {cron}"
+        )
         scheduler.add_job(
             lambda device_type=device_type, address=address, characteristic=characteristic, command=command, format_type=format_type: task_queue.add_task(
                 lambda: bluetooth.tasks.send_command_and_publish(

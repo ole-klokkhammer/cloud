@@ -9,3 +9,7 @@
 
 ## timescale
 * https://www.timescale.com/ai/solutions/agentic-applications?bb=220956
+
+## databases
+-- Create a new database for linole 
+CREATE DATABASE linole;

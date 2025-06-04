@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: sensor-processor
-          image: olklokk/sensor-processor:1.0.42
+          image: olklokk/sensor-processor:1.0.44
           imagePullPolicy: IfNotPresent
           env:
             - name: LOG_LEVEL
@@ -31,7 +31,7 @@ spec:
             - name: DB_PORT
               value: "5432"
             - name: DB_NAME
-              value: "sensordb"
+              value: "linole"
             - name: DB_USER
               valueFrom:
                 secretKeyRef:

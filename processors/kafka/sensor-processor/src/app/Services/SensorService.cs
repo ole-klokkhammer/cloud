@@ -6,15 +6,13 @@ using Npgsql;
 class SensorService
 {
     private readonly ILogger<SensorService> logger;
+    private readonly IConsumer<string, string> kafkaConsumer;
+    private readonly NpgsqlConnection postgresConn;
 
     public SensorService(ILogger<SensorService> logger)
     {
         this.logger = logger;
-    }
-
-    public async Task<int> DoWork()
-    {
-        using var kafkaConsumer = new ConsumerBuilder<string, string>(
+        this.kafkaConsumer = new ConsumerBuilder<string, string>(
             new ConsumerConfig
             {
                 BootstrapServers = AppEnvironment.KafkaBroker,
@@ -25,16 +23,19 @@ class SensorService
             .SetKeyDeserializer(Deserializers.Utf8)
             .SetValueDeserializer(Deserializers.Utf8)
             .Build();
-
-        using var postgresConn = new NpgsqlConnection(
+        this.postgresConn = new NpgsqlConnection(
             @$"
-                Host={AppEnvironment.DbHost};
-                Port={AppEnvironment.DbPort};
-                Username={AppEnvironment.DbUser};
-                Password={AppEnvironment.DbPassword};
-                Database={AppEnvironment.DbName}
-            "
+                    Host={AppEnvironment.DbHost};
+                    Port={AppEnvironment.DbPort};
+                    Username={AppEnvironment.DbUser};
+                    Password={AppEnvironment.DbPassword};
+                    Database={AppEnvironment.DbName}
+                "
         );
+    }
+
+    public async Task<int> DoWork()
+    {
 
         try
         {
@@ -49,7 +50,7 @@ class SensorService
             var cts = new CancellationTokenSource();
             Console.CancelKeyPress += (_, e) => { e.Cancel = true; cts.Cancel(); };
 
-            await ConsumeKafkaAsync(kafkaConsumer, postgresConn, cts.Token);
+            await ConsumeKafkaAsync(cts.Token);
         }
         catch (Exception ex)
         {
@@ -67,17 +68,17 @@ class SensorService
         return 0;
     }
 
-    async Task ConsumeKafkaAsync(IConsumer<string, string> consumer, NpgsqlConnection conn, CancellationToken token)
+    async Task ConsumeKafkaAsync(CancellationToken token)
     {
         while (!token.IsCancellationRequested)
         {
             try
             {
-                var cr = consumer.Consume(token);
+                var cr = kafkaConsumer.Consume(token);
                 var key = cr.Message.Key;
                 var value = cr.Message.Value;
 
-                if (string.IsNullOrEmpty(key) || !key.StartsWith("bluetooth"))
+                if (string.IsNullOrEmpty(key) || !key.StartsWith("sensor"))
                 {
                     logger.LogDebug($"Skipping message with key: {key} from topic: {cr.Topic}");
                     continue;
@@ -89,11 +90,11 @@ class SensorService
                     continue;
                 }
 
-                if (key.StartsWith("bluetooth/airthings") && key.Split('/').Length == 3)
+                if (key.StartsWith("sensor/airthings") && key.Split('/').Length == 3)
                 {
                     var name = key.Split('/')[2];
                     logger.LogDebug($"Processing airthings data: {value}, name: {name}");
-                    await HandleAirthingsData(name, value, conn, token);
+                    await HandleAirthingsData(name, value, token);
                 }
 
             }
@@ -109,18 +110,22 @@ class SensorService
             catch (Exception e)
             {
                 logger.LogError($"Database error: {e.Message}");
-                try { await conn.BeginTransaction().RollbackAsync(); } catch { }
+                try
+                {
+                    await postgresConn.BeginTransaction().RollbackAsync();
+                }
+                catch { }
             }
         }
     }
 
-    private async Task HandleAirthingsData(string name, string value, NpgsqlConnection conn, CancellationToken token)
+    private async Task HandleAirthingsData(string name, string value, CancellationToken token)
     {
         try
         {
             using var doc = JsonDocument.Parse(value);
             var root = doc.RootElement;
- 
+
             string pin = "";
 
             double temperature = root.GetProperty("temperature").GetDouble();
@@ -132,13 +137,13 @@ class SensorService
             double pressure = root.GetProperty("pressure").GetDouble();
 
             const string insertSql = @"
-                INSERT INTO airthings (
+                INSERT INTO sensor.airthings (
                     name, pin, temperature, humidity, co2, voc, pm25, radon, pressure, raw_data
                 ) VALUES (
                     @name, @pin, @temperature, @humidity, @co2, @voc, @pm25, @radon, @pressure, @raw_data
                 );
             ";
-            using var cmd = new NpgsqlCommand(insertSql, conn);
+            using var cmd = new NpgsqlCommand(insertSql, postgresConn);
             cmd.Parameters.AddWithValue("name", name);
             cmd.Parameters.AddWithValue("pin", pin);
             cmd.Parameters.AddWithValue("temperature", temperature);

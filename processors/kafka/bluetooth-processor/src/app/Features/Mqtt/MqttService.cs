@@ -77,13 +77,15 @@ class MqttService
         }
     }
 
-    public async Task<bool> TryPublishAsync<T>(string topic, T message)
+    public async Task<bool> TryPublishAsync<T>(string topic, T message, bool retain = false)
+    where T : class
     {
         try
         {
             var mqttMessage = new MqttApplicationMessageBuilder()
                 .WithTopic(topic)
                 .WithPayload(json.Serialize(message))
+                .WithRetainFlag(retain)
                 .Build();
 
             await mqttClient.PublishAsync(mqttMessage);

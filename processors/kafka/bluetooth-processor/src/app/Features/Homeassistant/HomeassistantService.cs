@@ -15,77 +15,83 @@ class HomeassistantService
         this.mqttService = mqttService;
     }
 
-    public async Task<bool> TryPublishAirthingsSensorConfigsAsync(
-        int serial,
-        AirthingsSensorData sensorData
-    )
+    // FIXME this is a temporary solution, we should maybe do this manually or smth instead
+    public async Task<bool> TryUpdateAirthingsHomeAssistantAutoDiscovery(int serial)
     {
         try
         {
             string location = MapSerialToRoom(serial); // TODO consider asking the db in the future
             var configs = new List<(string Key, string Topic, object Payload)>
         {
-            ("humidity", $"homeassistant/sensor/airthings_{location}_humidity/config", new {
-                name = $"{Capitalize(location)} Humidity",
-                state_topic = $"bluetooth/airthings/{serial}/sensor",
+            ("humidity", $"homeassistant/sensor/airthings_{location}/humidity/config", new {
+                platform = "sensor",
+                name = $"{location.Capitalize()} Humidity",
                 unit_of_measurement = "%",
-                value_template = sensorData.Humidity,
+                state_topic = $"bluetooth/airthings/{serial}/data",
+                value_template = "{{ value_json.humidity }}",
                 device_class = "humidity"
             }),
-            ("illuminance", $"homeassistant/sensor/airthings_{location}_illuminance/config", new {
-                name = $"{Capitalize(location)} Illuminance",
-                state_topic = $"bluetooth/airthings/{serial}/sensor",
+            ("illuminance", $"homeassistant/sensor/airthings_{location}/illuminance/config", new {
+                platform = "sensor",
+                name = $"{location.Capitalize()} Illuminance",
                 unit_of_measurement = "lx",
-                value_template = sensorData.Illuminance,
+                state_topic = $"bluetooth/airthings/{serial}/data",
+                value_template = "{{ value_json.illuminance }}",
                 device_class = "illuminance"
             }),
-            ("radon_1day_avg", $"homeassistant/sensor/airthings_{location}_radon_1day_avg/config", new {
-                name = $"{Capitalize(location)} Radon 1 Day Avg",
-                state_topic = $"bluetooth/airthings/{serial}/sensor",
+            ("radon_1day_avg", $"homeassistant/sensor/airthings_{location}/radon_1day_avg/config", new {
+                platform = "sensor",
+                name = $"{location.Capitalize()} Radon 1 Day Avg",
                 unit_of_measurement = "Bq/m³",
-                value_template =sensorData.Radon1DayAverage,
+                state_topic = $"bluetooth/airthings/{serial}/data",
+                value_template = "{{ value_json.radon_1day_avg }}",
                 icon = "mdi:radioactive"
             }),
-            ("radon_longterm_avg", $"homeassistant/sensor/airthings_{location}_radon_longterm_avg/config", new {
-                name = $"{Capitalize(location)} Radon Longterm Avg",
-                state_topic = $"bluetooth/airthings/{serial}/sensor",
+            ("radon_longterm_avg", $"homeassistant/sensor/airthings_{location}/radon_longterm_avg/config", new {
+                platform = "sensor",
+                name = $"{location.Capitalize()} Radon Longterm Avg",
                 unit_of_measurement = "Bq/m³",
-                value_template = sensorData.RadonLongTermAverage,
+                state_topic = $"bluetooth/airthings/{serial}/data",
+                value_template = "{{ value_json.radon_longterm_avg }}",
                 icon = "mdi:radioactive"
             }),
-            ("temperature", $"homeassistant/sensor/airthings_{location}_temperature/config", new {
-                name = $"{Capitalize(location)} Temperature",
-                state_topic = $"bluetooth/airthings/{serial}/sensor",
+            ("temperature", $"homeassistant/sensor/airthings_{location}/temperature/config", new {
+                platform = "sensor",
+                name = $"{location.Capitalize()} Temperature",
                 unit_of_measurement = "°C",
-                value_template = sensorData.Temperature,
+                state_topic = $"bluetooth/airthings/{serial}/data",
+                value_template = "{{ value_json.temperature }}",
                 device_class = "temperature"
             }),
-            ("pressure", $"homeassistant/sensor/airthings_{location}_pressure/config", new {
-                name = $"{Capitalize(location)} Pressure",
-                state_topic = $"bluetooth/airthings/{serial}/sensor",
+            ("pressure", $"homeassistant/sensor/airthings_{location}/pressure/config", new {
+                platform = "sensor",
+                name = $"{location.Capitalize()} Pressure",
                 unit_of_measurement = "hPa",
-                value_template = sensorData.Pressure,
+                state_topic = $"bluetooth/airthings/{serial}/data",
+                value_template = "{{ value_json.pressure }}",
                 device_class = "pressure"
             }),
-            ("co2", $"homeassistant/sensor/airthings_{location}_co2/config", new {
-                name = $"{Capitalize(location)} CO2",
-                state_topic = $"bluetooth/airthings/{serial}/sensor",
+            ("co2", $"homeassistant/sensor/airthings_{location}/co2/config", new {
+                platform = "sensor",
+                name = $"{location.Capitalize()} CO2",
                 unit_of_measurement = "ppm",
-                value_template = sensorData.CO2,
+                state_topic = $"bluetooth/airthings/{serial}/data",
+                value_template = "{{ value_json.co2 }}",
                 device_class = "carbon_dioxide"
             }),
-            ("voc", $"homeassistant/sensor/airthings_{location}_voc/config", new {
-                name = $"{Capitalize(location)} VOC",
-                state_topic = $"bluetooth/airthings/{serial}/sensor",
+            ("voc", $"homeassistant/sensor/airthings_{location}/voc/config", new {
+                platform = "sensor",
+                name = $"{location.Capitalize()} VOC",
                 unit_of_measurement = "ppb",
-                value_template = sensorData.VOC,
+                state_topic = $"bluetooth/airthings/{serial}/data",
+                value_template = "{{ value_json.voc }}",
                 icon = "mdi:chemical-weapon"
             })
         };
 
             foreach (var (key, topic, payload) in configs)
             {
-                await mqttService.TryPublishAsync(topic, payload);
+                await mqttService.TryPublishAsync(topic, payload, retain: true);
             }
             return true;
         }
@@ -94,12 +100,6 @@ class HomeassistantService
             logger.LogError(ex, "Failed to publish Airthings sensor configs");
             return false;
         }
-    }
-
-    private string Capitalize(string input)
-    {
-        if (string.IsNullOrEmpty(input)) return input;
-        return char.ToUpper(input[0]) + input.Substring(1);
     }
 
     private string MapSerialToRoom(int serial)

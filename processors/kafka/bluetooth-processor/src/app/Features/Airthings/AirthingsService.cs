@@ -95,7 +95,7 @@ class AirthingsService
         await mqttService.TryPublishAsync($"{AirthingsTopicPrefix}/{airthingsDevice.Serial}/device", airthingsDevice);
 
         // Publish to Home Assistant for autodiscovery
-        await homeassistantService.TryPublishAirthingsSensorConfigsAsync(airthingsDevice.Serial, airthingsSensorData);
+        await homeassistantService.TryUpdateAirthingsHomeAssistantAutoDiscovery(airthingsDevice.Serial);
     }
 
 }

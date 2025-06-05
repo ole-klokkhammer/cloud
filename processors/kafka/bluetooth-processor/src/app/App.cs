@@ -1,4 +1,5 @@
 
+using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -18,11 +19,15 @@ public class App
             builder.SetMinimumLevel(LogLevel.Information);
         });
 
+        services.AddSingleton<JsonUtil>();
         services.AddSingleton<BluetoothWorker>();
         services.AddSingleton<MqttService>();
         services.AddSingleton<AirthingsService>();
         services.AddSingleton<BluetoothService>();
         services.AddSingleton<PostgresService>();
+        services.AddSingleton<AirthingsRepository>();
+        services.AddSingleton<BluetoothRepository>();
+        services.AddSingleton<HomeassistantService>();
 
         using var provider = services.BuildServiceProvider();
         var bluetoothWorker = provider.GetRequiredService<BluetoothWorker>();

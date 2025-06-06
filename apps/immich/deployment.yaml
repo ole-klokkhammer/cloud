@@ -1,0 +1,104 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: immich
+  namespace: immich
+spec:
+  replicas: 1
+  serviceName: immich
+  selector:
+    matchLabels:
+      app: immich
+  template:
+    metadata:
+      labels:
+        app: immich
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - master0
+      containers:
+        - name: immich
+          image: ghcr.io/immich-app/immich-server:release 
+          securityContext:
+            privileged: true 
+          ports:
+            - containerPort: 2283 # Web UI/API 
+          volumeMounts:
+            - name: immich-data
+              mountPath: /usr/src/app/upload
+            - name: localtime
+              mountPath: /etc/localtime
+              readOnly: true
+          env:
+            - name: NVIDIA_DRIVER_CAPABILITIES
+              value: "all"
+            - name: NVIDIA_VISIBLE_DEVICES
+              value: "all" 
+            - name: IMMICH_PORT
+              value: "2283"
+            - name: REDIS_HOSTNAME
+              value: "redis.redis"
+            - name: REDIS_PORT
+              value: "6379"
+            - name: IMMICH_MACHINE_LEARNING_URL
+              value: "http://127.0.0.1:3003"
+            - name: DB_URL
+              valueFrom:
+                secretKeyRef:
+                  name: immich-secrets
+                  key: DB_URL
+        - name: immich-machine-learning
+          image: ghcr.io/immich-app/immich-machine-learning:release 
+          securityContext:
+            privileged: true
+          ports:
+            - containerPort: 3003 # ML
+          volumeMounts:
+            - name: immich-ml-model-cache
+              mountPath: /cache
+            - name: localtime
+              mountPath: /etc/localtime
+              readOnly: true 
+          env:
+            # Add any required env vars here, or use envFrom as above 
+            - name: NVIDIA_DRIVER_CAPABILITIES
+              value: "all"
+            - name: NVIDIA_VISIBLE_DEVICES
+              value: "all" 
+            - name: IMMICH_PORT
+              value: "3003"
+            - name: REDIS_HOSTNAME
+              value: "redis.redis"
+            - name: REDIS_PORT
+              value: "6379"
+            - name: DB_URL
+              valueFrom:
+                secretKeyRef:
+                  name: immich-secrets
+                  key: DB_URL
+      volumes: 
+        - name: localtime
+          hostPath:
+            path: /etc/localtime
+            type: File 
+        - name: immich-ml-model-cache
+          emptyDir: {}
+  volumeClaimTemplates:
+    - metadata:
+        name: immich-data
+        namespace: immich
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: local-path
+        resources:
+          requests:
+            storage: 100Gi
+        volumeName: immich-data

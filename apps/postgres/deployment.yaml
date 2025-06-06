@@ -13,7 +13,7 @@ spec:
       labels:
         app: postgres
         name: postgres
-    spec:
+    spec: 
       containers:
         - name: postgres
           image: timescale/timescaledb-ha:pg17
@@ -32,6 +32,28 @@ spec:
             - name: postgres-config
               subPath: postgresql.conf
               mountPath: /home/postgres/pgdata/data/postgresql.conf
+            # vchord-0.3.0 extension 
+            - name: postgres-config
+              subPath: extensions/pg17/vchord-0.3.0/pkglibdir/vchord.so
+              mountPath: /usr/lib/postgresql/17/lib/vchord.so
+            - name: postgres-config
+              subPath: extensions/pg17/vchord-0.3.0/sharedir/extension/vchord--0.1.0--0.2.0.sql
+              mountPath: /usr/share/postgresql/17/extension/vchord--0.1.0--0.2.0.sql
+            - name: postgres-config
+              subPath: extensions/pg17/vchord-0.3.0/sharedir/extension/vchord--0.2.0--0.2.1.sql
+              mountPath: /usr/share/postgresql/17/extension/vchord--0.2.0--0.2.1.sql
+            - name: postgres-config
+              subPath: extensions/pg17/vchord-0.3.0/sharedir/extension/vchord--0.2.1--0.2.2.sql
+              mountPath: /usr/share/postgresql/17/extension/vchord--0.2.1--0.2.2.sql
+            - name: postgres-config
+              subPath: extensions/pg17/vchord-0.3.0/sharedir/extension/vchord--0.2.2--0.3.0.sql
+              mountPath: /usr/share/postgresql/17/extension/vchord--0.2.2--0.3.0.sql 
+            - name: postgres-config
+              subPath: extensions/pg17/vchord-0.3.0/sharedir/extension/vchord--0.3.0.sql
+              mountPath: /usr/share/postgresql/17/extension/vchord--0.3.0.sql
+            - name: postgres-config
+              subPath: extensions/pg17/vchord-0.3.0/sharedir/extension/vchord.control
+              mountPath: /usr/share/postgresql/17/extension/vchord.control
           env:
             - name: POSTGRES_USER
               valueFrom:

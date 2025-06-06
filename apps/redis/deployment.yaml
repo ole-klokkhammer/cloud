@@ -1,19 +1,21 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: ollama
-  namespace: ollama
+  name: redis
+  namespace: redis
+  labels:
+    app: redis
 spec:
   replicas: 1
+  serviceName: redis
   selector:
     matchLabels:
-      app: ollama
+      app: redis
   template:
     metadata:
       labels:
-        app: ollama
-        name: ollama
-    spec: 
+        app: redis
+    spec:
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -22,26 +24,25 @@ spec:
                   - key: kubernetes.io/hostname
                     operator: In
                     values:
-                      - master0
+                      - master0 
       containers:
-        - name: ollama
-          image: ollama/ollama
-          imagePullPolicy: Always
-          ports:
-            - name: ollama
-              containerPort: 11434
-          volumeMounts:
-            - name: ollama-data
-              mountPath: /root/.ollama
+      - image: redis:alpine
+        name: redis
+        ports:
+          - containerPort: 6379
+        volumeMounts:
+          - name: redis-data
+            mountPath: /opt/redis/data
   volumeClaimTemplates:
     - metadata:
-        name: ollama-data
-        namespace: llm-agents
+        name: redis-data
+        namespace: redis
       spec:
         accessModes:
           - ReadWriteOnce
         storageClassName: local-path
         resources:
           requests:
-            storage: 50Gi
-        volumeName: ollama-data
+            storage: 500Mi
+        volumeName: redis-data
+---

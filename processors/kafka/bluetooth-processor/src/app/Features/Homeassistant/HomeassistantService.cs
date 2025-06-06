@@ -44,7 +44,7 @@ class HomeassistantService
                 name = $"{location.Capitalize()} Radon 1 Day Avg",
                 unit_of_measurement = "Bq/m³",
                 state_topic = $"bluetooth/airthings/{serial}/data",
-                value_template = "{{ value_json.radon_1day_avg }}",
+                value_template = "{{ value_json.radon1DayAverage }}",
                 icon = "mdi:radioactive"
             }),
             ("radon_longterm_avg", $"homeassistant/sensor/airthings_{location}/radon_longterm_avg/config", new {
@@ -52,7 +52,7 @@ class HomeassistantService
                 name = $"{location.Capitalize()} Radon Longterm Avg",
                 unit_of_measurement = "Bq/m³",
                 state_topic = $"bluetooth/airthings/{serial}/data",
-                value_template = "{{ value_json.radon_longterm_avg }}",
+                value_template = "{{ value_json.radonLongTermAverage }}",
                 icon = "mdi:radioactive"
             }),
             ("temperature", $"homeassistant/sensor/airthings_{location}/temperature/config", new {

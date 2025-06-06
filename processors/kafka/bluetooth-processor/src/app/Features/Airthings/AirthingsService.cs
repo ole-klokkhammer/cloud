@@ -53,7 +53,7 @@ class AirthingsService
         await airthingsRepository.InsertBatteryDataAsync(batteryData);
 
         logger.LogDebug("Publishing Airthings data to MQTT...");
-        await mqttService.TryPublishAsync($"{AirthingsTopicPrefix}/{serial.Value}/battery", batteryData);
+        await mqttService.TryPublishAsync($"{AirthingsTopicPrefix}/{serial.Value}/battery", batteryData, retain: true);
     }
 
     public async Task HandleConnectPayload(string kafkaKey, string payload)
@@ -91,8 +91,8 @@ class AirthingsService
         await airthingsRepository.InsertSensorDataAsync(airthingsSensorData);
 
         logger.LogDebug("Publishing Airthings data to MQTT...");
-        await mqttService.TryPublishAsync($"{AirthingsTopicPrefix}/{airthingsDevice.Serial}/data", airthingsSensorData);
-        await mqttService.TryPublishAsync($"{AirthingsTopicPrefix}/{airthingsDevice.Serial}/device", airthingsDevice);
+        await mqttService.TryPublishAsync($"{AirthingsTopicPrefix}/{airthingsDevice.Serial}/data", airthingsSensorData, retain: true);
+        await mqttService.TryPublishAsync($"{AirthingsTopicPrefix}/{airthingsDevice.Serial}/device", airthingsDevice, retain: true);
 
         // Publish to Home Assistant for autodiscovery
         await homeassistantService.TryUpdateAirthingsHomeAssistantAutoDiscovery(airthingsDevice.Serial);

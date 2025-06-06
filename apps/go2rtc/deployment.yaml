@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: go2rtc
+  namespace: go2rtc
+  labels:
+    app: go2rtc
+spec:
+  revisionHistoryLimit: 0
+  selector:
+    matchLabels:
+      app: go2rtc
+  template:
+    metadata:
+      labels:
+        app: go2rtc
+    spec:
+      containers:
+        - name: go2rtc
+          image: alexxit/go2rtc:latest-hardware # support hardware transcoding for Intel iGPU, AMD GPU and NVidia GPU
+          resources:
+            limits:
+              nvidia.com/gpu: 1
+          securityContext:
+            privileged: true # only for FFmpeg hardware transcoding
+          ports:
+            - containerPort: 1984 # Web UI/API
+            - containerPort: 8554 # RTSP
+            - containerPort: 8555 # WebRTC
+          env:
+            - name: NVIDIA_DRIVER_CAPABILITIES
+              value: "all"
+            - name: NVIDIA_VISIBLE_DEVICES
+              value: "all" 
+            - name: CAMERA_ENTRANCE_ROOF_IP
+              valueFrom:
+                secretKeyRef:
+                  name: go2rtc-secrets
+                  key: CAMERA_ENTRANCE_ROOF_IP
+            - name: CAMERA_ENTRANCE_ROOF_USER
+              valueFrom:
+                secretKeyRef:
+                  name: go2rtc-secrets
+                  key: CAMERA_ENTRANCE_ROOF_USER
+            - name: CAMERA_ENTRANCE_ROOF_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: go2rtc-secrets
+                  key: CAMERA_ENTRANCE_ROOF_PASSWORD
+          volumeMounts:
+            - name: go2rtc-config
+              mountPath: /config/go2rtc.yaml
+              subPath: go2rtc.yaml
+      volumes:
+        - name: go2rtc-config
+          configMap:
+            name: go2rtc-config
+
+---
+# - "ffmpeg:http://${CAMERA_ENTRANCE_ROOF_IP}/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=${CAMERA_ENTRANCE_ROOF_USER}&password=${CAMERA_ENTRANCE_ROOF_PASSWORD}#video=copy#audio=copy#audio=opus"
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: go2rtc-config
+  namespace: go2rtc
+data:
+  go2rtc.yaml: |
+    log:
+      level: debug
+
+    ffmpeg:
+      hwaccel_args: preset-nvidia
+
+    webrtc:
+      # Allow external access
+      listen: :8555
+      candidates:
+        - go2rtc-webrtc.go2rtc:8555
+
+    streams:
+      entrance_roof: 
+        - "ffmpeg:http://${CAMERA_ENTRANCE_ROOF_IP}/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=${CAMERA_ENTRANCE_ROOF_USER}&password=${CAMERA_ENTRANCE_ROOF_PASSWORD}#video=copy#audio=copy"
+      entrance_roof_sub: 
+        - "ffmpeg:http://${CAMERA_ENTRANCE_ROOF_IP}/flv?port=1935&app=bcs&stream=channel0_sub.bcs&user=${CAMERA_ENTRANCE_ROOF_USER}&password=${CAMERA_ENTRANCE_ROOF_PASSWORD}#video=copy#audio=copy"

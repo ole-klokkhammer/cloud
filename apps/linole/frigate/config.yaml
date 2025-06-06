@@ -29,34 +29,36 @@ detectors:
 #  width: 320
 #  height: 320
 
-ffmpeg:
-  hwaccel_args: preset-nvidia
+# ffmpeg:
+#   hwaccel_args: preset-nvidia
 
-# https://stackoverflow.com/questions/53518589/how-to-use-filtering-and-stream-copy-together-with-ffmpeg#53526514
-# https://docs.frigate.video/configuration/camera_specific/#reolink-cameras
-go2rtc:
-  streams:
-    entrance_roof:
-      - "ffmpeg:http://{FRIGATE_ENTRANCE_ROOF_IP}/flv?port=1935&app=bcs&stream=channel0_main.bcs&user={FRIGATE_REOLINK_USER}&password={FRIGATE_REOLINK_PASSWORD}#video=copy#audio=copy#audio=opus"
-    entrance_roof_sub:
-      - "ffmpeg:http://{FRIGATE_ENTRANCE_ROOF_IP}/flv?port=1935&app=bcs&stream=channel0_sub.bcs&user={FRIGATE_REOLINK_USER}&password={FRIGATE_REOLINK_PASSWORD}"
-  webrtc:
-    # Allow external access
-    listen: :8555
-    candidates:
-      - frigate-webrtc.linole:8555
+# # https://stackoverflow.com/questions/53518589/how-to-use-filtering-and-stream-copy-together-with-ffmpeg#53526514
+# # https://docs.frigate.video/configuration/camera_specific/#reolink-cameras
+# go2rtc:
+#   streams:
+#     entrance_roof:
+#       - "ffmpeg:http://{FRIGATE_ENTRANCE_ROOF_IP}/flv?port=1935&app=bcs&stream=channel0_main.bcs&user={FRIGATE_REOLINK_USER}&password={FRIGATE_REOLINK_PASSWORD}#video=copy#audio=copy#audio=opus"
+#     entrance_roof_sub:
+#       - "ffmpeg:http://{FRIGATE_ENTRANCE_ROOF_IP}/flv?port=1935&app=bcs&stream=channel0_sub.bcs&user={FRIGATE_REOLINK_USER}&password={FRIGATE_REOLINK_PASSWORD}"
+#   webrtc:
+#     # Allow external access
+#     listen: :8555
+#     candidates:
+#       - frigate-webrtc.linole:8555
 
 record:
   enabled: True
   retain:
-    days: 7
-    mode: motion
+    days: 3
+    mode: all
   alerts:
     retain:
       days: 30
+      mode: motion
   detections:
     retain:
       days: 30
+      mode: motion
 
 snapshots:
   enabled: True
@@ -76,11 +78,11 @@ cameras:
       output_args:
         record: preset-record-generic-audio-copy
       inputs:
-        - path: rtsp://127.0.0.1:8554/entrance_roof
+        - path: rtsp://go2rtc.go2rtc:8554/entrance_roof
           input_args: preset-rtsp-restream
           roles:
             - record
-        - path: rtsp://127.0.0.1:8554/entrance_roof_sub
+        - path: rtsp://go2rtc.go2rtc:8554/entrance_roof_sub
           input_args: preset-rtsp-restream
           roles:
             - detect

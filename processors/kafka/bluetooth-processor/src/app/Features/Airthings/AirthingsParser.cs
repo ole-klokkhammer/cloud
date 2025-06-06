@@ -35,8 +35,8 @@ public static class AirthingsParser
             RadonLongTermAverage = value[5],
             Temperature = value[6] / 100.0,
             Pressure = value[7] / 50.0,
-            CO2 = value[8] * 1.0,
-            VOC = value[9] * 1.0
+            Co2 = value[8] * 1.0,
+            Voc = value[9] * 1.0
         };
     }
 

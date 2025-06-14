@@ -9,3 +9,10 @@
 * kubectl apply -f deployment.yaml
 * kubectl apply -f service.yaml
 
+## nvidia hardware 
+check why frigate has support:
+ V....D av1_nvenc            NVIDIA NVENC av1 encoder (codec av1)
+ V....D h264_nvenc           NVIDIA NVENC H.264 encoder (codec h264)
+ V....D hevc_nvenc           NVIDIA NVENC hevc encoder (codec hevc)
+* /usr/lib/ffmpeg/7.0/bin/ffmpeg -hide_banner -encoders | grep NVIDIA
+* /usr/lib/ffmpeg/7.0/bin/ffmpeg -hide_banner -decoders | grep NVIDIA

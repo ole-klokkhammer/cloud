@@ -61,3 +61,27 @@ server \
 ## clients
 * copy /etc/rancher/k3s/k3s.yaml from the master node to local ~/.kube/config
 * replace the master node ip with the actual ip
+
+
+## etcd restore
+ reinstall k3s, stop the service, then:
+ sudo k3s server \
+  --cluster-init \
+  --cluster-reset \
+  --etcd-s3 \
+  --cluster-reset-restore-path=etcd-snapshot-master0-1749297605 \
+  --etcd-s3-bucket=k3s \
+  --etcd-s3-access-key=  \
+  --etcd-s3-secret-key=  \
+  --etcd-s3-endpoint=j8t7.ldn203.idrivee2-94.com \
+  --etcd-s3-region=London-2
+
+## force delete terminating namespaces
+
+
+* (
+NAMESPACE=your-rogue-namespace
+kubectl proxy &
+kubectl get namespace $NAMESPACE -o json |jq '.spec = {"finalizers":[]}' >temp.json
+curl -k -H "Content-Type: application/json" -X PUT --data-binary @temp.json 127.0.0.1:8001/api/v1/namespaces/$NAMESPACE/finalize
+)

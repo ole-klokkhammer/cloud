@@ -1,9 +1,0 @@
-# Configure a default setup of Home Assistant (frontend, api, etc)
-default_config:
-
-mqtt: !include ./mqtt-sensors.yaml
-
-apache_kafka:
-  ip_address: kafka-kafka-bootstrap.kafka
-  port: 9092
-  topic: home_assistant

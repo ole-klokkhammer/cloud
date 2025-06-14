@@ -1,5 +1,7 @@
+# homeassistant
 
-# Apply kube 
+## setup
+* kubectl create namespace homeassistant
 * kubectl create -f ./deployment.yaml
 * kubectl create -f ./service.yaml
 

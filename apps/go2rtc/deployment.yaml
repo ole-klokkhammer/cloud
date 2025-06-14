@@ -15,23 +15,24 @@ spec:
       labels:
         app: go2rtc
     spec:
+      runtimeClassName: nvidia
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - master0
       containers:
         - name: go2rtc
-          image: alexxit/go2rtc:latest-hardware # support hardware transcoding for Intel iGPU, AMD GPU and NVidia GPU
-          resources:
-            limits:
-              nvidia.com/gpu: 1
-          securityContext:
-            privileged: true # only for FFmpeg hardware transcoding
+          image: alexxit/go2rtc:master-hardware # support hardware transcoding for NVidia GPU
           ports:
             - containerPort: 1984 # Web UI/API
             - containerPort: 8554 # RTSP
             - containerPort: 8555 # WebRTC
-          env:
-            - name: NVIDIA_DRIVER_CAPABILITIES
-              value: "all"
-            - name: NVIDIA_VISIBLE_DEVICES
-              value: "all" 
+          env: 
             - name: CAMERA_ENTRANCE_ROOF_IP
               valueFrom:
                 secretKeyRef:
@@ -66,10 +67,14 @@ metadata:
 data:
   go2rtc.yaml: |
     log:
-      level: debug
+      level: info
 
-    ffmpeg:
-      hwaccel_args: preset-nvidia
+    # ffmpeg:
+    #   bin: ffmpeg  # path to ffmpeg binary
+    #   h264: "-codec:v libx264 -g:v 30 -preset:v superfast -tune:v zerolatency -profile:v main -level:v 4.1"
+    #   mycodec: "-any args that supported by ffmpeg..."
+    #   myinput: "-fflags nobuffer -flags low_delay -timeout 5000000 -i {input}"
+    #   myraw: "-ss 00:00:20"
 
     webrtc:
       # Allow external access
@@ -80,5 +85,7 @@ data:
     streams:
       entrance_roof: 
         - "ffmpeg:http://${CAMERA_ENTRANCE_ROOF_IP}/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=${CAMERA_ENTRANCE_ROOF_USER}&password=${CAMERA_ENTRANCE_ROOF_PASSWORD}#video=copy#audio=copy"
+      entrance_roof_onvif: 
+        - "onvif://${CAMERA_ENTRANCE_ROOF_USER}:${CAMERA_ENTRANCE_ROOF_PASSWORD}@${CAMERA_ENTRANCE_ROOF_IP}:8000"
       entrance_roof_sub: 
         - "ffmpeg:http://${CAMERA_ENTRANCE_ROOF_IP}/flv?port=1935&app=bcs&stream=channel0_sub.bcs&user=${CAMERA_ENTRANCE_ROOF_USER}&password=${CAMERA_ENTRANCE_ROOF_PASSWORD}#video=copy#audio=copy"

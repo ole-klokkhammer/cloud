@@ -8,7 +8,7 @@
 - https://dev.to/mweibel/add-nvidia-gpu-support-to-k3s-with-containerd-4j17
 
 ### create secret
-* kubectl create secret generic -n linole  frigate-secrets --from-env-file=.env
+* kubectl create secret generic -n frigate  frigate-secrets --from-env-file=.env
 
 # coral
 - https://coral.ai/docs/accelerator/get-started/#requirements

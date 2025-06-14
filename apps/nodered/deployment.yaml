@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: nodered
-  namespace: linole
+  namespace: nodered
   labels:
     app: nodered
 spec:
@@ -13,7 +13,7 @@ spec:
       app: nodered
   template:
     metadata:
-      namespace: linole
+      namespace: nodered
       labels:
         app: nodered
     spec:
@@ -28,7 +28,7 @@ spec:
   volumeClaimTemplates:
     - metadata:
         name: nodered-data
-        namespace: linole
+        namespace: nodered
       spec:
         storageClassName: longhorn-single-replica
         accessModes:
@@ -42,7 +42,7 @@ apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: nodered-data
-  namespace: linole
+  namespace: nodered
   labels:
     app: nodered
 spec:

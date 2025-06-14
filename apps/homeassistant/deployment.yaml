@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: homeassistant
-  namespace: linole
+  namespace: homeassistant
   labels:
     app: homeassistant
 spec:
@@ -13,7 +13,7 @@ spec:
       app: homeassistant
   template:
     metadata:
-      namespace: linole
+      namespace: homeassistant
       labels:
         app: homeassistant
     spec:
@@ -28,7 +28,7 @@ spec:
   volumeClaimTemplates:
     - metadata:
         name: homeassistant-data
-        namespace: linole
+        namespace: homeassistant
       spec:
         storageClassName: longhorn-single-replica
         accessModes:
@@ -42,8 +42,8 @@ apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: homeassistant-data
-  namespace: linole
-  labels:
+  namespace: homeassistant
+  labels: 
     app: homeassistant
 spec:
   storageClassName: longhorn-single-replica

@@ -1,0 +1,7 @@
+[Unit]
+Description=etcd backup
+
+[Service]
+Type=oneshot
+User=ubuntu
+ExecStart=/usr/local/bin/etcd-backup.sh

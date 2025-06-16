@@ -1,0 +1,7 @@
+[Unit]
+Description=Postgres backup - type determined in script (full on Sunday, incremental other days)
+
+[Service]
+Type=oneshot
+User=postgres
+ExecStart=/usr/local/bin/postgres-backup.sh

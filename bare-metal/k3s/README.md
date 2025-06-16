@@ -21,9 +21,9 @@ server \
 '--disable' \
 'servicelb' \
 '--write-kubeconfig-mode' \
-'644' \
---etcd-s3 \
---etcd-s3-config-secret='etcd-s3-config' \
+'644' \ 
+'--datastore-endpoint' \
+'http://127.0.0.1:2379' \
 --cluster-init
 "  sh -
 `

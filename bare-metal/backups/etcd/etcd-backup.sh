@@ -6,6 +6,7 @@ BUCKET_NAME="etcd"
 TIMESTAMP=$(date +%s)
 SNAPSHOT="/tmp/etcd-snapshot-$TIMESTAMP"
 
+export ETCDCTL_API=3 
 etcdctl --endpoints=http://127.0.0.1:2379 snapshot save "$SNAPSHOT"
 ETCD_STATUS=$?
 if [ $ETCD_STATUS -ne 0 ]; then

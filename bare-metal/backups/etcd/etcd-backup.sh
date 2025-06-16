@@ -25,4 +25,9 @@ fi
 
 rm "$SNAPSHOT"
 
+echo "Notify healthchecks on success"
+curl -fsS http://192.168.10.204:8000/ping/55fe5c54-ca9c-431d-84cc-824376dbe8a4
+
+
+echo "backup completed successfully."
 exit 0

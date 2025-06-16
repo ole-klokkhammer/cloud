@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: healthchecks
+  namespace: healthchecks
+spec:
+  revisionHistoryLimit: 0
+  selector:
+    matchLabels:
+      app: healthchecks
+  template:
+    metadata:
+      labels:
+        app: healthchecks
+    spec:
+      containers:
+        - name: healthchecks
+          image: healthchecks/healthchecks:latest
+          ports:
+            - containerPort: 8000
+          env:
+            - name: SITE_ROOT
+              value: "http://192.168.10.204:8000"
+            - name: DB
+              value: "postgres"
+            - name: DB_HOST
+              value: "postgres.postgres-external"
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              value: "healthchecks"
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: healthchecks-secrets
+                  key: DB_USER
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: healthchecks-secrets
+                  key: DB_PASSWORD

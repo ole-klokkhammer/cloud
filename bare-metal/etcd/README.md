@@ -6,8 +6,8 @@ https://etcd.io/docs/v3.6/quickstart/
 ### manual - k3s needs a specific version
 * cd /temp
 * wget https://github.com/etcd-io/etcd/releases/download/v3.5.21/etcd-v3.5.21-linux-amd64.tar.gz
-* tar -xvf etcd-v3.6.0-linux-amd64.tar.gz
-* sudo mv etcd-v3.6.0-linux-amd64/etcd* /usr/local/bin/
+* tar -xvf etcd-v3.5.21-linux-amd64.tar.gz
+* sudo mv etcd-v3.5.21-linux-amd64/etcd* /usr/local/bin/
 * sudo tee /etc/systemd/system/etcd.service > /dev/null <<'EOF'
 [Unit] 
 Description=etcd key-value store
@@ -36,15 +36,17 @@ EOF
 * sudo systemctl start etcd
 * sudo systemctl status etcd
 
-## backup
-* 
+## backup 
+
+* sudo ETCDCTL_API=3 etcdctl \
+    --endpoints=http://127.0.0.1:2379 \
+    snapshot save /tmp/etcd-snapshot-$(date +%s)
+* * aws s3 cp /tmp/etcd-snapshot-<timestamp> s3://k3s/ --endpoint-url https://j8t7.ldn203.idrivee2-94.com
 
 ## restore from backup
 
 ### prereq
-* curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-* unzip awscliv2.zip
-* sudo ./aws/install
+
 * aws configure
 * aws s3 ls s3://k3s --endpoint-url https://j8t7.ldn203.idrivee2-94.com | tail -n 1
 * aws s3 cp s3://k3s/etcd-snapshot-master0-1749902402  /tmp --endpoint-url https://j8t7.ldn203.idrivee2-94.com

@@ -33,7 +33,7 @@ spec:
             - name: MQTT_CLIENT_ID
               value: "bluetooth-processor"
             - name: DB_HOST
-              value: "postgres-internal.postgres"
+              value: "postgres.postgres-external"
             - name: DB_PORT
               value: "5432"
             - name: DB_NAME

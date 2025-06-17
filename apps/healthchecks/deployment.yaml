@@ -19,6 +19,8 @@ spec:
           ports:
             - containerPort: 8000
           env:
+            - name: DEBUG
+              value: "False" 
             - name: SITE_ROOT
               value: "http://192.168.10.204:8000"
             - name: DB
@@ -39,3 +41,8 @@ spec:
                 secretKeyRef:
                   name: healthchecks-secrets
                   key: DB_PASSWORD
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: healthchecks-secrets
+                  key: SECRET_KEY

@@ -2,7 +2,7 @@
 https://metallb.universe.tf/installation/
 
 ## follow this: https://kavishgr.gitlab.io/2023/05/k3salpine/
-* kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.9/config/manifests/metallb-native.yaml
+* kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.15.2/config/manifests/metallb-native.yaml
 * kubectl apply -f address-pool.yaml
 * kubectl apply -f advertisement.yaml
  

@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: ceph-test-writer 
+spec:
+  replicas: 1
+  serviceName: test-writer
+  selector:
+    matchLabels:
+      app: ceph-test-writer
+  template:
+    metadata:
+      labels:
+        app: ceph-test-writer
+    spec: 
+      containers:
+        - name: writer
+          image: busybox
+          command: [ "sleep", "3600" ]
+          volumeMounts:
+            - name: test-data
+              mountPath: /mnt
+  volumeClaimTemplates:
+    - metadata:
+        name: test-data 
+      spec:
+        storageClassName: ceph-rbd
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+        volumeName: test-data
+---
+# apiVersion: v1
+# kind: PersistentVolumeClaim
+# metadata:
+#   name: test-data
+# spec:
+#   storageClassName: ceph-rbd
+#   accessModes:
+#     - ReadWriteOnce
+#   volumeName: test-data
+#   resources:
+#     requests:
+#       storage: 1Gi
+# ---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: test-data
+spec:
+  storageClassName: ceph-rbd
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 1Gi
+  volumeMode: Filesystem
+  csi:
+    driver: rbd.csi.ceph.com 
+    volumeHandle: test-data
+    volumeAttributes:
+      clusterID: 32f3ccd9-19c2-4e74-adb0-149dc241da4e
+      pool: k3s
+      csi.storage.k8s.io/provisioner-secret-name: ceph-secret
+      csi.storage.k8s.io/provisioner-secret-namespace: default
+      csi.storage.k8s.io/controller-expand-secret-name: ceph-secret
+      csi.storage.k8s.io/controller-expand-secret-namespace: default
+      csi.storage.k8s.io/node-stage-secret-name: ceph-secret
+      csi.storage.k8s.io/node-stage-secret-namespace: default
+---

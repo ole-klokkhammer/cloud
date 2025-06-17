@@ -3,7 +3,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: cephfs-pvc
-  namespace: rook-ceph-external
+  namespace: rook-ceph
   labels:
     group: snapshot-test
 spec:
@@ -18,7 +18,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: csicephfs-demo-pod
-  namespace: rook-ceph-external
+  namespace: rook-ceph
 spec:
   containers:
     - name: web-server

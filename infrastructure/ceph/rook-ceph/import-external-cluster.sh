@@ -1,27 +1,29 @@
 #!/usr/bin/env -S bash
 set -e
 
-export NAMESPACE=rook-ceph-external
-export ROOK_EXTERNAL_FSID=093ef0fd-4b56-11f0-bc8d-18c04d68267f
+export ROOK_EXTERNAL_FSID=be174afd-4ba6-11f0-8118-18c04d68267f
 export ROOK_EXTERNAL_USERNAME=client.healthchecker
 export ROOK_EXTERNAL_CEPH_MON_DATA=master0=192.168.10.2:6789
-export ROOK_EXTERNAL_USER_SECRET=AQDGRFFoWn9BMRAA7KlH0DGMOGS0IQaH99Z/1A==
+export ROOK_EXTERNAL_USER_SECRET=AQDvsVFoU60ELhAAn+B6ej6gEoEunxu3uBn3Fg==
 export ROOK_EXTERNAL_DASHBOARD_LINK=https://192.168.10.2:8443/
-export CSI_RBD_NODE_SECRET=AQDGRFFodMZ6MRAARziIG9xS70oJk2CyGAT/7Q==
+export CSI_RBD_NODE_SECRET=AQDvsVFor+0tLhAAJ4ggwXuslwl9PSoSjqBvlA==
 export CSI_RBD_NODE_SECRET_NAME=csi-rbd-node
-export CSI_RBD_PROVISIONER_SECRET=AQDGRFFohZukMRAAvV077gZb4D5EvnQOvsuz2w==
+export CSI_RBD_PROVISIONER_SECRET=AQDvsVFoYAlQLhAAMlbvY0CpiDpb1dqg4Teztw==
 export CSI_RBD_PROVISIONER_SECRET_NAME=csi-rbd-provisioner
 export CEPHFS_POOL_NAME=k3s-cephfs-metadata
 export CEPHFS_METADATA_POOL_NAME=k3s-cephfs-data
 export CEPHFS_FS_NAME=k3s-multi-attach
-export CSI_CEPHFS_NODE_SECRET=AQDGRFFokrHYMRAAgqGHRcK+iXTnMsr9iMKH6A==
-export CSI_CEPHFS_PROVISIONER_SECRET=AQDGRFFo75D6MRAAf2ogcCP604/jKT3iPPPM8g==
+export CSI_CEPHFS_NODE_SECRET=AQDvsVFoITxwLhAAPG7+9uq2diXLOUMqDmXZXg==
+export CSI_CEPHFS_PROVISIONER_SECRET=AQDvsVFouzeSLhAAlY3cJU7k2TPWYtcDt/NPNg==
 export CSI_CEPHFS_NODE_SECRET_NAME=csi-cephfs-node
 export CSI_CEPHFS_PROVISIONER_SECRET_NAME=csi-cephfs-provisioner
 export MONITORING_ENDPOINT=192.168.10.2
 export MONITORING_ENDPOINT_PORT=9283
 export RBD_POOL_NAME=k3s-rbd
 export RGW_POOL_PREFIX=default
+export RGW_ENDPOINT=192.168.10.2:80
+export RGW_ADMIN_OPS_USER_ACCESS_KEY=ZE8BNCC77CSDCT21RZGW
+export RGW_ADMIN_OPS_USER_SECRET_KEY=gqAYT04INMR6AxLBtqrbwNJdn1O18y4iTkomlwRx
 
 ##############
 # VARIABLES #
@@ -306,7 +308,7 @@ parameters:
   csi.storage.k8s.io/node-stage-secret-namespace: $NAMESPACE
   csi.storage.k8s.io/fstype: ext4
 allowVolumeExpansion: true
-reclaimPolicy: Delete
+reclaimPolicy: Retain
 eof
   else
     echo "storageclass $RBD_STORAGE_CLASS_NAME already exists"
@@ -334,7 +336,7 @@ parameters:
   csi.storage.k8s.io/node-stage-secret-namespace: $NAMESPACE
   csi.storage.k8s.io/fstype: ext4
 allowVolumeExpansion: true
-reclaimPolicy: Delete
+reclaimPolicy: Retain
 eof
   else
     echo "storageclass $RBD_STORAGE_CLASS_NAME already exists"
@@ -389,7 +391,7 @@ parameters:
   csi.storage.k8s.io/node-stage-secret-namespace: $NAMESPACE
   csi.storage.k8s.io/fstype: ext4
 allowVolumeExpansion: true
-reclaimPolicy: Delete
+reclaimPolicy: Retain
 volumeBindingMode: WaitForFirstConsumer
 eof
   else

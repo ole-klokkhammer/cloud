@@ -9,8 +9,7 @@ https://docs.ceph.com/en/quincy/cephadm/install/#cephadm-install-distros
 * sudo cephadm bootstrap --mon-ip 192.168.10.2 --initial-dashboard-user admin --initial-dashboard-password 'initialpasswordissetonfirstlogin'
 * sudo cephadm shell -- ceph -s
 
-### add ceph cli
-* sudo cephadm add-repo --release quincy
+### add ceph cli 
 * sudo cephadm install ceph-common 
 
 ### dashboard
@@ -32,8 +31,8 @@ rbd for block storage (RADOS Block Device)
 cephfs for Ceph Filesystem
 rgw for object storage (RADOS Gateway)
 
-### object storage
-
+### Enabling the Object Gateway Management Frontend 
+* sudo ceph orch apply rgw default --placement="1 master0"
 
 ## commands
 * sudo ceph config set global mon_allow_pool_delete true 
@@ -49,3 +48,7 @@ poor integration with rook etc
 * sudo microceph cluster bootstrap
 * sudo microceph status
 * sudo microceph add disk /dev/sdX --wipe
+
+## tips and tricks
+* if installation fails and it deletes the cluster ... fix the docker installation.
+* 

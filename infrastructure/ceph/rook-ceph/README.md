@@ -36,11 +36,8 @@ Create block storage and shared storage: rbd + cephfs
   --rgw-endpoint '192.168.10.2:80' \
   --namespace rook-ceph \
   --format bash
-* set export vars in ./import-external-cluster.sh
-* change script to set persistentVolumeReclaimPolicy: Retain
-this way we can create volumes with kubernetes, then retain them independently
-* ./import-external-cluster.sh 
- 
+* set export vars in ./import-external-cluster.sh 
+* ./import-external-cluster.sh  
 
 ## test storageclasses
 https://github.com/rook/rook/tree/release-1.17/deploy/examples/csi

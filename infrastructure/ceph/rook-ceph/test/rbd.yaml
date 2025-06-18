@@ -53,8 +53,7 @@ spec:
   - ReadWriteOnce
   capacity:
     storage: 1Gi
-  storageClassName: ceph-rbd
-  
+  storageClassName: ceph-rbd 
   persistentVolumeReclaimPolicy: Retain
   volumeMode: Filesystem
   csi:

@@ -51,4 +51,13 @@ poor integration with rook etc
 
 ## tips and tricks
 * if installation fails and it deletes the cluster ... fix the docker installation.
-* 
+
+
+
+## mount disk local
+* sudo rbd map <pool-name>/<image-name>
+* sudo mkdir -p /mnt/ceph-maintenance
+* create filesystem if needed: sudo mkfs.ext4 /dev/rbdX
+* sudo mount /dev/rbdX /mnt/ceph-maintenance
+* sudo umount /mnt/myrbd
+* sudo rbd unmap /dev/rbdX

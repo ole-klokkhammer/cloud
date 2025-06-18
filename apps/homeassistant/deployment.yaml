@@ -30,31 +30,59 @@ spec:
         name: homeassistant-data
         namespace: homeassistant
       spec:
-        storageClassName: longhorn-single-replica
+        storageClassName: ceph-rbd
         accessModes:
           - ReadWriteOnce
         resources:
           requests:
             storage: 500Mi
         volumeName: homeassistant-data
----
+--- 
 apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: homeassistant-data
   namespace: homeassistant
-  labels: 
-    app: homeassistant
 spec:
-  storageClassName: longhorn-single-replica
   accessModes:
-    - ReadWriteOnce
+  - ReadWriteOnce
   capacity:
-    storage: 500Mi
+    storage: 1Gi
+  storageClassName: ceph-rbd 
+  persistentVolumeReclaimPolicy: Retain
   volumeMode: Filesystem
   csi:
-    driver: driver.longhorn.io
-    fsType: ext4
+    driver: rook-ceph.rbd.csi.ceph.com
+    fsType: ext4 
     volumeHandle: homeassistant-data
     volumeAttributes:
-      numberOfReplicas: "1"
+      clusterID: rook-ceph
+      staticVolume: "true"  
+      imageFeatures: layering
+      imageFormat: '2' 
+      pool: k3s-rbd
+    nodeStageSecretRef:
+      name: rook-csi-rbd-node
+      namespace: rook-ceph
+---
+# apiVersion: v1
+# kind: PersistentVolume
+# metadata:
+#   name: homeassistant-data
+#   namespace: homeassistant
+#   labels: 
+#     app: homeassistant
+# spec:
+#   storageClassName: longhorn-single-replica
+#   accessModes:
+#     - ReadWriteOnce
+#   capacity:
+#     storage: 500Mi
+#   volumeMode: Filesystem
+#   csi:
+#     driver: driver.longhorn.io
+#     fsType: ext4
+#     volumeHandle: homeassistant-data
+#     volumeAttributes:
+#       numberOfReplicas: "1"
+--- 

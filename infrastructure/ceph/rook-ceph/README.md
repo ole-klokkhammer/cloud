@@ -38,6 +38,7 @@ Create block storage and shared storage: rbd + cephfs
   --format bash
 * set export vars in ./import-external-cluster.sh 
 * ./import-external-cluster.sh  
+* sudo ceph fs subvolumegroup create k3s-cephfs csi
 
 ## test storageclasses
 https://github.com/rook/rook/tree/release-1.17/deploy/examples/csi

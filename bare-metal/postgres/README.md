@@ -17,7 +17,7 @@ host    all             all              0.0.0.0/0                       md5
 host    all             all              ::/0                            md5
 
 ## pgbackrest
-
+ 
 * sudo apt-get update
 * sudo apt-get install pgbackrest
 * update /etc/postgresql/17/main/postgresql.conf

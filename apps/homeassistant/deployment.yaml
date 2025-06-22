@@ -25,6 +25,12 @@ spec:
           volumeMounts:
             - mountPath: /config
               name: homeassistant-data
+          env:
+            - name: HA_DB_URL
+              valueFrom:
+                secretKeyRef:
+                  name: homeassistant-secrets
+                  key: recorder_url
   volumeClaimTemplates:
     - metadata:
         name: homeassistant-data

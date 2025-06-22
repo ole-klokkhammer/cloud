@@ -34,10 +34,6 @@ rgw for object storage (RADOS Gateway)
 ### Enabling the Object Gateway Management Frontend 
 * sudo ceph orch apply rgw default --placement="1 master0"
 
-## commands
-* sudo ceph config set global mon_allow_pool_delete true 
-* sudo ceph osd pool delete k3s k3s --yes-i-really-really-mean-it
-* sudo ceph config set global mon_allow_pool_delete false 
 
 ## microceph
 https://canonical-microceph.readthedocs-hosted.com/en/latest/how-to/single-node/
@@ -53,6 +49,10 @@ poor integration with rook etc
 * if installation fails and it deletes the cluster ... fix the docker installation.
 
 
+## delete pool
+* sudo ceph config set global mon_allow_pool_delete true 
+* sudo ceph osd pool delete k3s k3s --yes-i-really-really-mean-it
+* sudo ceph config set global mon_allow_pool_delete false 
 
 ## mount disk local
 * sudo rbd map <pool-name>/<image-name>
@@ -61,3 +61,18 @@ poor integration with rook etc
 * sudo mount /dev/rbdX /mnt/ceph-maintenance
 * sudo umount /mnt/myrbd
 * sudo rbd unmap /dev/rbdX
+* sudo rbd showmapped
+
+## performance test
+* sudo rbd map k3s-rbd/performance-test --name client.admin
+* sudo fio --name=ceph-test --filename=/dev/rbd<X> --direct=1 --rw=randrw --bs=4k --size=1G --numjobs=4 --time_based --runtime=60 --group_reporting
+* sudo rbd unmap /dev/rbd<X>
+* sudo rbd showmapped
+
+### more commands
+* sudo fio --name=ceph-test --filename=/dev/rbd1 --direct=1 --rw=randrw --bs=256k --size=500M --numjobs=4 --time_based --runtime=60 --group_reporting --iodepth=64 --ioengine=libaio
+* 
+
+## crush rules
+* sudo ceph osd crush rule list
+* sudo ceph osd crush rule dump <rule-name>

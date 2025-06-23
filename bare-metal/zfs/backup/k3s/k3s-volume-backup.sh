@@ -17,7 +17,7 @@ echo "List all ZFS volumes (zvols)"
 for volume in $(zfs list -H -o name -t filesystem,volume | grep "^$ZFS_POOL/"); do
   SNAPSHOT_NAME="${SNAPSHOT_PREFIX}-${TIMESTAMP}"
   SNAPSHOT="${volume}@${SNAPSHOT_NAME}"
-  SNAPSHOT_FILE="/temp/$(echo "${volume}" | tr '/' '_')_${SNAPSHOT_NAME}.zfs"
+  SNAPSHOT_FILE="/temp/$(echo "${volume}" | tr '/' '_')@${SNAPSHOT_NAME}.zfs"
 
   echo "Creating snapshot: $SNAPSHOT"
   zfs_snapshot_output=$(zfs snapshot "$SNAPSHOT")

@@ -1,0 +1,10 @@
+[Unit]
+Description=k3s-volume backup
+
+[Service]
+Type=oneshot
+User=ubuntu
+StandardOutput=journal
+StandardError=journal
+Environment=AWS_DEBUG=1
+ExecStart=/usr/local/bin/k3s-volume-backup.sh

@@ -3,13 +3,24 @@
 ## setup
 https://docs.timescale.com/self-hosted/latest/install/installation-linux/#install-and-configure-timescaledb-on-postgresql
 
-* sudo apt-get install postgresql postgresql-common postgresql-contr
-* sudo pg_createcluster <version> main --start
+### install postgres with correct data path
+* sudo apt-get install postgresql postgresql-common 
+* sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh
+* create appropriate data folders with permissions to postgres:postgres
+  * sudo chown -R postgres:postgres /mnt/databases/postgresql/17/main
+  * sudo chmod 700 /mnt/databases/postgresql/17/main
+  * ensure root is accessible too sudo chmod 777 /mnt/databases
+* sudo pg_createcluster 17 main --datadir=/mnt/databases/postgresql/17/main --start
+
+### add timescaledb
 * sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh
 * echo "deb https://packagecloud.io/timescale/timescaledb/ubuntu/ $(lsb_release -c -s) main" | sudo tee /etc/apt/sources.list.d/timescaledb.list
 * wget --quiet -O - https://packagecloud.io/timescale/timescaledb/gpgkey | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/timescaledb.gpg
 * sudo apt-get update
-* sudo apt-get install timescaledb-2-postgresql-17 postgresql-client-17
+* if timescaledb isnt found:
+  * sudo nano /etc/apt/sources.list.d/timescaledb.sources
+  * change plucky to jammy
+* sudo apt-get install timescaledb-2-postgresql-17 postgresql-client-17 
 * update postgresql.conf with: listen_addresses = '*'
 * set /etc/postgresql/17/main/pg_hba.conf:
 # Allow all users from local network with md5 password
@@ -25,7 +36,7 @@ archive_mode = on
 archive_command = 'pgbackrest --stanza=main archive-push %p'
 restore_command = 'pgbackrest --stanza=main archive-get %f %p'
 archive_timeout = 1800s
-* update /etc/pgbackrest/pgbackrest.conf
+* update /etc/pgbackrest/pgbackrest.conf. create it with postgres:postgres if not exists:
 [global]
 process-max=4
 log-level-console=info
@@ -48,7 +59,7 @@ repo1-s3-key-secret=<s3_secret>
 [main]
 pg1-port=5432
 pg1-host-user=postgres
-pg1-path=/var/lib/postgresql/17/main 
+pg1-path=/mnt/databases/postgresql/17/main
 pg1-socket-path=/var/run/postgresql
 
 [global:archive-push]

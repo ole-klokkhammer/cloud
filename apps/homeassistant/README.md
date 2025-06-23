@@ -6,6 +6,15 @@
 * GRANT ALL ON DATABASE homeassistant TO homeassistant;
 * GRANT ALL PRIVILEGES  ON SCHEMA public TO homeassistant;
 
+## setup volume
+Use volumeMode: Block for ZVOLs
+Use volumeMode: Filesystem for datasets
+
+openebs expects to mount the filesystem itself.
+
+* sudo zfs create -o quota=500M k3s/homeassistant-data  
+* sudo zfs list -o name,volsize,used,available k3s/homeassistant-data
+
 ## setup
 * kubectl create namespace homeassistant
 * kubectl create secret generic -n homeassistant  homeassistant-secrets --from-env-file=.env
@@ -13,10 +22,3 @@
 * kubectl create -f ./service.yaml
 
 https://github.com/freol35241/ltss
-
-
-# restore longhorn backup volume
-- create the volume in longhorn
-- create a volume in kubernetes
-- select the volume in volumeClaimTemplates with volumeName: homeassistant-data
-

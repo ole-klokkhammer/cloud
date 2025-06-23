@@ -3,7 +3,7 @@
 - sudo ubuntu-drivers --gpgpu install
 
 # install nvidia container toolkit
-- https://www.atlantic.net/gpu-server-hosting/how-to-install-k3s-with-nvidia-gpu-operator-on-ubuntu-22-04/
+- https://www.atlantic.net/gpu-server-hosting/how-to-install-k3s-with-nvi   dia-gpu-operator-on-ubuntu-22-04/
 
 # version mismatch
 - https://stackoverflow.com/questions/43022843/nvidia-nvml-driver-library-version-mismatch

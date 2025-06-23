@@ -29,8 +29,7 @@ sudo zfs list
 
 ### 7. Enable at Boot
 
-ZFS services are enabled by default on most distributions. To ensure:
-```sh
+ZFS services are enabled by default on most distributions.
 sudo systemctl enable zfs-import-cache
 sudo systemctl enable zfs-mount
-```
+

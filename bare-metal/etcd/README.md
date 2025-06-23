@@ -18,8 +18,8 @@ Wants=network-online.target local-fs.target remote-fs.target time-sync.target
 [Service]
 Type=notify
 ExecStart=/usr/local/bin/etcd
-Environment=ETCD_DATA_DIR=/var/lib/etcd/data
-Environment=ETCD_WAL_DIR=/var/lib/etcd/wal
+Environment=ETCD_DATA_DIR=/mnt/databases/etcd/data
+Environment=ETCD_WAL_DIR=/mnt/databases/etcd/wal
 Environment=ETCD_NAME=etcd
 Environment=ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
 Environment=ETCD_ADVERTISE_CLIENT_URLS=http://192.168.10.2:2379
@@ -47,14 +47,17 @@ EOF
 
 ### prereq
 
-* aws configure
-* aws s3 ls s3://k3s --endpoint-url https://j8t7.ldn203.idrivee2-94.com | tail -n 1
-* aws s3 cp s3://k3s/etcd-snapshot-master0-1749902402  /tmp --endpoint-url https://j8t7.ldn203.idrivee2-94.com
-* etcdctl snapshot restore /tmp/etcd-snapshot-master0-1749902402 --endpoints=https://127.0.0.1:2379 --data-dir /var/lib/etcd/data 
+#### aws cli
+* curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+* unzip awscliv2.zip
+* sudo ./aws/install
+* aws --version
 
-### do
-* etcdctl --endpoints=https://127.0.0.1:2379 
-  snapshot restore s3://k3s.j8t7.ldn203.idrivee2-94.com/etcd-snapshot-master0-1749902402
+#### setup
+* aws configure
+* aws s3 ls --profile etcd-backup s3://etcd --endpoint-url https://j8t7.ldn203.idrivee2-94.com | tail -n 1
+* aws s3 cp --profile etcd-backup s3://etcd/etcd-snapshot-master0-1749902402  /tmp --endpoint-url https://j8t7.ldn203.idrivee2-94.com
+* etcdctl snapshot restore /tmp/etcd-snapshot-master0-1749902402 --endpoints=https://127.0.0.1:2379 --data-dir /mnt/databases/etcd/data
 
 
 ## ui client

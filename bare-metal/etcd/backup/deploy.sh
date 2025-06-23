@@ -19,7 +19,7 @@ echo "Copy files to remote host "
 scp "$LOCAL_SCRIPT_FILE" "$LOCAL_SERVICE_FILE" "$LOCAL_TIMER_FILE" ${REMOTE_USER}@${REMOTE_HOST}:$REMOTE_TMP_DIR/
 
 echo "Run setup commands on remote host"
-ssh ${REMOTE_USER}@${REMOTE_HOST} "
+ssh -t ${REMOTE_USER}@${REMOTE_HOST} "
     sudo cp $REMOTE_TMP_DIR/$(basename $LOCAL_SCRIPT_FILE) $SCRIPT_FILE && \
     sudo chmod +x $SCRIPT_FILE && \
     sudo cp $REMOTE_TMP_DIR/$(basename $LOCAL_SERVICE_FILE) $SERVICE_FILE && \

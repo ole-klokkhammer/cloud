@@ -33,3 +33,6 @@ ZFS services are enabled by default on most distributions.
 sudo systemctl enable zfs-import-cache
 sudo systemctl enable zfs-mount
 
+### 8. set script permissions
+for backup
+* zfs allow ubuntu snapshot k3s

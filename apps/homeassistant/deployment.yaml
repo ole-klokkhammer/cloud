@@ -17,6 +17,13 @@ spec:
       labels:
         app: homeassistant
     spec:
+      initContainers:
+        - name: check-fs-mount
+          image: busybox
+          command: ['sh', '-c', 'test -f /fs/mounted.txt || (echo "File mount missing" && exit 1)']
+          volumeMounts:
+            - mountPath: /fs
+              name: homeassistant-data
       containers:
         - name: homeassistant
           image: homeassistant/home-assistant:stable

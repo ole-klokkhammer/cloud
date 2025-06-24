@@ -33,7 +33,7 @@ data:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: hivemq-extensions
+  name: hivemq-data
   namespace: hivemq
   labels:
     app: hivemq
@@ -53,3 +53,17 @@ spec:
               operator: In
               values:
                 - master0
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: hivemq-data-pvc
+  namespace: hivemq
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 500Mi
+  volumeName: hivemq-data

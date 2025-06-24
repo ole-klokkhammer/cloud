@@ -8,9 +8,7 @@
 
 ## setup volume
 Use volumeMode: Block for ZVOLs
-Use volumeMode: Filesystem for datasets
-
-openebs expects to mount the filesystem itself.
+Use volumeMode: Filesystem for datasets 
 
 * sudo zfs create -o quota=500M k3s/homeassistant-data  
 * sudo zfs list -o name,volsize,used,available k3s/homeassistant-data

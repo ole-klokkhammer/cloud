@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: jellyfin
+  namespace: jellyfin
+  labels:
+    app: jellyfin
+spec:
+  replicas: 1
+  serviceName: jellyfin
+  selector:
+    matchLabels:
+      app: jellyfin
+  template:
+    metadata:
+      namespace: jellyfin
+      labels:
+        app: jellyfin
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - master0
+      initContainers:
+        - name: check-jellyfin-data-mount
+          image: busybox
+          command: ['sh', '-c', 'test -f /fs/mounted.txt || (echo "File mount missing" && exit 1)']
+          volumeMounts:
+            - mountPath: /fs
+              name: jellyfin-data
+      containers:
+      - name: jellyfin
+        image: jellyfin/jellyfin:latest
+        ports:
+        - containerPort: 8096
+        volumeMounts:
+        - name: jellyfin-data
+          mountPath: /config
+        - name: cache
+          mountPath: /cache
+        - name: jellyfin-media
+          mountPath: /media
+      volumes:
+      - name: jellyfin-data
+        persistentVolumeClaim:
+          claimName: jellyfin-data-pvc
+      - name: jellyfin-media
+        persistentVolumeClaim:
+          claimName: jellyfin-media-pvc
+      - name: cache
+        emptyDir: {}

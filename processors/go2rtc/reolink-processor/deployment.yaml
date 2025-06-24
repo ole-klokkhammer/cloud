@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reolink-processor
+  namespace: go2rtc-processors
+  labels:
+    app: reolink-processor
+spec:
+  revisionHistoryLimit: 0
+  selector:
+    matchLabels:
+      app: reolink-processor
+  template:
+    metadata:
+      labels:
+        app: reolink-processor
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - master0
+      containers:
+        - name: reolink-processor
+          image: olklokk/reolink-processor:1.0.0
+          env:
+            - name: LOG_LEVEL
+              value: "info" 
+            - name: ENTRANCE_ROOF_STREAM_URL
+              value: "rtsp://go2rtc.go2rtc:8554/entrance_roof"  

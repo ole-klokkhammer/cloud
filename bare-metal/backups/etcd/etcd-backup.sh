@@ -25,7 +25,14 @@ fi
  
 # aws_output=$(aws s3 cp "$SNAPSHOT" s3://$BUCKET_NAME --profile etcd-backup --endpoint-url https://j8t7.ldn203.idrivee2-94.com 2>&1)
 # force single part upload to avoid multipart issues
-aws_output=$(aws s3api put-object --bucket $BUCKET_NAME --key "$SNAPSHOT_NAME" --body "$SNAPSHOT_PATH" --profile "$AWS_PROFILE" --endpoint-url "$ENDPOINT_URL" 2>&1)
+aws_output=$(
+  aws s3api put-object \
+    --bucket $BUCKET_NAME \
+    --key "$SNAPSHOT_NAME" \
+    --body "$SNAPSHOT_PATH" \
+    --profile "$AWS_PROFILE" \
+    --endpoint-url "$ENDPOINT_URL" 2>&1
+)
 AWS_STATUS=$?
 if [ $AWS_STATUS -ne 0 ]; then
   echo "aws s3 upload failed"
@@ -34,7 +41,14 @@ if [ $AWS_STATUS -ne 0 ]; then
 fi
 
 echo "Cleanup: keep only the latest $SNAPSHOT_KEEP snapshots in the bucket"
-SNAPSHOT_LIST=$(aws s3api list-objects-v2 --bucket $BUCKET_NAME --profile "$AWS_PROFILE" --endpoint-url "$ENDPOINT_URL" --query 'Contents[].Key' --output json | jq -r ".[] | select(startswith(\"$SNAPSHOT_PREFIX\"))" | sort -n)
+SNAPSHOT_LIST=$(
+  aws s3api list-objects-v2 \
+    --bucket $BUCKET_NAME \
+    --profile "$AWS_PROFILE" \
+    --endpoint-url "$ENDPOINT_URL" \
+    --query 'Contents[].Key' \
+    --output json | jq -r ".[] | select(startswith(\"$SNAPSHOT_PREFIX\"))" | sort -n
+)
 SNAPSHOT_COUNT=$(echo "$SNAPSHOT_LIST" | wc -l)
 
 if [ "$SNAPSHOT_COUNT" -gt "$SNAPSHOT_KEEP" ]; then

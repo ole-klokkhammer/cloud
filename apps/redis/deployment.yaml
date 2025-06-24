@@ -25,6 +25,13 @@ spec:
                     operator: In
                     values:
                       - master0 
+      initContainers:
+        - name: check-fs-mount
+          image: busybox
+          command: ['sh', '-c', 'test -f /fs/mounted.txt || (echo "File mount missing" && exit 1)']
+          volumeMounts:
+            - mountPath: /fs
+              name: redis-data
       containers:
       - image: redis:alpine
         name: redis
@@ -33,16 +40,7 @@ spec:
         volumeMounts:
           - name: redis-data
             mountPath: /opt/redis/data
-  volumeClaimTemplates:
-    - metadata:
-        name: redis-data
-        namespace: redis
-      spec:
-        accessModes:
-          - ReadWriteOnce
-        storageClassName: local-path
-        resources:
-          requests:
-            storage: 500Mi
-        volumeName: redis-data
----
+      volumes:
+        - name: redis-data
+          persistentVolumeClaim:
+            claimName: redis-data-pvc

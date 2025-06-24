@@ -21,3 +21,17 @@ spec:
     storage: 500Mi
   local:
     path: /var/lib/redis
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: redis-data-pvc
+  namespace: redis
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 500Mi
+  volumeName: redis-data

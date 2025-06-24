@@ -21,11 +21,12 @@ motion_times = []
 fourcc = cv2.VideoWriter_fourcc(*"XVID")  # mp4v or 'XVID' for .avi
 video_writer = None
 
+motion_threshold = 500  # Minimum contour area to consider as motion
+recording_frames = 20.0  # Number of frames to record after motion is detected
 recording = False
 min_record_time = 3
 record_start_time = None
 last_motion_time = None
-motion_threshold = 500  # Minimum contour area to consider as motion
 
 max_failures = 10
 failures = 0
@@ -67,7 +68,7 @@ try:
         diff_frame = cv2.absdiff(static_back, gray)
 
         # Threshold the difference to get binary image of motion areas
-        _, thresh_frame = cv2.threshold(diff_frame, 20, 255, cv2.THRESH_BINARY)
+        _, thresh_frame = cv2.threshold(diff_frame, 50, 255, cv2.THRESH_BINARY)
 
         # Dilate to fill in holes and make contours more detectable
         thresh_frame = cv2.dilate(thresh_frame, None, iterations=2)
@@ -90,12 +91,14 @@ try:
             break 
 
         if motion is True: 
+            static_back = gray
+
             if video_writer is None:
                 timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
                 video_filename = f"{snapshot_dir}/motion_{timestamp}.mp4"
                 height, width = frame.shape[:2]
                 video_writer = cv2.VideoWriter(
-                    video_filename, fourcc, 15.0, (width, height)
+                    video_filename, fourcc, recording_frames, (width, height)
                 )
                 recording = True
                 logging.info(f"Started recording: {video_filename}") 
@@ -106,12 +109,7 @@ try:
                     video_writer.release()
                     video_writer = None
                     recording = False
-                    logging.info("Stopped recording")
-
-            if (last_motion_time is None or (time.time() - last_motion_time) > background_update_interval):
-                # Update the static background every 10 seconds if no motion detected
-                logging.debug("Updating static background...") 
-                static_back = gray
+                    logging.info("Stopped recording") 
        
         if recording is True and video_writer is not None:
             video_writer.write(frame)     

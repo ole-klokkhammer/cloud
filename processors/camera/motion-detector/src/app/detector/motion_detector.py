@@ -23,6 +23,18 @@ class MotionDetector:
         self.frame_number = 0
         self.recording_id = None
         self.min_record_time = 3  # seconds
+        self.target_fps = 20.0
+        self.frame_interval = 1.0 / self.target_fps
+
+        # TARGET_FPS = 10
+        # FRAME_INTERVAL = 1.0 / TARGET_FPS
+
+        # while True:
+        #     start_time = time.time()
+        #     # ... existing code ...
+        #     elapsed = time.time() - start_time
+        #     if elapsed < FRAME_INTERVAL:
+        #         time.sleep(FRAME_INTERVAL - elapsed)
 
         self.reference_frame = None
         self.last_motion_time = None
@@ -41,13 +53,21 @@ class MotionDetector:
             height = int(self.video.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
             while True:
+                time.sleep(0.01)  # Sleep to reduce CPU usage
+
                 check, frame = self.video.read()
-                if not self.handle_stream_failure(check, self.video):
+                if not self.handle_stream_failure(check):
                     continue
 
                 simplified_frame = self.simplify_frame(frame)
                 if self.reference_frame is None:
                     self.reference_frame = simplified_frame
+                    if environment.LOCAL_DEBUG:
+                        logging.info(
+                            "Reference frame initialized, saving to disk for debugging."
+                        )
+                        cv2.imwrite("../snapshots/reference_frame.jpg", self.reference_frame)
+                        cv2.imwrite("../snapshots/simplified_frame.jpg", simplified_frame)
                     continue  # skip the first frame
 
                 motion_detected = self.detect_motion(
@@ -72,6 +92,11 @@ class MotionDetector:
                         self.frame_number = 0
 
                 if self.recording is True:
+                    if environment.LOCAL_DEBUG:
+                        logging.info(
+                            f"Recording frame {self.frame_number} with ID {self.recording_id}"
+                        ) 
+                    
                     if self.kafka_producer and self.kafka_topic:
                         ret, buffer = cv2.imencode(".jpg", frame)
                         if ret:
@@ -102,7 +127,7 @@ class MotionDetector:
                 self.video.release()
                 logging.info("Video capture released.")
 
-    def handle_stream_failure(self, check, video):
+    def handle_stream_failure(self, check):
         """
         Handles video stream read failures and attempts reconnection if needed.
         Returns True if the stream is OK, False if it should continue to next loop.
@@ -114,7 +139,8 @@ class MotionDetector:
             )
             if self.failures >= self.max_failures:
                 logging.error("Max failures reached, attempting to reconnect...")
-                video.release()
+                if self.video is not None:
+                   self.video.release()
                 logging.info("Waiting for 2 seconds before reconnecting...")
                 time.sleep(2)
                 self.video = cv2.VideoCapture(self.stream_url)
@@ -124,14 +150,27 @@ class MotionDetector:
             self.failures = 0
             return True
 
-    def simplify_frame(self, frame):
+    def simplify_frame(self, frame, size=(640, 480), blur_kernel=(5, 5)):
         """
-        Converts frame to grayscale and applies Gaussian blur.
-        Returns the simplified frame.
+        Converts frame to a lower resolution, grayscale, and applies Gaussian blur.
+        Returns the simplified frame to be used in motion detection.
+
+        Args:
+            frame (np.ndarray): The input frame.
+            size (tuple): The target size for resizing (width, height).
+            blur_kernel (tuple): The kernel size for Gaussian blur.
+
+        Returns:
+            np.ndarray: The processed frame.
         """
-        gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        simplified_frame = cv2.GaussianBlur(gray_frame, (21, 21), 0)
-        return simplified_frame
+        return cv2.GaussianBlur(
+            cv2.cvtColor(
+                cv2.resize(frame, size), 
+                cv2.COLOR_BGR2GRAY
+            ), 
+            blur_kernel, 
+            0
+        )
 
     def detect_motion(self, reference_frame, simplified_frame, threshold) -> bool:
         """
@@ -142,6 +181,7 @@ class MotionDetector:
         motion = False
         for contour in contours:
             area = cv2.contourArea(contour)
+            logging.debug(f"Contour area: {area}")
             if area < threshold:
                 continue
             motion = True

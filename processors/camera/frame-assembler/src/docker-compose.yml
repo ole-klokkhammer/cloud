@@ -1,0 +1,11 @@
+services:
+  frame-assembler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment: 
+      - LOG_LEVEL=INFO  
+    restart: unless-stopped
+
+
+ 

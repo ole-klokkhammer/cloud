@@ -76,8 +76,10 @@ data:
 
     streams:
       entrance_roof: 
-        - "ffmpeg:http://${CAMERA_ENTRANCE_ROOF_IP}/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=${CAMERA_ENTRANCE_ROOF_USER}&password=${CAMERA_ENTRANCE_ROOF_PASSWORD}#video=copy#audio=copy"
+        - "ffmpeg:http://${CAMERA_ENTRANCE_ROOF_IP}/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=${CAMERA_ENTRANCE_ROOF_USER}&password=${CAMERA_ENTRANCE_ROOF_PASSWORD}#video=copy#audio=opus"
       entrance_roof_onvif: 
         - "onvif://${CAMERA_ENTRANCE_ROOF_USER}:${CAMERA_ENTRANCE_ROOF_PASSWORD}@${CAMERA_ENTRANCE_ROOF_IP}:8000"
       entrance_roof_sub: 
-        - "ffmpeg:http://${CAMERA_ENTRANCE_ROOF_IP}/flv?port=1935&app=bcs&stream=channel0_sub.bcs&user=${CAMERA_ENTRANCE_ROOF_USER}&password=${CAMERA_ENTRANCE_ROOF_PASSWORD}#video=copy#audio=copy"
+        - "ffmpeg:http://${CAMERA_ENTRANCE_ROOF_IP}/flv?port=1935&app=bcs&stream=channel0_sub.bcs&user=${CAMERA_ENTRANCE_ROOF_USER}&password=${CAMERA_ENTRANCE_ROOF_PASSWORD}#video=copy#audio=opus"
+      office_test: 
+        - "ffmpeg:http://192.168.10.110/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=${CAMERA_ENTRANCE_ROOF_USER}&password=${CAMERA_ENTRANCE_ROOF_PASSWORD}#video=copy#audio=opus"

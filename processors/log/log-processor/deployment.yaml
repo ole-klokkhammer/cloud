@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: log-processor
+  namespace: log-processors
+  labels:
+    app: log-processor
+spec: 
+  revisionHistoryLimit: 0
+  selector:
+    matchLabels:
+      app: log-processor
+  template:
+    metadata:
+      labels:
+        app: log-processor
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname 
+                    operator: In
+                    values:
+                      - master0
+      containers:
+        - name: log-processor
+          image: olklokk/log-processor:1.0.3
+          env:
+            - name: LOG_LEVEL
+              value: "info"
+            - name: KAFKA_BROKER
+              value: "kafka-kafka-bootstrap.kafka:9092"
+            - name: KAFKA_TOPIC
+              value: "otlp_logs"
+            - name: MQTT_BROKER
+              value: "hivemq-internal.hivemq"
+            - name: MQTT_PORT
+              value: "1883"
+            - name: MQTT_CLIENT_ID
+              value: "log-processor"
+              

@@ -1,7 +1,6 @@
 
 ##
-* kubectl create -f ./deployment.yaml
-* kubectl create -f ./service.yaml
+* kubectl create -f ./deployment.yaml 
 
 ## airthings
 * https://github.com/Airthings/wave-reader/blob/master/read_wave.py

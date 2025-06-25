@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bluetooth-processor
+  namespace: bluetooth-processors
+  labels:
+    app: bluetooth-processor
+spec:
+  revisionHistoryLimit: 0
+  selector:
+    matchLabels:
+      app: bluetooth-processor
+  template:
+    metadata:
+      labels:
+        app: bluetooth-processor
+    spec:
+      containers:
+        - name: bluetooth-processor
+          image: olklokk/bluetooth-processor:1.0.46
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: LOG_LEVEL
+              value: "info" 
+            - name: KAFKA_BROKER
+              value: "kafka-kafka-bootstrap.kafka:9092"
+            - name: KAFKA_TOPIC
+              value: "bluetooth"
+            - name: MQTT_BROKER
+              value: "hivemq-internal.hivemq"
+            - name: MQTT_PORT
+              value: "1883"
+            - name: MQTT_CLIENT_ID
+              value: "bluetooth-processor"
+            - name: DB_HOST
+              value: "postgres.postgres-external"
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              value: "linole"
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: bluetooth-processor-config 
+                  key: DB_USER
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: bluetooth-processor-config 
+                  key: DB_PASSWORD 

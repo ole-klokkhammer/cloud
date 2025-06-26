@@ -1,12 +1,9 @@
 #!/usr/bin/python3
 
-import os
 import logging
 import signal
 import env as environment
-from detector.motion_detector import MotionDetector
-from kafka import KafkaProducer
-
+from services.motion_detector import MotionDetector
 
 logging.basicConfig(
     level=logging._nameToLevel[environment.log_level.upper()],
@@ -14,27 +11,15 @@ logging.basicConfig(
 )
 
 if __name__ == "__main__":
-    logging.info("Starting motion detector...")
-    logging.info(f"Using stream URL: {environment.entrance_roof_stream_url}") 
+    motion_detector = MotionDetector()
 
-    # producer = KafkaProducer(
-    #     bootstrap_servers=environment.kafka_bootstrap_servers,
-    #     value_serializer=lambda v: v,  # Send bytes
-    #     max_request_size=4 * 1024 * 1024,
-    #     compression_type=None,
-    #     linger_ms=0,  # Send immediately 
-    #     acks=1,
-    # )
-
-    motion_detector = MotionDetector(
-        stream_url=environment.entrance_roof_stream_url,
-       
-        kafka_topic=environment.kafka_topic,
-    )
-
+    def shutdown(signum, frame):
+        logging.info(f"Received signal {signum}, shutting down...")
+        motion_detector.stop()
+        exit(0)
 
     # Register signal handlers
-    signal.signal(signal.SIGINT, motion_detector.shutdown)
-    signal.signal(signal.SIGTERM, motion_detector.shutdown)
+    signal.signal(signal.SIGINT, shutdown)
+    signal.signal(signal.SIGTERM, shutdown)
 
-    motion_detector.run()
+    motion_detector.start()

@@ -25,3 +25,22 @@ tensorflowlite needs a specific python version
 * https://coral.ai/examples/
 * https://ai.google.dev/edge/litert/migration
 * https://ai.google.dev/edge/litert/inference#run-python
+
+## frame differencing
+* https://medium.com/@itberrios6/introduction-to-motion-detection-part-1-e031b0bb9bb2
+
+## optical flow
+* https://medium.com/@itberrios6/introduction-to-motion-detection-part-2-6ec3d6b385d4
+
+## background substraction
+* https://medium.com/@itberrios6/introduction-to-motion-detection-part-3-025271f66ef9
+* https://github.com/itberrios/CV_projects/blob/main/motion_detection/detection_with_background_subtraction.ipynb
+
+* ffplay rtsp://127.0.0.1:8554/mystream
+
+## advanced: unsupervised motion detection on moving cameras
+* https://python.plainenglish.io/unsupervised-motion-detection-8b523c53c49b
+
+### models
+* https://github.com/google-coral/edgetpu/raw/master/test_data
+* https://www.coral.ai/models/object-detection/

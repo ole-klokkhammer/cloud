@@ -1,3 +1,5 @@
-opencv-python-headless
-pandas
-kafka-python
+opencv-python-headless 
+kafka-python 
+# tflite-runtime
+ai_edge_litert
+numpy<2 # numpy 2.0.0 is not compatible with tflite-runtime

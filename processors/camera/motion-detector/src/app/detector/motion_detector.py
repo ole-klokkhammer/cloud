@@ -1,12 +1,14 @@
 import logging
-import signal
+import pathlib
 import uuid
 import cv2
-import env as environment
 import time
 import os
-import pandas as pd
-from datetime import datetime
+import numpy as np
+
+from ai_edge_litert.interpreter import Interpreter, load_delegate
+
+# import tflite_runtime.interpreter as tflite
 
 
 class MotionDetector:
@@ -19,25 +21,11 @@ class MotionDetector:
         self.failures = 0
         self.max_failures = 10
 
-        self.motion_threshold = 500
         self.recording = False
         self.kafka_frame_number = -1
         self.recording_id = None
         self.min_record_time = 3  # seconds
-        self.target_fps = 20.0
-        self.frame_interval = 1.0 / self.target_fps
 
-        # TARGET_FPS = 10
-        # FRAME_INTERVAL = 1.0 / TARGET_FPS
-
-        # while True:
-        #     start_time = time.time()
-        #     # ... existing code ...
-        #     elapsed = time.time() - start_time
-        #     if elapsed < FRAME_INTERVAL:
-        #         time.sleep(FRAME_INTERVAL - elapsed)
-
-        self.reference_frame = None
         self.last_motion_time = None
         self.video = None
 
@@ -52,9 +40,35 @@ class MotionDetector:
         try:
             logging.info("Running motion detection...")
 
-            # Register signal handlers
-            signal.signal(signal.SIGINT, self.shutdown)
-            signal.signal(signal.SIGTERM, self.shutdown)
+            logging.info("Loading model...")
+            app_root = pathlib.Path(__file__).parent.parent.absolute()
+            model_file = os.path.join(
+                app_root,
+                "models/mobilenet_ssd_v2_coco_quant_postprocess_edgetpu.tflite",
+            )
+            label_path = os.path.join(app_root, "models/coco_labels.txt")
+
+            logging.info(f"Creating interpreter with model: {model_file}")
+            model_file, *device = model_file.split("@")
+            interpreter = Interpreter(
+                model_path=model_file,
+                experimental_delegates=[
+                    load_delegate("libedgetpu.so.1", {"device": "usb"})
+                ],
+            )
+            logging.info("Interpreter created successfully.")
+            try:
+                interpreter.allocate_tensors()
+                logging.info("Tensors allocated successfully.")
+            except Exception as e:
+                logging.error(f"Failed to allocate tensors: {e}")
+                raise e
+
+            # # Get input and output details
+            input_details = interpreter.get_input_details()
+            output_details = interpreter.get_output_details()
+            logging.debug(f"Input details: {input_details}")
+            logging.debug(f"Output details: {output_details}")
 
             os.environ["OPENCV_FFMPEG_CAPTURE_OPTIONS"] = (
                 "rtsp_transport;tcp|stimeout;60000"
@@ -71,41 +85,43 @@ class MotionDetector:
             )
 
             while True:
-
-                start_time = time.time()  # Start timing
-
+                start_time = time.time()
                 check, frame = self.video.read()
+                read_duration = time.time() - start_time
+                logging.debug(f"Time to read frame: {read_duration:.4f} seconds")
 
                 if not self.handle_stream_failure(check):
                     continue
 
-                simplified_frame = self.simplify_frame(frame)
-                if self.reference_frame is None:
-                    self.reference_frame = simplified_frame
-                    if environment.LOCAL_DEBUG:
-                        logging.info(
-                            "Reference frame initialized, saving to disk for debugging."
-                        )
-                        cv2.imwrite(
-                            "../snapshots/reference_frame.jpg", self.reference_frame
-                        )
-                        cv2.imwrite(
-                            "../snapshots/simplified_frame.jpg", simplified_frame
-                        )
-                    continue  # skip the first frame
+                # --- Inference on frame ---
+                # 1. Resize frame to model input size
+                input_shape = input_details[0]["shape"]
+                height, width = input_shape[1], input_shape[2]
+                frame_resized = cv2.resize(frame, (width, height))
 
-                motion_detected = self.detect_motion(
-                    reference_frame=self.reference_frame,
-                    simplified_frame=simplified_frame,
-                    threshold=self.motion_threshold,
-                )
-                end_time = time.time()
-                frame_time = end_time - start_time
-                logging.debug(f"Computation time for frame: {frame_time:.4f} seconds")
+                # 2. Convert to expected dtype (usually uint8)
+                input_data = frame_resized.astype(input_details[0]["dtype"])
+
+                # 3. Add batch dimension if needed
+                if len(input_data.shape) == 3:
+                    input_data = np.expand_dims(input_data, axis=0)
+
+                # 4. Set input tensor
+                interpreter.set_tensor(input_details[0]["index"], input_data)
+
+                # 5. Run inference
+                start = time.perf_counter()
+                interpreter.invoke()
+                inference_time = time.perf_counter() - start
+                logging.info(f"Inference time: {inference_time * 1000:.1f} ms")
+
+                # 6. Get output tensor
+                output_data = interpreter.get_tensor(output_details[0]["index"])
+                # logging.info(f"Inference result: {output_data}")
+                motion_detected = True
 
                 if motion_detected:
                     self.last_motion_time = time.time()
-                    self.reference_frame = simplified_frame
                     if self.recording is False:
                         self.start_recording()
                 elif self.recording and self.last_motion_time is not None:
@@ -118,22 +134,22 @@ class MotionDetector:
                     if time_since_last_motion > self.min_record_time:
                         self.stop_recording()
 
-                if self.recording is True:
-                    logging.info(
-                        "Recording: recording_id=%s, frame_number=%s",
-                        self.recording_id,
-                        self.kafka_frame_number,
-                    )
-                    self.kafka_frame_number += 1
-                    self.send_frame_to_kafka(
-                        topic=self.kafka_topic,
-                        frame_number=self.kafka_frame_number,
-                        recording_id=self.recording_id,
-                        frame=frame,
-                        fps=fps,
-                        width=width,
-                        height=height,
-                    ) 
+                # if self.recording is True:
+                # logging.info(
+                #     "Recording: recording_id=%s, frame_number=%s",
+                #     self.recording_id,
+                #     self.kafka_frame_number,
+                # )
+                # self.kafka_frame_number += 1
+                # self.send_frame_to_kafka(
+                #     topic=self.kafka_topic,
+                #     frame_number=self.kafka_frame_number,
+                #     recording_id=self.recording_id,
+                #     frame=frame,
+                #     fps=fps,
+                #     width=width,
+                #     height=height,
+                # )
 
         except KeyboardInterrupt:
             logging.info("Interrupted by user, shutting down...")
@@ -218,79 +234,3 @@ class MotionDetector:
         else:
             self.failures = 0
             return True
-
-    def simplify_frame(self, frame, size=(640, 480), blur_kernel=(5, 5)):
-        """
-        Converts frame to a lower resolution, grayscale, and applies Gaussian blur.
-        Returns the simplified frame to be used in motion detection.
-
-        Args:
-            frame (np.ndarray): The input frame.
-            size (tuple): The target size for resizing (width, height).
-            blur_kernel (tuple): The kernel size for Gaussian blur.
-
-        Returns:
-            np.ndarray: The processed frame.
-        """
-        return cv2.GaussianBlur(
-            cv2.cvtColor(cv2.resize(frame, size), cv2.COLOR_BGR2GRAY), blur_kernel, 0
-        )
-
-    def detect_motion(self, reference_frame, simplified_frame, threshold) -> bool:
-        """
-        Checks contours for motion above the threshold.
-        Sets self.motion and self.last_motion_time if motion is detected.
-        """
-        # self.start_time = time.time()
-        contours = self.get_contours(reference_frame, simplified_frame)
-        # encode_time = time.time() - self.start_time
-        # logging.info(f"motion detect time: {encode_time:.4f} seconds")
-        motion = False
-        for contour in contours:
-            area = cv2.contourArea(contour)
-            logging.debug(f"Contour area: {area}")
-            if area < threshold:
-                continue
-            motion = True
-            break
-        return motion
-
-    def get_contours(
-        self,
-        reference_frame,
-        simplified_frame,
-        # threshold_value Good for most indoor scenes; increase if you get too many false positives
-        threshold_value=20,
-        # dilate_iterations 1-3 is typical; higher fills gaps but can merge small objects
-        dilate_iterations=2,
-        # morph_kernel_size (3, 3) or (5, 5) are common; larger removes more noise but can erase small motion
-        morph_kernel_size=(3, 3),
-        # use_morph_open True helps remove small noise; set False if you want to keep all small changes
-        use_morph_open=True,
-    ):
-        """
-        Computes contours of moving objects between reference and current frame.
-
-        Args:
-            reference_frame (np.ndarray): The reference grayscale frame.
-            simplified_frame (np.ndarray): The current grayscale frame.
-            threshold_value (int): Threshold for binarization.
-            dilate_iterations (int): Number of dilation iterations.
-            morph_kernel_size (tuple): Kernel size for morphological operations.
-            use_morph_open (bool): Whether to apply morphological opening to remove noise.
-
-        Returns:
-            list: List of detected contours.
-        """
-        diff_frame = cv2.absdiff(reference_frame, simplified_frame)
-        _, thresh_frame = cv2.threshold(
-            diff_frame, threshold_value, 255, cv2.THRESH_BINARY
-        )
-        if use_morph_open:
-            kernel = cv2.getStructuringElement(cv2.MORPH_RECT, morph_kernel_size)
-            thresh_frame = cv2.morphologyEx(thresh_frame, cv2.MORPH_OPEN, kernel)
-        thresh_frame = cv2.dilate(thresh_frame, None, iterations=dilate_iterations)
-        contours, _ = cv2.findContours(
-            thresh_frame, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
-        )
-        return contours

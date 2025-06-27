@@ -19,6 +19,7 @@ class VideoStreamer:
         if on_frame is None:
             raise ValueError("on_frame callback must not be None")
 
+        self.video = None
         self.stream_url = stream_url
         self.on_frame = on_frame
         self.failures = 0

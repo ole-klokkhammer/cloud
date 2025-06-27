@@ -18,7 +18,7 @@ spec:
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
+            nodeSelectorTerms: 
               - matchExpressions:
                   - key: kubernetes.io/hostname
                     operator: In
@@ -26,11 +26,28 @@ spec:
                       - master0
       containers:
         - name: motion-detector
-          image: olklokk/motion-detector:1.0.11
+          image: olklokk/motion-detector:1.0.22
+          securityContext:
+            privileged: true # use if coral
           env: 
             - name: LOG_LEVEL
               value: "info" 
+            - name: ENABLE_RESTREAMER
+              value: "False" 
+            - name: ENABLE_OBJECT_DETECTION
+              value: "False" 
             - name: KAFKA_BOOTSTRAP_SERVERS
               value: "kafka-kafka-bootstrap.kafka:9092" 
+            - name: KAFKA_TOPIC
+              value: "camera_frames" 
             - name: ENTRANCE_ROOF_STREAM_URL
-              value: "rtsp://go2rtc.go2rtc:8554/entrance_roof" 
+              value: "rtsp://go2rtc.go2rtc:8554/entrance_roof"  
+        - name: rtsp-server
+          image: bluenviron/mediamtx:latest  
+          ports:
+            - containerPort: 8554
+              name: rtsp-udp
+              protocol: UDP
+            - containerPort: 8554
+              name: rtsp-tcp
+              protocol: TCP

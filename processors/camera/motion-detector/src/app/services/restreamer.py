@@ -3,10 +3,10 @@ import subprocess
 
 
 class FfmpegReStreamer:
-    def __init__(self, stream_name, detection_frame_size, fps):
+    def __init__(self, stream_name, frame_size, fps):
         self.stream_name = stream_name
-        self.width = detection_frame_size[0]
-        self.height = detection_frame_size[1]
+        self.width = frame_size[0]
+        self.height = frame_size[1]
         self.fps = fps
         self.ffmpeg_proc = None
 
@@ -48,6 +48,12 @@ class FfmpegReStreamer:
         """
         Writes a single frame to the FFmpeg subprocess.
         """
+        expected_shape = (self.height, self.width)
+        if frame.shape != expected_shape:
+            logging.error(
+                f"Frame shape mismatch: expected {expected_shape}, got {frame.shape}"
+            )
+            return
         if self.ffmpeg_proc and self.ffmpeg_proc.stdin:
             try:
                 self.ffmpeg_proc.stdin.write(frame.tobytes())

@@ -5,7 +5,7 @@ import time
 import uuid
 import cv2
 import numpy as np
-from datetime import datetime
+from datetime import datetime, timezone
 from kafka.errors import CorruptRecordError
 
 
@@ -28,12 +28,7 @@ class FrameAssembler:
 
         if not self.kafka_consumer:
             raise ValueError("Kafka consumer is not initialized.")
-
-        video_writer = None
-        video_filename = None
-        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-        fps = 20  # Default FPS, can be adjusted or read from message headers
-        frame_size = None
+   
 
         while True:
             try:
@@ -45,44 +40,31 @@ class FrameAssembler:
                             logging.warning("Received None frame, skipping...")
                             continue 
  
-                        parsed = {k: v.decode() for k, v in message.headers}
-                        recording_id = parsed['recording_id']
-                        frame_number = int(parsed['frame_number'])
-                        timestamp = float(parsed['timestamp'])
-                        fps = float(parsed['fps'])
-                        width = int(parsed['width'])
-                        height = int(parsed['height'])
-                        encoding = parsed['encoding']
- 
-                        logging.info(f"recording_id: {recording_id}")
-                        logging.info(f"frame_number: {frame_number}")
+                        parsed_headers = {k: v.decode() for k, v in message.headers} 
+                        timestamp = float(parsed_headers['timestamp'])
+                        fps = float(parsed_headers['fps'])
+                        width = int(parsed_headers['width'])
+                        height = int(parsed_headers['height'])
+                        encoding = parsed_headers['encoding']
+  
                         # logging.info(f"timestamp: {timestamp}") 
                         # logging.info(f"FPS: {fps}")
                         # logging.info(f"Width: {width}")
                         # logging.info(f"Height: {height}")
                         # logging.info(f"Encoding: {encoding}")  
 
-                        # frame = cv2.imdecode(
-                        #     np.frombuffer(frame_bytes, np.uint8), cv2.IMREAD_COLOR
-                        # )
-                        # if frame is None:
-                        #     logging.error("Failed to decode frame, skipping...")
-                        #     continue
+                        frame = cv2.imdecode(
+                            np.frombuffer(frame_bytes, np.uint8), cv2.IMREAD_COLOR
+                        )
+                        if frame is None:
+                            logging.error("Failed to decode frame, skipping...")
+                            continue
 
-                        # if frame_size is None: 
-                        #    # frame_size = (frame.shape[1], frame.shape[0])
-                        #     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                        #     video_filename = f"video_{timestamp}_{uuid.uuid4()}.mp4"
-                        #     video_writer = cv2.VideoWriter(
-                        #         f"../snapshots/{video_filename}",
-                        #         fourcc,
-                        #         fps,
-                        #         (width, height)  # Use width and height from headers
-                        #     )
-                        #     logging.info(f"Started new video file: {video_filename}")
-
-                        # if video_writer is not None:
-                        #     video_writer.write(frame) 
+                        # Save each frame as an image file instead of writing to video
+                        timestamp_str = datetime.fromtimestamp(timestamp, tz=timezone.utc).strftime("%Y%m%d_%H%M%S_%f")
+                        image_filename = f"../snapshots/frame_{timestamp_str}_{uuid.uuid4()}.jpg"
+                        cv2.imwrite(image_filename, frame)
+                        logging.info(f"Saved frame to {image_filename}")
 
                         # Commit the message after successful processing
                         self.kafka_consumer.commit()

@@ -5,26 +5,23 @@ import cv2
 # https://github.com/itberrios/CV_projects/blob/main/motion_detection/motion_detection_utils.py
 class BackgroundSubtractorMOG2:
     def __init__(
-            self, 
-            history=100, 
-            varThreshold=5, 
-            detectShadows=True, 
-            shadowThreshold=0.5
-        ):
+        self, history=100, varThreshold=5, detectShadows=True, shadowThreshold=0.5
+    ):
         self.bg_sub = cv2.createBackgroundSubtractorMOG2(
             history=history, varThreshold=varThreshold, detectShadows=detectShadows
         )
-        self.bg_sub.setShadowThreshold(shadowThreshold)  
+        self.bg_sub.setShadowThreshold(shadowThreshold)
 
     def reset(self):
         """Resets the background subtraction model."""
         self.bg_sub.reset()
 
     def get_detections(
-        self, 
+        self,
         frame,
         bbox_thresh=100,
-        nms_thresh=0.1,
+        # nms_thresh=0.1,
+        nms_thresh=1e-2,
         kernel=np.array((9, 9), dtype=np.uint8),
     ):
         """Main function to get detections via Frame Differencing
@@ -38,11 +35,11 @@ class BackgroundSubtractorMOG2:
             detections - list with bounding box locations of all detections
                 bounding boxes are in the form of: (xmin, ymin, xmax, ymax)
         """
-        # Update Background Model and get foreground mask 
+        # Update Background Model and get foreground mask
         fg_mask = self.bg_sub.apply(frame)
 
         # get clean motion mask
-        motion_mask = self.get_motion_mask(fg_mask, kernel=kernel)
+        motion_mask = self.get_motion_mask(fg_mask, min_thresh=0, kernel=kernel)
 
         # get initially proposed detections from contours
         detections = self.get_contour_detections(motion_mask, bbox_thresh)
@@ -57,9 +54,7 @@ class BackgroundSubtractorMOG2:
             # perform Non-Maximal Supression on initial detections
             return self.non_max_suppression(bboxes, scores, nms_thresh)
 
-    def get_motion_mask(
-        self, fg_mask, min_thresh=0, kernel=np.array((9, 9), dtype=np.uint8)
-    ):
+    def get_motion_mask(self, fg_mask, min_thresh, kernel):
         """Obtains image mask
         Inputs:
             fg_mask - foreground mask
@@ -80,7 +75,7 @@ class BackgroundSubtractorMOG2:
 
         return motion_mask
 
-    def get_contour_detections(self, mask, thresh=400):
+    def get_contour_detections(self, mask, thresh):
         """Obtains initial proposed detections from contours discoverd on the
         mask. Scores are taken as the bbox area, larger is higher.
         Inputs:
@@ -103,7 +98,7 @@ class BackgroundSubtractorMOG2:
 
         return np.array(detections)
 
-    def non_max_suppression(self, boxes, scores, threshold=1e-1):
+    def non_max_suppression(self, boxes, scores, threshold):
         """
         Perform non-max suppression on a set of bounding boxes
         and corresponding scores.

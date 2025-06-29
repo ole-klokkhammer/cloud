@@ -8,7 +8,7 @@ import cv2
 from ai_edge_litert.interpreter import Interpreter, load_delegate
 
 
-class CoralTPUObjectDetector:
+class CoralTPUObjectDetectorService:
     def __init__(
         self,
         model_file="mobilenet_ssd_v2_coco_quant_postprocess_edgetpu.tflite",
@@ -32,7 +32,6 @@ class CoralTPUObjectDetector:
                     load_delegate("libedgetpu.so.1", {"device": "usb"})
                 ],
             ) 
-
             self.interpreter.allocate_tensors()
             logging.info("Tensors allocated successfully.")
         except Exception as e:

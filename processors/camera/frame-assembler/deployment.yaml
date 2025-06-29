@@ -26,9 +26,22 @@ spec:
                       - master0
       containers:
         - name: frame-assembler
-          image: olklokk/frame-assembler:1.0.0
+          image: olklokk/frame-assembler:1.0.2
           env: 
             - name: LOG_LEVEL
               value: "info" 
             - name: KAFKA_BOOTSTRAP_SERVERS
-              value: "kafka-kafka-bootstrap.kafka:9092"  
+              value: "kafka-kafka-bootstrap.kafka:9092"
+            - name: KAFKA_TOPIC
+              value: "camera_frames" 
+            - name: KAFKA_GROUP_ID
+              value: "frame_assembler"
+            - name: SNAPSHOT_DIR
+              value: "/app/app/snapshots"
+          volumeMounts:
+            - name: snapshots
+              mountPath: /app/app/snapshots
+      volumes:
+        - name: snapshots
+          hostPath:
+            path: /mnt/data/camera/snapshots

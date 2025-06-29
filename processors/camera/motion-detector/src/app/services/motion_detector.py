@@ -8,122 +8,76 @@ import time
 from typing import TypedDict
 import cv2
 import env as environment
-from services.restreamer import FfmpegReStreamer
-from services.object_detector import CoralTPUObjectDetector
-from services.bg_subtractor_mog2 import BackgroundSubtractorMOG2
-from services.video_streamer import VideoStreamer
+from services.object_detector import CoralTPUObjectDetectorService
+from services.video_streamer import VideoStreamerService
+from services.restreamer import FfmpegReStreamerService
+from utils.bg_subtractor_mog2 import BackgroundSubtractorMOG2
 from kafka import KafkaProducer
 
 
-@dataclass
-class ObjectDetectorConfig:
-    model_file: str
-    label_file: str
-
-
-@dataclass
-class RestreamerConfig:
-    stream_name: str
-    frame_size: tuple
-    fps: int
-
-
-@dataclass
-class CameraConfig:
-    stream_url: str
-    camera_id: str
-
-
-@dataclass
-class KafkaConfig:
-    bootstrap_servers: str
-    topic: str
-
-
-@dataclass
-class MotionDetectorConfig:
-    frame_width: int
-    frame_height: int
-
-
-class MotionDetector:
+class MotionDetectorService:
     def __init__(
         self,
-        camera_config: CameraConfig,
-        motion_detector_config: MotionDetectorConfig,
-        object_detector_config: ObjectDetectorConfig | None = None,
-        restreamer_config: RestreamerConfig | None = None,
-        kafka_config: KafkaConfig | None = None,
+        stream_url: str,
+        detector_frame_size: tuple[int, int] = (640, 480),
+        output_frame_size: tuple[int, int] = (640, 480),
+        kafka_topic: str | None = None,
+        kafka_producer: KafkaProducer | None = None,
+        object_detector: CoralTPUObjectDetectorService | None = None,
     ):
-        self.motion_detector_config = motion_detector_config
-        self.camera_config = camera_config
-        self.restreamer_config = restreamer_config
-        self.object_detector_config = object_detector_config
-        self.kafka_config = kafka_config
+        self.stream_url = stream_url
+        self.detector_frame_size = detector_frame_size
+        self.output_frame_size = output_frame_size
 
-    def initialize(self):
-        self.video_streamer = VideoStreamer(
-            stream_url=environment.entrance_roof_stream_url, on_frame=self.on_frame
+        self.camera_id = self.stream_url.rsplit("/", 1)[-1]
+        self.restreamer_frame_size = output_frame_size
+        self.restreamer_stream_name = self.camera_id
+        self.kafka_topic = kafka_topic
+
+        ###############################################
+        # Initialize the video streamer components
+        ###############################################
+
+        self.video_streamer = VideoStreamerService(
+            stream_url=self.stream_url, on_frame=self.on_frame
         )
-
         self.background_subtractor = BackgroundSubtractorMOG2(
             history=100, varThreshold=5, detectShadows=True, shadowThreshold=0.5
         )
+        self.kafka_producer = kafka_producer
+        self.object_detector = object_detector
 
-        self.object_detector = None
-        if self.object_detector_config is not None:
-            self.object_detector = CoralTPUObjectDetector(
-                model_file=self.object_detector_config.model_file,
-                label_file=self.object_detector_config.label_file,
+        # Initialize the restreamer if enabled
+        if environment.enable_restreamer:
+            logging.info("Restreamer is enabled.")
+            self.restreamer = FfmpegReStreamerService(
+                stream_name=self.restreamer_stream_name,
+                frame_size=self.restreamer_frame_size,
             )
         else:
-            logging.warning(
-                "Object detector is not configured, skipping initialization."
-            )
-
-        self.restreamer = None
-        if self.restreamer_config is not None:
-            self.restreamer = FfmpegReStreamer(
-                stream_name=self.restreamer_config.stream_name,
-                frame_size=self.restreamer_config.frame_size,
-                fps=self.restreamer_config.fps,
-            )
-        else:
-            logging.warning("Restreamer is not configured, skipping initialization.")
-
-        self.kafka_producer = None
-        if self.kafka_config is not None:
-            self.kafka_topic = self.kafka_config.topic
-            self.kafka_producer = KafkaProducer(
-                bootstrap_servers=self.kafka_config.bootstrap_servers,
-                value_serializer=lambda v: v,  # Send bytes
-            )
-        else:
-            logging.warning(
-                "Kafka configuration is not set, skipping Kafka producer initialization."
-            )
+            logging.info("Restreamer is disabled.")
+            self.restreamer = None
 
     def start(self):
         try:
             logging.info("Starting motion detector...")
 
-            logging.info("Initializing parts needed for motion detection...")
-            self.initialize()
-            logging.info("Motion detector initialized successfully.")
-
             if self.object_detector is not None:
-                logging.info("Initializing object_detector...")
+                logging.info("Initializing object detector...")
                 self.object_detector.initialize()
                 logging.info("Object detector initialized successfully.")
             else:
-                logging.info("Object detector is not configured, skipping initialization.")
- 
+                logging.warning(
+                    "Object detector is not configured, skipping initialization."
+                )
+
             if self.restreamer is not None:
                 logging.info("Starting FFmpeg subprocess for RTSP output...")
                 self.restreamer.spawn_ffmpeg_subprocess()
             else:
-                logging.info("Restreamer is not configured, skipping FFmpeg subprocess.")   
-
+                logging.info(
+                    "Restreamer is not configured, skipping FFmpeg subprocess."
+                )
 
             logging.info("Starting video streamer...")
             self.video_streamer.start()
@@ -148,17 +102,10 @@ class MotionDetector:
             logging.error(f"Error during shutdown: {e}")
 
     def on_frame(self, frame):
-        start_time = time.time()
-
-        detector_frame_width = self.motion_detector_config.frame_height 
-        detector_frame_height = self.motion_detector_config.frame_width
         detection_frame = cv2.cvtColor(
             cv2.resize(
                 frame,
-                (
-                    detector_frame_width,
-                    detector_frame_height,
-                ),
+                self.detector_frame_size,
             ),
             cv2.COLOR_BGR2GRAY,
         )
@@ -170,22 +117,12 @@ class MotionDetector:
 
         if detections.size > 0:
             logging.info(f"Detected {len(detections)} objects in the frame.")
+            self.send_frame_to_kafka(frame=detection_frame)
+
             if self.restreamer is not None:
                 self.restreamer.write_frame(detection_frame)
 
-            if self.kafka_producer is not None:
-                self.send_frame_to_kafka(
-                    self.kafka_topic,
-                    frame=detection_frame,
-                    width=detector_frame_width,
-                    height=detector_frame_height,
-                )
-
-        end_time = time.time()
-        processing_time = end_time - start_time
-        # logging.info(f"Frame processing time: {processing_time:.4f} seconds")
-
-    def send_frame_to_kafka(self, topic, frame, width, height):
+    def send_frame_to_kafka(self, frame):
         """
         Encodes the frame as JPEG and sends it to Kafka with appropriate headers.
         """
@@ -193,13 +130,11 @@ class MotionDetector:
             ret, buffer = cv2.imencode(".jpg", frame)
             if ret:
                 future = self.kafka_producer.send(
-                    topic,
+                    self.kafka_topic,
                     value=buffer.tobytes(),
-                    key=self.camera_config.camera_id.encode("utf-8"),
+                    key=self.camera_id.encode("utf-8"),
                     headers=[
                         ("timestamp", str(time.time()).encode("utf-8")),
-                        ("width", str(width).encode("utf-8")),
-                        ("height", str(height).encode("utf-8")),
                         ("encoding", b"jpg"),
                     ],
                 )

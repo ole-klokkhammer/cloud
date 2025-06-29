@@ -3,14 +3,9 @@
 import logging
 import signal
 import env as environment
-from services.motion_detector import (
-    MotionDetector,
-    CameraConfig,
-    ObjectDetectorConfig,
-    KafkaConfig,
-    RestreamerConfig,
-    MotionDetectorConfig,
-)
+from services.motion_detector import MotionDetectorService
+from services.object_detector import CoralTPUObjectDetectorService
+from kafka import KafkaProducer
 
 logging.basicConfig(
     level=logging._nameToLevel[environment.log_level.upper()],
@@ -18,56 +13,49 @@ logging.basicConfig(
 )
 
 if __name__ == "__main__":
-    assert environment.entrance_roof_stream_url, "ENTRANCE_ROOF_STREAM_URL must be set"
-    assert environment.kafka_bootstrap_servers, "KAFKA_BOOTSTRAP_SERVERS must be set"
-    assert environment.kafka_topic, "KAFKA_TOPIC must be set"
+    if environment.entrance_roof_stream_url is None:
+        logging.error("ENTRANCE_ROOF_STREAM_URL is not set. Exiting.")
+        exit(1)
+    if environment.kafka_bootstrap_servers is None:
+        logging.error("KAFKA_BOOTSTRAP_SERVERS is not set. Exiting.")
+        exit(1)
 
-    motion_detector = MotionDetector(
-        motion_detector_config=MotionDetectorConfig(
-            frame_width=environment.motion_detector_frame_width,
-            frame_height=environment.motion_detector_frame_height,
-        ),
-        camera_config=CameraConfig(
-            stream_url=environment.entrance_roof_stream_url,
-            camera_id=environment.entrance_roof_stream_url,
-        ),
-        object_detector_config=(
-            ObjectDetectorConfig(
-                model_file=environment.object_detector_model_file,
-                label_file=environment.object_detector_label_file,
-            )
-            if environment.enable_object_detection
-            else None
-        ),
-        restreamer_config=(
-            RestreamerConfig(
-                stream_name=environment.restreamer_stream_name,
-                frame_size=(
-                    environment.motion_detector_frame_width,
-                    environment.motion_detector_frame_height,
-                ),
-                fps=environment.restreamer_fps,
-            )
-            if environment.enable_restreamer
-            else None
-        ),
-        kafka_config=(
-            KafkaConfig(
-                bootstrap_servers=environment.kafka_bootstrap_servers,
-                topic=environment.kafka_topic,
-            )
-            if environment.enable_kafka
-            else None
-        ),
+    if environment.LOCAL_DEBUG is False:
+        kafka_producer = KafkaProducer(
+            bootstrap_servers=environment.kafka_bootstrap_servers,
+            value_serializer=lambda v: v,  # Send bytes
+        )
+    else:
+        # disable locally for debugging
+        kafka_producer = None
+        logging.warning("Kafka disabled, skipping Kafka producer initialization.")
+
+    if environment.enable_object_detection:
+        logging.info("Object detection is enabled.")
+        object_detector = CoralTPUObjectDetectorService(
+            model_file=environment.object_detector_model_file,
+            label_file=environment.object_detector_label_file,
+        )
+    else:
+        logging.info("Object detection is disabled.")
+        object_detector = None
+
+    entrance_cam_detector = MotionDetectorService(
+        stream_url=environment.entrance_roof_stream_url, 
+        detector_frame_size=environment.entrance_roof_detector_frame_size,
+        output_frame_size=environment.entrance_roof_output_frame_size,
+        kafka_topic=environment.kafka_topic,
+        kafka_producer=kafka_producer,
+        object_detector=object_detector,
     )
 
     def shutdown(signum, frame):
         logging.info(f"Received signal {signum}, shutting down...")
-        motion_detector.stop()
+        entrance_cam_detector.stop()
         exit(0)
 
     # Register signal handlers
     signal.signal(signal.SIGINT, shutdown)
     signal.signal(signal.SIGTERM, shutdown)
 
-    motion_detector.start()
+    entrance_cam_detector.start()

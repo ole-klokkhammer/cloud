@@ -8,7 +8,7 @@ import time
 
 
 # https://github.com/itberrios/CV_projects/blob/main/motion_detection/motion_detection_utils.py
-class VideoStreamer:
+class VideoStreamerService:
     def __init__(
         self,
         stream_url,
@@ -33,8 +33,10 @@ class VideoStreamer:
             )
             self.video = cv2.VideoCapture(self.stream_url)
             time.sleep(2)  # Allow time for the stream to stabilize
+
             if not self.video.isOpened():
                 raise Exception(f"Failed to open video stream: {self.stream_url}")
+
             original_fps = self.video.get(cv2.CAP_PROP_FPS)
             original_width = int(self.video.get(cv2.CAP_PROP_FRAME_WIDTH))
             original_height = int(self.video.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -54,10 +56,13 @@ class VideoStreamer:
                 self.video.release()
                 logging.info("Video capture released.")
 
-    def stop(self, signum=None, frame=None):
-        logging.info("Shutting video streamer...")
-        if self.video is not None:
-            self.video.release()
+    def stop(self):
+        try:
+            logging.info("Shutting video streamer...")
+            if self.video is not None:
+                self.video.release()
+        except Exception as e:
+            logging.error(f"Error during video streamer shutdown: {e}")
 
     def handle_stream_failure(self, check):
         """

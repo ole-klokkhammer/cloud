@@ -2,34 +2,40 @@
 
 import os
 import logging
+import signal
+import sys
 import env as environment
-from assembler.frame_assembler import FrameAssembler
+from services.frame_assembler import FrameAssembler
 from kafka import KafkaConsumer
 
 
 logging.basicConfig(
-    level=logging._nameToLevel[environment.log_level.upper()] , 
-    format="%(asctime)s %(levelname)s %(message)s"
+    level=logging._nameToLevel[environment.log_level.upper()],
+    format="%(asctime)s %(levelname)s %(message)s",
 )
 
 logging.info(f"Log level set to: {logging._nameToLevel[environment.log_level.upper()]}")
 
-if __name__ == "__main__":   
+if __name__ == "__main__":
     logging.info("Starting frame assembler...")
-    logging.info(f"Using kafka topic: {environment.kafka_topic}") 
-    
-    consumer = KafkaConsumer(
-        environment.kafka_topic,
+
+    if not environment.kafka_bootstrap_servers:
+        logging.error("KAFKA_BOOTSTRAP_SERVERS environment variable is not set.")
+        sys.exit(1)
+
+    frame_assembler = FrameAssembler(
         bootstrap_servers=environment.kafka_bootstrap_servers,
-        value_deserializer=lambda x: x,  # Keep as bytes 
-        group_id=environment.kafka_group_id,
-        enable_auto_commit=False,  # Disable auto-commit to reduce latency
-        fetch_min_bytes=1,
-        fetch_max_wait_ms=1,  # Reduce wait time for new messages 
+        topic=environment.kafka_topic or "camera_frames",
+        group_id=environment.kafka_group_id or "frame_assembler_group",
     )
 
-    frame_assembler = FrameAssembler( 
-        kafka_consumer=consumer
-    )
+    def shutdown(signum, frame):
+        logging.info("Received shutdown signal, stopping frame assembler...")
+        frame_assembler.stop()
+        sys.exit(0)
 
-    frame_assembler.run()
+    # Register signal handlers
+    signal.signal(signal.SIGINT, shutdown)
+    signal.signal(signal.SIGTERM, shutdown)
+
+    frame_assembler.start()

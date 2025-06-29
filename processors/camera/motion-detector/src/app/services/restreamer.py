@@ -2,8 +2,8 @@ import logging
 import subprocess
 
 
-class FfmpegReStreamer:
-    def __init__(self, stream_name, frame_size, fps):
+class FfmpegReStreamerService:
+    def __init__(self, stream_name, frame_size, fps = 10):
         self.stream_name = stream_name
         self.width = frame_size[0]
         self.height = frame_size[1]

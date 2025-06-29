@@ -44,4 +44,4 @@ spec:
       volumes:
         - name: snapshots
           hostPath:
-            path: /mnt/data/camera/snapshots
+            path: /mnt/data/camera/entrance_hallway/snapshots

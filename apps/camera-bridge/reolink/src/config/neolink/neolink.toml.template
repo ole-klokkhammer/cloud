@@ -1,0 +1,22 @@
+bind = "0.0.0.0"
+
+[mqtt]
+broker_addr = "${MQTT_BROKER_ADDR}"
+port = ${MQTT_PORT}
+credentials = ["${MQTT_USERNAME}", "${MQTT_PASSWORD}"]
+
+[[cameras]]
+name = "${ENTRANCE_CAMERA_NAME}"
+username = "${ENTRANCE_CAMERA_USERNAME}"
+password = "${ENTRANCE_CAMERA_PASSWORD}"
+address = "${ENTRANCE_CAMERA_ADDRESS}"
+
+[cameras.mqtt]
+enable_motion = false
+enable_light = false
+enable_battery = false
+enable_preview = false
+enable_floodlight = false
+battery_update = 2000
+preview_update = 2000
+floodlight_update = 2000

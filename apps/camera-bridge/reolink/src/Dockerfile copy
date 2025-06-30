@@ -1,0 +1,97 @@
+FROM alexxit/go2rtc:master-hardware
+
+RUN apt update && apt install -y \
+    wget \
+    unzip \
+    libgstrtspserver-1.0-0 \
+    libgstreamer1.0-0 \
+    libgstreamer-plugins-bad1.0-0 \
+    gstreamer1.0-x \
+    gstreamer1.0-plugins-base \
+    gstreamer1.0-plugins-good \
+    gstreamer1.0-plugins-bad \
+    libssl-dev && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p /config/neolink
+
+RUN wget https://github.com/QuantumEntangledAndy/neolink/releases/download/v0.6.3.rc.2/neolink_linux_x86_64_ubuntu.zip && \
+    unzip neolink_linux_x86_64_ubuntu.zip && \
+    mv neolink_linux_x86_64_ubuntu/* /config/neolink/ && \
+    chmod +x /config/neolink/neolink && \
+    rm -rf neolink_linux_x86_64_ubuntu.zip neolink_linux_x86_64_ubuntu
+
+
+RUN apt update && apt install -y gettext
+RUN cat > /config/neolink/neolink.toml.template <<'EOF'
+bind = "0.0.0.0"
+
+[mqtt]
+broker_addr = "${MQTT_BROKER_ADDR}"
+port = ${MQTT_PORT}
+credentials = ["${MQTT_USERNAME}", "${MQTT_PASSWORD}"]
+
+[[cameras]]
+name = "Entrance"
+username = "${ENTRANCE_CAMERA_USERNAME}"
+password = "${ENTRANCE_CAMERA_PASSWORD}"
+address = "${ENTRANCE_CAMERA_ADDRESS}"
+
+[cameras.mqtt]
+enable_motion = false
+enable_light = false
+enable_battery = false
+enable_preview = false
+enable_floodlight = false
+battery_update = 2000
+preview_update = 2000
+floodlight_update = 2000
+EOF
+
+# Add entrypoint script to substitute env vars at container start
+RUN cat > /entrypoint.sh <<'EOF'
+#!/bin/sh
+envsubst < /config/neolink/neolink.toml.template > /config/neolink/neolink.toml
+exec "$@"
+EOF
+RUN chmod +x /entrypoint.sh
+
+RUN cat > /config/neolink/neolink_talk.sh <<'EOF'
+#!/usr/bin/env bash
+
+set -e
+
+ffmpeg -fflags nobuffer -f alaw -ar 8000 -i - -f wav - | /config/neolink/neolink talk Entrance -c /config/neolink/neolink.toml --volume=1.0 -m -i "fdsrc fd=0"
+EOF 
+
+RUN chmod +x /config/neolink/neolink_talk.sh
+
+
+RUN cat > /config/neolink/neolink_talk_test.sh <<'EOF'
+#!/usr/bin/env bash
+
+set -e
+
+ffmpeg -i https://rhasspy.github.io/piper-samples/samples/en/en_US/lessac/high/speaker_0.mp3 -f  alaw -ar 8000 -f wav - | /config/neolink/neolink talk Entrance -c /config/neolink/neolink.toml --volume=1.0 -m -i "fdsrc fd=0"
+EOF 
+
+RUN chmod +x /config/neolink/neolink_talk_test.sh
+
+
+RUN cat > /config/go2rtc.yaml <<'EOF'
+
+log:
+  level: debug
+
+rtsp:
+  listen: ":8554"
+
+streams:
+  incoming:
+    - "ffmpeg:rtsp://admin:Gnxzsd7B@192.168.10.111/Preview_01_main#video=copy#audio=opus"
+    - exec:/config/neolink/neolink_talk.sh#backchannel=1
+
+EOF
+
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["go2rtc", "-c", "/config/go2rtc.yaml"]

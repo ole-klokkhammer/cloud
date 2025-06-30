@@ -1,0 +1,14 @@
+log:
+  level: trace
+
+rtsp:
+  listen: ":8554"
+ 
+webrtc:
+  listen: ":8555"
+  allow_talk: true
+
+streams:
+  incoming: 
+    - ffmpeg:rtsp://${ENTRANCE_CAMERA_USERNAME}:${ENTRANCE_CAMERA_PASSWORD}@${ENTRANCE_CAMERA_ADDRESS}/Preview_01_main#video=copy#audio=opus
+    - exec:/config/neolink/neolink_talk.sh#backchannel=1

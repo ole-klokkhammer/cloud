@@ -1,0 +1,70 @@
+# - "ffmpeg:http://${CAMERA_ENTRANCE_ROOF_IP}/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=${CAMERA_ENTRANCE_ROOF_USER}&password=${CAMERA_ENTRANCE_ROOF_PASSWORD}#video=copy#audio=copy#audio=opus"
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: go2rtc-config
+  namespace: camera-bridge
+data:
+  go2rtc.yaml: |
+    log:
+      level: info
+
+    webrtc:
+      # Allow external access
+      listen: :8555
+      allow_talk: true
+      candidates:
+        - go2rtc-webrtc.camera-bridge:8555
+
+    streams:
+      entrance_roof: 
+        - "ffmpeg:http://${CAMERA_ENTRANCE_ROOF_IP}/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=${CAMERA_ENTRANCE_ROOF_USER}&password=${CAMERA_ENTRANCE_ROOF_PASSWORD}#video=copy#audio=opus"
+        - rtsp://192.168.10.68:8554/incoming#backchannel=1#audio=pcma
+      entrance_roof_rtsp: 
+        - "ffmpeg:rtsp://${CAMERA_OFFICE_USER}:${CAMERA_OFFICE_PASSWORD}@${CAMERA_ENTRANCE_ROOF_IP}/Preview_01_main#video=copy#audio=opus"
+        - "onvif://${CAMERA_ENTRANCE_ROOF_USER}:${CAMERA_ENTRANCE_ROOF_PASSWORD}@${CAMERA_ENTRANCE_ROOF_IP}:8000/onvif/device_service"
+        - rtsp://192.168.10.68:8554/incoming#backchannel=1#audio=pcma
+      office_test: 
+        - "ffmpeg:http://${CAMERA_OFFICE_IP}/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=${CAMERA_OFFICE_USER}&password=${CAMERA_OFFICE_PASSWORD}#video=copy#audio=opus"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: neolink-config
+  namespace: camera-bridge
+data:
+  config.toml: |
+    bind = "0.0.0.0"
+
+    [mqtt]
+    broker_addr = "hivemq-internal.hivemq" # Address of the mqtt server
+    port = 1883 # mqtt servers port
+    credentials = ["username", "password"] # mqtt server login details
+
+    [[cameras]]
+    name = "Entrance"
+    username = "admin"
+    password = "xxxx"
+    address = "192.168.10.111:9000"
+
+    
+    [cameras.mqtt]
+    enable_motion = false        # motion detection
+                                 # (limited battery drain since it
+                                 # is a passive listening connection)
+                                 #
+    enable_light = false         # flood lights only available on some camera
+                                 # (limited battery drain since it
+                                 # is a passive listening connection)
+                                 #
+    enable_battery = false       # battery updates in `/status/battery_level`
+                                 #
+    enable_preview = false       # preview image in `/status/preview`
+                                 #
+    enable_floodlight = false    # preview image in `/status/floodlight_tasks`
+                                 #
+    battery_update = 2000        # Number of ms between `/status/battery_level` updates
+                                 #
+    preview_update = 2000        # Number of ms between `/status/preview` updates
+                                 #
+    floodlight_update = 2000     # Number of ms between `/status/floodlight_tasks` updates

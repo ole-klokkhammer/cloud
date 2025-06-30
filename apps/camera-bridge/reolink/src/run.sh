@@ -1,0 +1,1 @@
+docker run --rm -it -p 8554:8554 -p 1984:1984 --env-file .env go2rtc-custom:test

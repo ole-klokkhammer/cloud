@@ -5,7 +5,7 @@
 
 ## setup
 * kubectl create namespace go2rtc
-* kubectl create secret generic -n go2rtc  go2rtc-secrets --from-env-file=.env
+* kubectl create secret generic -n camera-bridge  go2rtc-secrets --from-env-file=.env
 * kubectl apply -f deployment.yaml
 * kubectl apply -f service.yaml
 
@@ -16,3 +16,7 @@ check why frigate has support:
  V....D hevc_nvenc           NVIDIA NVENC hevc encoder (codec hevc)
 * /usr/lib/ffmpeg/7.0/bin/ffmpeg -hide_banner -encoders | grep NVIDIA
 * /usr/lib/ffmpeg/7.0/bin/ffmpeg -hide_banner -decoders | grep NVIDIA
+
+
+## reolink
+https://github.com/QuantumEntangledAndy/neolink

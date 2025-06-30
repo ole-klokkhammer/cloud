@@ -10,6 +10,6 @@
 
 
 ## mp3 test
-* ffmpeg -i https://rhasspy.github.io/piper-samples/samples/en/en_US/lessac/high/speaker_0.mp3 -f  alaw -ar 8000 -f wav - | ./neolink talk Doorbell -c config.toml --volume=1.0 -m -i "fdsrc fd=0"
+* ffmpeg -i https://rhasspy.github.io/piper-samples/samples/en/en_US/lessac/high/speaker_0.mp3 -f  alaw -ar 8000 -f wav - | /config/neolink/neolink talk Entrance -c /config/neolink/neolink.toml --volume=1.0 -m -i "fdsrc fd=0"
 *  ffmpeg -re   -i https://rhasspy.github.io/piper-samples/samples/en/en_US/lessac/high/speaker_0.mp3   -vn   -c:a pcm_alaw   -ar 8000   -ac 1   -payload_type 8   -rtsp_transport tcp   -f rtsp   rtsp://127.0.0.1:8554/incoming_talk
 *  ffmpeg -re -i https://rhasspy.github.io/piper-samples/samples/en/en_US/lessac/high/speaker_0.mp3 -acodec pcm_alaw -ar 8000 -f rtsp rtsp://localhost:8554/incoming

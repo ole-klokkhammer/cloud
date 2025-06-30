@@ -9,7 +9,7 @@ credentials = ["${MQTT_USERNAME}", "${MQTT_PASSWORD}"]
 name = "${ENTRANCE_CAMERA_NAME}"
 username = "${ENTRANCE_CAMERA_USERNAME}"
 password = "${ENTRANCE_CAMERA_PASSWORD}"
-address = "${ENTRANCE_CAMERA_ADDRESS}"
+address = "${ENTRANCE_CAMERA_IP}:9000"
 
 [cameras.mqtt]
 enable_motion = false

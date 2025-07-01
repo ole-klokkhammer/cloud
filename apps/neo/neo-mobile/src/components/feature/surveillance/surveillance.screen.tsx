@@ -1,13 +1,7 @@
-import { v4 as uuidv4 } from 'uuid';
-import { FlatList, KeyboardAvoidingView, Platform } from "react-native";
-import { useChatStyles } from "./home.screen.styles"
+
 import { AppContainer } from "@/components/ui/container/container";
 import { AppText } from "@/components/ui/text/text";
-import { AppTextInput } from "@/components/ui/input/input";
-import { AppButton } from "@/components/ui/button/button";
 import React, { useEffect, useState } from "react";
-import { useLocalSearchParams, useNavigation } from "expo-router";
-import { useMqttSubscription } from "@/hooks/mqtt/useMqttSubscription";
 
 export type ChatMessage = {
     id: string;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, ViewStyle, TextStyle, GestureResponderEvent } from 'react-native';
+import { TouchableOpacity, StyleSheet, ViewStyle, TextStyle, GestureResponderEvent, Text } from 'react-native';
 import { useThemeColor } from '@/hooks/theme/useThemeColor';
 
 type ThemedButtonProps = {
@@ -10,7 +10,7 @@ type ThemedButtonProps = {
     disabled?: boolean;
 };
 
-export function ThemedButton(
+export function AppButton(
     {
         title,
         onPress,

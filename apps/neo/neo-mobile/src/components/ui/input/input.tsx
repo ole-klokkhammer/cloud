@@ -1,10 +1,10 @@
 import React from 'react';
-import { TextInput, TextInputProps, StyleSheet } from 'react-native';
+import { TextInput as NativeTextInput, TextInputProps, StyleSheet } from 'react-native';
 import { useThemeColor } from '@/hooks/theme/useThemeColor';
 
 export type ThemedInputProps = TextInputProps;
 
-export function ThemedInput({
+export function AppTextInput({
     style, 
     ...rest
 }: ThemedInputProps) {
@@ -13,7 +13,7 @@ export function ThemedInput({
     const color = useThemeColor('text');
 
     return (
-        <TextInput
+        <NativeTextInput
             style={[
                 styles.input,
                 { backgroundColor, borderColor, color },

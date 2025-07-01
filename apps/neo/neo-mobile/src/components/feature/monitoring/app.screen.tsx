@@ -1,13 +1,13 @@
 import { v4 as uuidv4 } from 'uuid';
 import { FlatList, KeyboardAvoidingView, Platform } from "react-native";
-import { useChatStyles } from "./chat.screen.styles"
-import { ThemedView } from "@/components/ui/view/ThemedView";
-import { ThemedText } from "@/components/ui/text/ThemedText";
-import { ThemedInput } from "@/components/ui/input/ThemedInput";
-import { ThemedButton } from "@/components/ui/button/ThemedButton";
 import React, { useEffect, useState } from "react";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { useMqttSubscription } from "@/hooks/mqtt/useMqttSubscription";
+import { useChatStyles } from './app.screen.styles';
+import { AppTextInput } from '@/components/ui/input/input';
+import { AppContainer } from '@/components/ui/container/container';
+import { AppButton } from '@/components/ui/button/button';
+import { AppText } from '@/components/ui/text/text';
 
 export type ChatMessage = {
     id: string;
@@ -15,7 +15,7 @@ export type ChatMessage = {
     sender: 'me' | 'other';
 };
 
-export default function ChatScreen() {
+export default function MonitoringAppScreen() {
     const styles = useChatStyles();
     const navigation = useNavigation();
     const { id } = useLocalSearchParams<{ id: string }>();
@@ -68,26 +68,26 @@ export default function ChatScreen() {
                 data={messages}
                 keyExtractor={item => item.id}
                 renderItem={({ item }) => (
-                    <ThemedView
+                    <AppContainer
                         style={[
                             styles.message,
                             item.sender === 'me' ? styles.myMessage : styles.otherMessage,
                         ]}
                     >
-                        <ThemedText style={styles.messageText}>{item.text}</ThemedText>
-                    </ThemedView>
+                        <AppText style={styles.messageText}>{item.text}</AppText>
+                    </AppContainer>
                 )}
                 contentContainerStyle={styles.messagesContainer}
             />
-            <ThemedView style={styles.inputContainer}>
-                <ThemedInput
+            <AppContainer style={styles.inputContainer}>
+                <AppTextInput
                     style={styles.input}
                     value={input}
                     onChangeText={onInputChange}
                     placeholder="Type a message..."
                 />
-                <ThemedButton title="Send" onPress={onSendMessage} />
-            </ThemedView>
+                <AppButton title="Send" onPress={onSendMessage} />
+            </AppContainer>
         </KeyboardAvoidingView>
     );
 }

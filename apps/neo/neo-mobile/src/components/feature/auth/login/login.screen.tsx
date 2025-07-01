@@ -1,10 +1,9 @@
 import React from "react";
 import { styles } from "./login.screen.styles";
-import { ThemedView } from "@/components/ui/view/ThemedView";
-import { ThemedText } from "@/components/ui/text/ThemedText";
+import { AppContainer } from "@/components/ui/container/container";
+import { AppText } from "@/components/ui/text/text";
 import * as WebBrowser from 'expo-web-browser';
-import { ThemedButton } from "@/components/ui/button/ThemedButton";
-import { handleLogin } from "@/services/auth/authentication";
+import { AppButton } from "@/components/ui/button/button"; 
 import { useAuth } from "@/context/auth/context";
 
 WebBrowser.maybeCompleteAuthSession();
@@ -12,12 +11,12 @@ WebBrowser.maybeCompleteAuthSession();
 export function LoginScreen() {
     const { login } = useAuth();
     return (
-        <ThemedView style={styles.container}>
-            <ThemedText style={styles.title}>Login</ThemedText>
-            <ThemedButton
+        <AppContainer style={styles.container}>
+            <AppText style={styles.title}>Login</AppText>
+            <AppButton
                 title="Login"
                 onPress={login}
             />
-        </ThemedView>
+        </AppContainer>
     );
 }

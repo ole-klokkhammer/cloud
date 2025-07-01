@@ -4,7 +4,7 @@
 * https://github.com/AlexxIT/go2rtc/tree/master/internal/app
 
 ## setup
-* kubectl create namespace go2rtc
+* kubectl create namespace camera-bridge
 * kubectl create secret generic -n camera-bridge  go2rtc-secrets --from-env-file=.env
 * kubectl apply -f deployment.yaml
 * kubectl apply -f service.yaml

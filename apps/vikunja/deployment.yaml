@@ -1,0 +1,101 @@
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: vikunja
+  namespace: vikunja
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vikunja
+  template:
+    metadata:
+      labels:
+        app: vikunja
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - master0
+      initContainers:
+        - name: check-vikunja-data-mount
+          image: busybox
+          command: ['sh', '-c', 'test -f /fs/mounted.txt || (echo "File mount missing" && exit 1)']
+          volumeMounts:
+            - mountPath: /fs
+              name: vikunja-data
+      containers: 
+        - name: vikunja
+          image: vikunja/vikunja:unstable
+          ports:
+            - containerPort: 3456
+          volumeMounts:
+            - mountPath: /app/vikunja/files
+              name: vikunja-data
+          env: 
+            - name: VIKUNJA_LOG_LEVEL
+              value: "DEBUG"
+            - name: VIKUNJA_SERVICE_PUBLICURL
+              value: "https://project.linole.org"
+            # Database Configuration
+            - name: VIKUNJA_DATABASE_TYPE
+              value: "postgres"
+            - name: VIKUNJA_DATABASE_HOST
+              value: "postgres.postgres-external"
+            - name: VIKUNJA_DATABASE_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: vikunja-secrets
+                  key: VIKUNJA_DATABASE_DATABASE
+            - name: VIKUNJA_DATABASE_USER
+              valueFrom:
+                secretKeyRef:
+                  name: vikunja-secrets
+                  key: VIKUNJA_DATABASE_USER
+            - name: VIKUNJA_DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: vikunja-secrets
+                  key: VIKUNJA_DATABASE_PASSWORD  
+            # OpenID Authentication 
+            - name: VIKUNJA_AUTH_LOCAL_ENABLED
+              value: "false"
+            - name: VIKUNJA_AUTH_OPENID_ENABLED
+              value: "true" 
+            - name: VIKUNJA_AUTH_OPENID_REDIRECTURL
+              valueFrom:
+                secretKeyRef:
+                  name: vikunja-secrets
+                  key: VIKUNJA_AUTH_OPENID_REDIRECTURL
+            - name: VIKUNJA_AUTH_OPENID_PROVIDERS_KEYCLOAK_NAME
+              value: "Keycloak"
+            - name: VIKUNJA_AUTH_OPENID_PROVIDERS_KEYCLOAK_AUTHURL
+              valueFrom:
+                secretKeyRef:
+                  name: vikunja-secrets
+                  key: VIKUNJA_AUTH_OPENID_PROVIDERS_KEYCLOAK_AUTHURL
+            - name: VIKUNJA_AUTH_OPENID_PROVIDERS_KEYCLOAK_LOGOUTURL
+              valueFrom:
+                secretKeyRef:
+                  name: vikunja-secrets
+                  key: VIKUNJA_AUTH_OPENID_PROVIDERS_KEYCLOAK_LOGOUTURL
+            - name: VIKUNJA_AUTH_OPENID_PROVIDERS_KEYCLOAK_CLIENTID
+              valueFrom:
+                secretKeyRef:
+                  name: vikunja-secrets
+                  key: VIKUNJA_AUTH_OPENID_PROVIDERS_KEYCLOAK_CLIENTID
+            - name: VIKUNJA_AUTH_OPENID_PROVIDERS_KEYCLOAK_CLIENTSECRET
+              valueFrom:
+                secretKeyRef:
+                  name: vikunja-secrets
+                  key: VIKUNJA_AUTH_OPENID_PROVIDERS_KEYCLOAK_CLIENTSECRET
+      volumes:
+        - name: vikunja-data
+          persistentVolumeClaim:
+            claimName: vikunja-data-pvc

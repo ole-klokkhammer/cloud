@@ -1,13 +1,13 @@
 import React from 'react';
 import { ActivityIndicator } from 'react-native';
 import { styles } from './loading.styling';
-import { AppContainer } from '@/components/ui/container/container';
+import { Container } from '@/components/ui/layout/container';
 
 const AppLoading = () => {
     return (
-        <AppContainer style={styles.container}>
+        <Container style={styles.container}>
             <ActivityIndicator size="large" color="#0000ff" />
-        </AppContainer>
+        </Container>
     );
 };
 

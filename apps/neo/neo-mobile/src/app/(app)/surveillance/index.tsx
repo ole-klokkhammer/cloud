@@ -1,5 +1,9 @@
-import { HomeScreen } from "@/components/feature/home/home.screen";
+import { Page } from "@/components/ui/layout/page";
 
-export default function Surveillance() {
-  return <HomeScreen />;
+export default function SurveillancePage() {
+  return (
+    <Page>
+
+    </Page>
+  );
 }

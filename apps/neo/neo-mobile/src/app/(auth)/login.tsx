@@ -1,8 +1,10 @@
 import { useAuth } from "@/context/auth/context";
 import * as WebBrowser from 'expo-web-browser';
-import { Button, Text } from "react-native";
-import { Page } from "@/components/ui/layout/page";
-import { Card } from "@/components/ui/card/card";
+import { Page } from "@/components/ui/page/Page";
+import { Card } from "@/components/ui/card";
+import React from "react";
+import { Heading } from "@/components/ui/heading";
+import { Button, ButtonText } from "@/components/ui/button";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -11,11 +13,16 @@ export default function Login() {
 
   return (
     <Page className="flex-1 items-center justify-center">
-      <Card header="Login to Neo">
+      <Card>
+        <Heading size="md" className="mb-1">
+          Login to Neo
+        </Heading>
         <Button
-          title="Login"
+
           onPress={login}
-        />
+        >
+          <ButtonText>Login with Neo</ButtonText>
+        </Button>
       </Card>
     </Page>
   );

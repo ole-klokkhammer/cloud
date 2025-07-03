@@ -1,13 +1,14 @@
 import { Link } from 'expo-router';
-import { AppText } from '@/components/ui/text/text';
-import { Page } from '@/components/ui/layout/page';
+import { Page } from '@/components/ui/page/Page';
+import { LinkText } from '@/components/ui/link';
+import { Heading } from '@/components/ui/heading';
 
 export default function NotFound() {
   return (
     <Page className="flex-1 items-center justify-center p-20">
-      <AppText type="title">This screen doesn't exist.</AppText>
+      <Heading bold >This screen doesn't exist.</Heading>
       <Link href="/home" className='mt-15 p-15'>
-        <AppText type="link">Go to home screen!</AppText>
+        <LinkText>Go to home screen!</LinkText>
       </Link>
     </Page>
   );

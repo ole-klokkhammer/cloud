@@ -1,6 +1,6 @@
-import { Container } from "@/components/ui/layout/container";
-import { Page } from "@/components/ui/layout/page";
-import { AppText } from "@/components/ui/text/text";
+import { Box } from "@/components/ui/box/index";
+import { Page } from "@/components/ui/page/Page";
+import { Text } from "@/components/ui/text";
 import { useMqttSubscription } from "@/hooks/mqtt/useMqttSubscription";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -43,13 +43,6 @@ export default function MonitoringPage() {
       <FlatList
         data={apps}
         keyExtractor={item => item.id}
-        ListHeaderComponent={
-          <Image
-            source={require('@/assets/images/neo/neo_v2.png')}
-            className="w-full align-baseline self-center mb-2"
-            resizeMode="cover"
-          />
-        }
         contentContainerClassName="gap-2.5 pb-5"
         renderItem={({ item }) => (
           <TouchableOpacity
@@ -60,10 +53,10 @@ export default function MonitoringPage() {
               source={require('@/assets/images/favicon.png')}
               className="w-12 h-12 rounded-full mr-3"
             />
-            <Container className="flex-1 flex-direction-column justify-content-center">
-              <AppText className="text-base font-bold mb-0.5">{item.name}</AppText>
-              <AppText className="text-sm text-gray-500 mb-2">{item.lastMessage}</AppText>
-            </Container>
+            <Box className="flex-1 flex-direction-column justify-content-center">
+              <Text className="text-base font-bold mb-0.5">{item.name}</Text>
+              <Text className="text-sm text-gray-500 mb-2">{item.lastMessage}</Text>
+            </Box>
           </TouchableOpacity>
         )}
       />

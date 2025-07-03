@@ -1,8 +1,8 @@
-import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import mqtt, { MqttClient } from 'mqtt';
 import { environment } from '@/constants/environment';
-import { Page } from '@/components/ui/layout/page';
-import { ActivityIndicator } from 'react-native';
+import { Loading } from '@/components/ui/loading/loading';
+import { Spinner } from '@/components/ui/spinner';
 
 const MqttClientContext = createContext<MqttClient | null>(null);
 
@@ -47,11 +47,7 @@ export const MqttClientProvider: React.FC<MqttClientProviderProps> = (props) => 
     }, []);
 
     if (client == null) {
-        return (
-            <Page>
-                <ActivityIndicator size="large" color="#0000ff" />
-            </Page>
-        );
+        return <Spinner />
     } else {
         return (
             <MqttClientContext.Provider value={client}>

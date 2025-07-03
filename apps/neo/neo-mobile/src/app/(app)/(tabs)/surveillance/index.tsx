@@ -1,4 +1,4 @@
-import { Page } from "@/components/ui/layout/page";
+import { Page } from "@/components/ui/page/Page";
 
 export default function SurveillancePage() {
   return (

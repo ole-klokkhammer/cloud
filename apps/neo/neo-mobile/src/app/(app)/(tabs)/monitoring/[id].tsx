@@ -1,13 +1,13 @@
 import { v4 as uuidv4 } from 'uuid';
-import { AppButton } from '@/components/ui/button/button';
-import { AppTextInput } from '@/components/ui/input/input';
-import { Container } from '@/components/ui/layout/container';
-import { Page } from '@/components/ui/layout/page';
-import { AppText } from '@/components/ui/text/text';
+import { Box } from '@/components/ui/box/index';
+import { Page } from '@/components/ui/page/Page';
+import { Text } from '@/components/ui/text';
 import { useMqttSubscription } from '@/hooks/mqtt/useMqttSubscription';
 import { useLocalSearchParams, useNavigation } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { FlatList, KeyboardAvoidingView, Platform } from 'react-native';
+import { Button, ButtonText } from '@/components/ui/button';
+import { Input, InputField } from '@/components/ui/input';
 
 export type ChatMessage = {
   id: string;
@@ -68,28 +68,27 @@ export default function MonitorApp() {
           data={messages}
           keyExtractor={item => item.id}
           renderItem={({ item }) => (
-            <Container
+            <Box
               className={[
                 "my-1.5 py-2.5 px-4 rounded-xl max-w-[80%] shadow",
-                item.sender === 'other'
-                  ? "bg-gray-800 dark:bg-gray-700 self-start rounded-bl-[6px]"
-                  : "bg-blue-600 dark:bg-blue-500 self-end rounded-br-[6px]"
-              ].filter(Boolean).join(' ')}
+                item.sender === 'me'
+                  ? "bg-blue-600 dark:bg-blue-500 self-start rounded-br-[6px]"
+                  : "bg-gray-800 dark:bg-gray-700 self-end rounded-bl-[6px]"
+              ].join(' ')}
             >
-              <AppText className='font-m'>{item.text}</AppText>
-            </Container>
+              <Text size='md'>{item.text}</Text>
+            </Box>
           )}
           contentContainerClassName='p-12 pb-4'
         />
-        <Container className='flex-row p-2.5 border-t border-t-gray-200 dark:border-t-zinc-800 bg-white dark:bg-zinc-900 items-center'>
-          <AppTextInput
-            className='flex-1 border rounded-2xl px-4 py-2 mr-2 text-base'
-            value={input}
-            onChangeText={onInputChange}
-            placeholder="Type a message..."
-          />
-          <AppButton title="Send" onPress={onSendMessage} />
-        </Container>
+        <Box className='flex-row p-2.5 border-t border-t-gray-200 dark:border-t-zinc-800 bg-white dark:bg-zinc-900 items-center'>
+          <Input className='flex-1 border rounded-2xl px-4 py-2 mr-2' >
+            <InputField placeholder="Type a message..." value={input} onChangeText={onInputChange} />
+          </Input>
+          <Button onPress={onSendMessage}>
+            <ButtonText>Send</ButtonText>
+          </Button>
+        </Box>
       </KeyboardAvoidingView>
     </Page>
   );

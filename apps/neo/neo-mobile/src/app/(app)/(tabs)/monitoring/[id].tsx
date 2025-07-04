@@ -1,6 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Box } from '@/components/ui/box/index';
-import { Page } from '@/components/ui/page/Page';
 import { Text } from '@/components/ui/text';
 import { useMqttSubscription } from '@/hooks/mqtt/useMqttSubscription';
 import { useLocalSearchParams, useNavigation } from 'expo-router';
@@ -57,39 +56,37 @@ export default function MonitorApp() {
   }, [messages]);
 
   return (
-    <Page>
-      <KeyboardAvoidingView
-        className="flex-1"
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={80}
-      >
-        <FlatList
-          ref={flatListRef}
-          data={messages}
-          keyExtractor={item => item.id}
-          renderItem={({ item }) => (
-            <Box
-              className={[
-                "my-1.5 py-2.5 px-4 rounded-xl max-w-[80%] shadow",
-                item.sender === 'me'
-                  ? "bg-blue-600 dark:bg-blue-500 self-start rounded-br-[6px]"
-                  : "bg-gray-800 dark:bg-gray-700 self-end rounded-bl-[6px]"
-              ].join(' ')}
-            >
-              <Text size='md'>{item.text}</Text>
-            </Box>
-          )}
-          contentContainerClassName='p-12 pb-4'
-        />
-        <Box className='flex-row p-2.5 border-t border-t-gray-200 dark:border-t-zinc-800 bg-white dark:bg-zinc-900 items-center'>
-          <Input className='flex-1 border rounded-2xl px-4 py-2 mr-2' >
-            <InputField placeholder="Type a message..." value={input} onChangeText={onInputChange} />
-          </Input>
-          <Button onPress={onSendMessage}>
-            <ButtonText>Send</ButtonText>
-          </Button>
-        </Box>
-      </KeyboardAvoidingView>
-    </Page>
+    <KeyboardAvoidingView
+      className="flex-1"
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      keyboardVerticalOffset={80}
+    >
+      <FlatList
+        ref={flatListRef}
+        data={messages}
+        keyExtractor={item => item.id}
+        renderItem={({ item }) => (
+          <Box
+            className={[
+              "my-1.5 py-2.5 px-4 rounded-xl max-w-[80%] shadow",
+              item.sender === 'me'
+                ? "bg-blue-600 dark:bg-blue-500 self-start rounded-br-[6px]"
+                : "bg-gray-800 dark:bg-gray-700 self-end rounded-bl-[6px]"
+            ].join(' ')}
+          >
+            <Text size='md'>{item.text}</Text>
+          </Box>
+        )}
+        contentContainerClassName='p-12 pb-4'
+      />
+      <Box className='flex-row p-2.5 border-t border-t-gray-200 dark:border-t-zinc-800 bg-white dark:bg-zinc-900 items-center'>
+        <Input className='flex-1 border rounded-2xl px-4 py-2 mr-2' >
+          <InputField placeholder="Type a message..." value={input} onChangeText={onInputChange} />
+        </Input>
+        <Button onPress={onSendMessage}>
+          <ButtonText>Send</ButtonText>
+        </Button>
+      </Box>
+    </KeyboardAvoidingView>
   );
 }

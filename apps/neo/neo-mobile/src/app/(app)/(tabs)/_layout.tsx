@@ -6,9 +6,9 @@ export default function TabLayout() {
     return (
         <Tabs screenOptions={{ headerShown: false }}>
             <Tabs.Screen
-                name="news"
+                name="index"
                 options={{
-                    title: 'News',
+                    title: 'Home',
                     tabBarIcon: ({ color }) => <FontAwesome size={28} name="home" color={color} />,
                 }}
             />

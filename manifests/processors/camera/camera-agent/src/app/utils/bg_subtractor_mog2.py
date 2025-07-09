@@ -23,7 +23,7 @@ class BackgroundSubtractorMOG2:
         # nms_thresh=0.1,
         nms_thresh=1e-2,
         kernel=np.array((9, 9), dtype=np.uint8),
-    ):
+    ) -> np.ndarray:
         """Main function to get detections via Frame Differencing
         Inputs:
             backSub - Background Subtraction Model

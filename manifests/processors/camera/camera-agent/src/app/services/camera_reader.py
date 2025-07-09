@@ -8,11 +8,11 @@ import time
 
 
 # https://github.com/itberrios/CV_projects/blob/main/motion_detection/motion_detection_utils.py
-class VideoStreamerService:
+class CameraReaderService:
     def __init__(
         self,
         stream_url,
-        on_frame: Optional[Callable[[np.ndarray], None]] = None,
+        on_frame: Optional[Callable[[cv2.UMat], None]] = None,
     ):
         if stream_url is None:
             raise ValueError("stream_url must not be None")
@@ -43,7 +43,8 @@ class VideoStreamerService:
             logging.info("Video stream initialized successfully.")
 
             while True:
-                check, frame = self.video.read()
+                payload: tuple[bool, cv2.UMat] = self.video.read()
+                check, frame = payload
 
                 if not self.handle_stream_failure(check):
                     continue

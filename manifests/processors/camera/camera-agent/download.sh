@@ -2,8 +2,8 @@
 
 REMOTE_USER=ubuntu
 REMOTE_HOST=192.168.10.2
-REMOTE_DIR=/mnt/data/camera/entrance_hallway/snapshots
-LOCAL_DIR=/home/ole/Downloads/camera/entrance_hallway/snapshots/
+REMOTE_DIR=/mnt/data/camera/entrance_hallway/video
+LOCAL_DIR=/home/ole/Downloads/camera/entrance_hallway
 RETRIEVAL_COUNT=10000
 
 # Get the last $RETRIEVAL_COUNT files and sync them

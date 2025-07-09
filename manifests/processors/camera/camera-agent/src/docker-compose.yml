@@ -1,0 +1,19 @@
+services:
+  motion-detector:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment: 
+      - LOCAL_DEBUG=1
+      - LOG_LEVEL=INFO
+      - CAMERA_STREAM_URL=rtsp://192.168.10.203:8554/office
+      - RECORDER_STORAGE_DIR=/data
+      - ENABLE_VIDEO_RESTREAMER=false
+      - ENABLE_OBJECT_DETECTION=false
+    image: ghcr.io/ole-klokkhammer/camera-agent
+    network_mode: host
+    privileged: true 
+    volumes:
+      - /dev/bus/usb:/dev/bus/usb 
+      - /home/ole/Downloads/camera/local/:/data
+    restart: unless-stopped  

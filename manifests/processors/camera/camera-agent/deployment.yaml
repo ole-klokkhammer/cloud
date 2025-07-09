@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: camera-agent
+  namespace: camera-processors
+  labels:
+    app: camera-agent
+spec:
+  revisionHistoryLimit: 0
+  selector:
+    matchLabels:
+      app: camera-agent
+  template:
+    metadata:
+      labels:
+        app: camera-agent
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - master0
+
+      containers:
+        - name: entrance-hallway
+          image: ghcr.io/ole-klokkhammer/camera-agent:1.0.45
+          securityContext:
+            privileged: true # use if coral
+          env:
+            - name: LOG_LEVEL
+              value: "info"
+            - name: CAMERA_STREAM_URL
+              value: "rtsp://go2rtc.camera-bridge:8554/entrance_roof"
+            - name: ENABLE_VIDEO_RESTREAMER
+              value: "false"
+            - name: ENABLE_OBJECT_DETECTION
+              value: "false"
+          volumeMounts:
+            - name: camera-agent-data
+              subPath: entrance_hallway
+              mountPath: /data
+        - name: office
+          image: ghcr.io/ole-klokkhammer/camera-agent:1.0.45
+          securityContext:
+            privileged: true # use if coral
+          env:
+            - name: LOG_LEVEL
+              value: "info"
+            - name: CAMERA_STREAM_URL
+              value: "rtsp://go2rtc.camera-bridge:8554/office"
+            - name: ENABLE_OBJECT_DETECTION
+              value: "false"
+            - name: ENABLE_VIDEO_RESTREAMER
+              value: "false"
+            - name: VIDEO_RESTREAMER_STREAM_URL
+              value: "rtsp://go2rtc.camera-bridge:8554/office_detector"
+          volumeMounts:
+            - name: camera-agent-data
+              subPath: office
+              mountPath: /data
+
+      volumes:
+        - name: camera-agent-data
+          hostPath:
+            path: /mnt/data/camera

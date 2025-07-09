@@ -1,5 +1,5 @@
 # python < 3.11
-FROM python:3.10-slim-bookworm
+FROM python:3.10-slim
 
 RUN apt-get update && apt-get install -y curl gnupg ffmpeg
 RUN echo "deb https://packages.cloud.google.com/apt coral-edgetpu-stable main" | tee /etc/apt/sources.list.d/coral-edgetpu.list

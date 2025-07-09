@@ -13,11 +13,17 @@
 ### Add shutdown script (optional)
 * alias killK3s="/usr/local/bin/k3s-killall.sh"
 
-### disable ipv6 on os level
+### disable ipv6 on os level??
 * sudo nano /etc/sysctl.d/99-disable-ipv6.conf
    net.ipv6.conf.all.disable_ipv6 = 1
    net.ipv6.conf.default.disable_ipv6 = 1
 * sudo sysctl --system
+
+### set ulimit
+ulimit -n 65536
+* sudo nano /etc/security/limits.conf and add:
+  * soft nofile 65536
+  * hard nofile 65536 
 
 ## Install 
 `curl -sfL https://get.k3s.io | K3S_TOKEN_FILE=~/.k3s/k3s-server-token INSTALL_K3S_EXEC="\

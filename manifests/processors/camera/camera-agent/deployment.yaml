@@ -27,7 +27,7 @@ spec:
 
       containers:
         - name: entrance-hallway
-          image: ghcr.io/ole-klokkhammer/camera-agent:1.0.45
+          image: ghcr.io/ole-klokkhammer/camera-agent:1.0.46
           securityContext:
             privileged: true # use if coral
           env:
@@ -42,9 +42,9 @@ spec:
           volumeMounts:
             - name: camera-agent-data
               subPath: entrance_hallway
-              mountPath: /data
+              mountPath: /data 
         - name: office
-          image: ghcr.io/ole-klokkhammer/camera-agent:1.0.45
+          image: ghcr.io/ole-klokkhammer/camera-agent:1.0.46
           securityContext:
             privileged: true # use if coral
           env:
@@ -57,13 +57,41 @@ spec:
             - name: ENABLE_VIDEO_RESTREAMER
               value: "false"
             - name: VIDEO_RESTREAMER_STREAM_URL
-              value: "rtsp://go2rtc.camera-bridge:8554/office_detector"
+              value: "rtsp://127.0.0.1:8554/office_motion"
           volumeMounts:
             - name: camera-agent-data
               subPath: office
               mountPath: /data
+              
+        - name: go2rtc
+          image: alexxit/go2rtc
+          ports:
+            - containerPort: 1984 # Web UI/API
+            - containerPort: 8554 # RTSP
+            - containerPort: 8555 # WebRTC
+          volumeMounts:
+            - name: go2rtc-config
+              mountPath: /config/go2rtc.yaml
+              subPath: go2rtc.yaml
 
       volumes:
         - name: camera-agent-data
           hostPath:
             path: /mnt/data/camera
+        - name: go2rtc-config
+          configMap:
+            name: go2rtc-config 
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: go2rtc-config
+  namespace: camera-processors
+data:
+  go2rtc.yaml: |
+    streams:
+      entrance_roof_motion:
+        - rtsp://127.0.0.1:8554/entrance_roof_motion
+      office_motion:
+        - rtsp://127.0.0.1:8554/office_motion
+    # Add more config as needed

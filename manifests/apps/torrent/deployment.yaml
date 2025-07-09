@@ -18,7 +18,7 @@ spec:
     spec:
       restartPolicy: Always
       initContainers:
-        - name: check-torrent-config-mount
+        - name: check-torrent-config-mount # CHECK ZFS MOUNT
           image: busybox
           command:
             [
@@ -163,6 +163,23 @@ spec:
               value: "1000"
             - name: PGID
               value: "1000"
+          # Shares network with vpn container
+
+        - name: jellyseerr
+          image: fallenbagel/jellyseerr:latest
+          ports:
+            - containerPort: 5055
+          volumeMounts:
+            - name: torrent-config
+              subPath: jellyseerr
+              mountPath: /app/config
+          env:
+            - name: LOG_LEVEL
+              value: "info"
+            - name: TZ
+              value: "Europe/Oslo"
+            - name: PORT
+              value: "5055"
           # Shares network with vpn container
 
       volumes:

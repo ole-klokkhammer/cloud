@@ -2,18 +2,20 @@ import logging
 import os
 import pathlib
 import time
+from typing import Protocol
 
 import numpy as np
 import cv2
 from ai_edge_litert.interpreter import Interpreter, load_delegate
 
+logger = logging.getLogger(__name__)
 
 class CoralTPUObjectDetectorService:
     def __init__(
         self,
         model_file="mobilenet_ssd_v2_coco_quant_postprocess_edgetpu.tflite",
         label_file="coco_labels.txt",
-    ):
+    ): 
         app_root = pathlib.Path(__file__).parent.parent.absolute()
         self.model_file_path = os.path.join(
             app_root,
@@ -25,7 +27,7 @@ class CoralTPUObjectDetectorService:
 
     def initialize(self):
         try:
-            logging.info(f"Initializing Coral TPU with model: {self.model_file_path}")
+            logger.info(f"Initializing Coral TPU with model: {self.model_file_path}")
             self.interpreter = Interpreter(
                 model_path=self.model_file_path,
                 experimental_delegates=[
@@ -33,10 +35,24 @@ class CoralTPUObjectDetectorService:
                 ],
             ) 
             self.interpreter.allocate_tensors()
-            logging.info("Tensors allocated successfully.")
+            logger.info("Tensors allocated successfully.")
         except Exception as e:
-            logging.error(f"Failed to initialize Coral TPU: {e}")
-            raise e
+            logger.error(f"Failed to initialize Coral TPU: {e}")
+            raise e 
+
+    def detect_objects(self, frame: cv2.UMat):
+        logger.info("Motion detected, processing frame...")
+
+        # do some object detection if enabled
+        object_detections = np.empty((0, 6), dtype=np.float32)  
+        # if environment.enable_object_detection:
+        #     try:
+        #         object_detections = self.object_detector.detect_objects(
+        #             frame=self.get_detection_frame(frame)
+        #         )
+        #     except Exception as e:
+        #         logger.error(f"Object detection failed: {e}")
+        return object_detections
 
     def inference(self, frame):
         # --- Inference on frame ---

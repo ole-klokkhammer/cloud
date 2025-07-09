@@ -22,13 +22,9 @@ object_detector_label_file = os.getenv(
     "OBJECT_DETECTOR_LABEL_FILE", "models/coco_labels.txt"
 )
 
-# RECORDER
-recorder_storage_dir = os.getenv("RECORDER_STORAGE_DIR", "/data") 
-recorder_frame_size = (1024, 768) 
-recorder_fps = 10
-
-# VIDEO RESTREAMER settings
-enable_restreamer = os.getenv("ENABLE_VIDEO_RESTREAMER", "False").lower() in TRUTHY_VALUES
-video_restreamer_stream_url =  os.getenv("VIDEO_RESTREAMER_STREAM_URL")
-video_restreamer_frame_size = (640, 480)
-video_restreamer_fps = 10
+# POST_PROCESSOR settings
+postprocessor_enable_restreamer = os.getenv("ENABLE_VIDEO_RESTREAMER", "False").lower() in TRUTHY_VALUES
+postprocessor_stream_url =  os.getenv("VIDEO_RESTREAMER_STREAM_URL")
+postprocessor_recorder_storage_dir = os.getenv("RECORDER_STORAGE_DIR", "/data") 
+postprocessor_frame_size = (1024, 768) 
+postprocessor_fps = 10 

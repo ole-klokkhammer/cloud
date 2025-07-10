@@ -8,7 +8,7 @@ services:
       - LOG_LEVEL=INFO
       - CAMERA_STREAM_URL=rtsp://192.168.10.203:8554/office
       - RECORDER_STORAGE_DIR=/data
-      - ENABLE_VIDEO_RESTREAMER=true
+      - ENABLE_VIDEO_RESTREAMER=false
       - VIDEO_RESTREAMER_STREAM_URL=rtsp://127.0.0.1:8554/office_motion
       - ENABLE_OBJECT_DETECTION=false
     image: ghcr.io/ole-klokkhammer/camera-agent

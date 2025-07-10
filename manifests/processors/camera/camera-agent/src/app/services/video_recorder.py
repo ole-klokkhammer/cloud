@@ -23,7 +23,7 @@ class VideoRecorderService:
         self.video_writer = None
         self.prev_timestamp = None   
 
-    def write_frame( self, frame: cv2.UMat, timestamp: float) -> None:
+    def write_frame(self, frame: cv2.UMat, timestamp: float) -> None:
         try:   
             # Check if we need to start a new chunk
             start_new_chunk = False

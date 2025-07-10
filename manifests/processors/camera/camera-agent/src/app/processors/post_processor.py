@@ -15,26 +15,26 @@ logger = logging.getLogger(__name__)
 class PostProcessor:
 
     def __init__(self):
-        self.frame_queue = queue.Queue[MotionEvent](maxsize=100)
+        self.event_queue = queue.Queue[MotionEvent](maxsize=100)
         self.stop_event = threading.Event()
         self.worker_thread = threading.Thread(target=self._worker, daemon=True)
 
-        self.fps = environment.postprocessor_fps
-        self.frame_size = environment.postprocessor_frame_size
+        self.processor_fps = environment.postprocessor_fps
+        self.processor_frame_size = environment.postprocessor_frame_size
         self.storage_dir = environment.postprocessor_recorder_storage_dir
-        self.stream_url = environment.postprocessor_stream_url
+        self.processor_restream_url = environment.postprocessor_stream_url
         self.detector_frame_size = environment.detector_frame_size
 
         self.video_recorder = VideoRecorderService(
-            fps=self.fps,
-            frame_size=self.frame_size,
+            fps=self.processor_fps,
+            frame_size=self.processor_frame_size,
             storage_dir=self.storage_dir,
         )
 
         self.video_restreamer = VideoRestreamerService(
-            stream_url=self.stream_url,
-            frame_size=self.frame_size,
-            fps=self.fps,
+            stream_url=self.processor_restream_url,
+            frame_size=self.processor_frame_size,
+            fps=self.processor_fps,
         ) 
         
     def start(self) -> None:
@@ -58,7 +58,7 @@ class PostProcessor:
             self.video_writer.release()
             self.video_writer = None 
 
-        if environment.postprocessor_enable_restreamer:
+        if environment.postprocessor_enable_restreamer and self.video_restreamer is not None:
             self.video_restreamer.stop() 
 
         logger.info("Post processor stopped successfully.")
@@ -67,17 +67,17 @@ class PostProcessor:
             # Put frame data into the queue for the worker thread
             try:
                 if(self.worker_thread.is_alive() is False):
-                    logger.error("FramePostProcessorService Worker thread is not alive. Cannot write frame.")
+                    logger.error("Worker thread is not alive. Cannot write frame.")
                     return
                  
-                self.frame_queue.put_nowait(event)
+                self.event_queue.put_nowait(event)
             except queue.Full:
                 logger.error("Frame queue is full. Dropping frame.")
 
     def _worker(self):
         while not self.stop_event.is_set():
             try:
-                event = self.frame_queue.get(timeout=1)
+                event = self.event_queue.get(timeout=1)
                 self._process(event)
             except queue.Empty:
                 time.sleep(0.1)  # Sleep briefly to avoid busy waiting
@@ -85,9 +85,9 @@ class PostProcessor:
 
     def _process(self, event: MotionEvent) -> None:
         try:  
-            original_frame = event.original_frame
+            original_frame = event.frame_event.frame
             detected_motions = event.detected_motions
-            record_frame = cv2.resize(original_frame, self.frame_size, interpolation=cv2.INTER_LINEAR) 
+            record_frame = cv2.resize(original_frame, self.processor_frame_size, interpolation=cv2.INTER_LINEAR) 
             timestamp = time.time()
             self.paint_overlays(
                 frame=record_frame,

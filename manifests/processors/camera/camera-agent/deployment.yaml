@@ -27,7 +27,7 @@ spec:
 
       containers:
         - name: entrance-hallway
-          image: ghcr.io/ole-klokkhammer/camera-agent:1.0.46
+          image: ghcr.io/ole-klokkhammer/camera-agent:1.0.47
           securityContext:
             privileged: true # use if coral
           env:
@@ -41,10 +41,10 @@ spec:
               value: "false"
           volumeMounts:
             - name: camera-agent-data
-              subPath: entrance_hallway
+              subPath: entrance_roof
               mountPath: /data 
         - name: office
-          image: ghcr.io/ole-klokkhammer/camera-agent:1.0.46
+          image: ghcr.io/ole-klokkhammer/camera-agent:1.0.47
           securityContext:
             privileged: true # use if coral
           env:

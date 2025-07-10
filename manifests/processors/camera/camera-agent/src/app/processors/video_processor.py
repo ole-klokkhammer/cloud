@@ -1,27 +1,37 @@
 import logging
 import os
 import threading
-from typing import Protocol 
+from typing import Protocol
 import cv2
 import time
+from dataclasses import dataclass
+
+
+@dataclass
+class FrameEvent:
+    fps: int
+    frame: cv2.UMat
+    frame_size: tuple[int, int]
+    timestamp: float
+
+
+class OnFrameCallback(Protocol):
+    def __call__(self, event: FrameEvent):
+        None
+
 
 logger = logging.getLogger(__name__)
 
-class OnFrameCallback(Protocol):
-    def __call__(
-        self, 
-        frame: cv2.UMat
-    ): None
 
 # https://github.com/itberrios/CV_projects/blob/main/motion_detection/motion_detection_utils.py
-class VideoCaptureService:
+class StreamProcessor:
     def __init__(self, stream_url):
         if stream_url is None:
             raise ValueError("stream_url must not be None")
-        
+
         self.listeners: list[OnFrameCallback] = []
         self.video = None
-        self.stream_url = stream_url 
+        self.stream_url = stream_url
         self.failures = 0
         self.max_failures = 10
 
@@ -62,7 +72,14 @@ class VideoCaptureService:
                     continue
 
                 for on_frame in self.listeners:
-                    on_frame(frame)
+                    on_frame(
+                        FrameEvent(
+                            frame=frame,
+                            fps=original_fps,
+                            frame_size=(original_width, original_height),
+                            timestamp=time.time(),
+                        )
+                    )
 
         except KeyboardInterrupt:
             logger.info("Interrupted by user, shutting down...")

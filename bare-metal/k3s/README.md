@@ -5,6 +5,7 @@
 ## Prerequisits
 ``## disable firewall
 * ufw disable 
+* swap off: comment out swap in /etc/fstab
 
 ### Define server token at ~/.k3s/k3s-server-token
 * K3S_TOKEN=<find-in-keystore>

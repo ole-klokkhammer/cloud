@@ -44,7 +44,7 @@ spec:
   capacity:
     storage: 500Mi
   local:
-    path: /var/lib/hivemq
+    path: /k3s-temp/hivemq
   nodeAffinity:
     required:
       nodeSelectorTerms:

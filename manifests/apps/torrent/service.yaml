@@ -62,7 +62,7 @@ metadata:
 spec:
   type: LoadBalancer
   selector:
-    app: jellyseerr
+    app: torrent-stack
   ports:
     - port: 5055
       targetPort: 5055

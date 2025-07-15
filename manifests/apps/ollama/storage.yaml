@@ -13,7 +13,7 @@ spec:
   capacity:
     storage: 50Gi
   local:
-    path: /var/lib/ollama
+    path: /k3s-temp/ollama
   nodeAffinity:
     required:
       nodeSelectorTerms:

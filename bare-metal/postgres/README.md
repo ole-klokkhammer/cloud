@@ -9,7 +9,9 @@ https://docs.timescale.com/self-hosted/latest/install/installation-linux/#instal
 * create appropriate data folders with permissions to postgres:postgres
   * sudo chown -R postgres:postgres /mnt/databases/postgresql/17/main
   * sudo chmod 700 /mnt/databases/postgresql/17/main
-  * ensure root is accessible too sudo chmod 777 /mnt/databases
+  * ensure root is accessible too sudo chmod 777 /mnt/databases 
+* sudo pg_ctlcluster 17 main stop
+* sudo pg_dropcluster 17 main
 * sudo pg_createcluster 17 main --datadir=/mnt/databases/postgresql/17/main --start
 
 ### add timescaledb
@@ -26,6 +28,8 @@ https://docs.timescale.com/self-hosted/latest/install/installation-linux/#instal
 # Allow all users from local network with md5 password
 host    all             all              0.0.0.0/0                       md5
 host    all             all              ::/0                            md5
+
+* sudo timescaledb-tune
 
 ## pgbackrest
  

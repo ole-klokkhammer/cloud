@@ -13,7 +13,8 @@ sudo modprobe zfs
 
 ### 3. Create a ZFS Pool
 
-sudo zpool create mypool /dev/sdX
+* sudo zpool create k3s /dev/nvme0n1p1
+* sudo zpool create k3s-temp /dev/nvme0n1p2
 
 ### 4. Create a ZFS Filesystem
 sudo zfs create mypool/mydataset
@@ -36,3 +37,8 @@ sudo systemctl enable zfs-mount
 ### 8. set script permissions
 for backup
 * zfs allow ubuntu snapshot k3s
+
+## restoring volumes 
+
+* aws s3 cp --profile k3s-volume-backup s3://k3s-volumes/k3s/homeassistant-data/snapshot-1752566019.zfs /tmp --endpoint-url https://j8t7.ldn203.idrivee2-94.com
+* sudo zfs receive k3s/homeassistant-data < /tmp/snapshot-1752566019.zfs

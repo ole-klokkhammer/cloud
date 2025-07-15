@@ -6,5 +6,11 @@
 * sudo ./aws/install
 * set keys in profiles
 
+## create profiles
+* aws configure --profile etcd-backup
+* aws configure --profile k3s-volume-backup
+* 
+
 ## monitoring
 https://github.com/healthchecks/healthchecks
+ 

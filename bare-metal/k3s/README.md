@@ -26,6 +26,12 @@ ulimit -n 65536
   * soft nofile 65536
   * hard nofile 65536 
 
+### prevent service restart on apt-get install
+sudo systemctl edit k3s.service
+[Service]
+Restart=no
+sudo systemctl daemon-reload
+
 ## Install 
 `curl -sfL https://get.k3s.io | K3S_TOKEN_FILE=~/.k3s/k3s-server-token INSTALL_K3S_EXEC="\
 server \

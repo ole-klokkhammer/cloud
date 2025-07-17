@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: bluetooth-kafka
-  namespace: bluetooth-processors
+  namespace: bridges
   labels:
     app: bluetooth-kafka
 spec:

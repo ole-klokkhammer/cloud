@@ -3,7 +3,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: go2rtc-config
-  namespace: camera-bridge
+  namespace: bridges
 data:
   go2rtc.yaml: |
     log:
@@ -33,7 +33,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: neolink-config
-  namespace: camera-bridge
+  namespace: bridges
 data:
   config.toml: |
     bind = "0.0.0.0"

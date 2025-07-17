@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: log-processor
-  namespace: log-processors
+  namespace: processors
   labels:
     app: log-processor
 spec: 

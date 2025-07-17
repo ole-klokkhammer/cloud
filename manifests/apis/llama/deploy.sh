@@ -2,7 +2,7 @@
 
 set -e
 
-APP_NAME="camera-agent"
+APP_NAME="llama-api"
 
 # Step 1: Auto-bump the patch version
 PREV_VERSION=$(grep -m1 -oP 'ole-klokkhammer/'"$APP_NAME"':\K[0-9]+\.[0-9]+\.[0-9]+' deployment.yaml)
@@ -15,6 +15,6 @@ echo "$PREV_VERSION"
 sed -i "s#ghcr.io/ole-klokkhammer/$APP_NAME:$PREV_VERSION#ghcr.io/ole-klokkhammer/$APP_NAME:$NEW_VERSION#g" deployment.yaml
 
 # Step 3: Build and push the new Docker image
-cd src && docker buildx build --push --platform linux/amd64 -t "ghcr.io/ole-klokkhammer/$APP_NAME:$NEW_VERSION" .
+cd src && docker buildx build --target server --push --platform linux/amd64 -t "ghcr.io/ole-klokkhammer/$APP_NAME:$NEW_VERSION" .
 
 cd .. && kubectl apply -f deployment.yaml

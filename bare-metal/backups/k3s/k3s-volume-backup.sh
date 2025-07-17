@@ -17,7 +17,7 @@ echo "List all ZFS volumes (zvols) and filesystems in the pool: $ZFS_POOL"
 for volume in $(zfs list -H -o name -t filesystem,volume | grep "^$ZFS_POOL/"); do
   VOLUME_NAME=$volume 
   SNAPSHOT="${VOLUME_NAME}@${SNAPSHOT_PREFIX}-${TIMESTAMP}" 
-  SNAPSHOT_PATH="/temp/$(echo "${SNAPSHOT}" | tr '/:' '__').zfs"
+  SNAPSHOT_PATH="/tmp/$(echo "${SNAPSHOT}" | tr '/:' '__').zfs"
   S3_SNAPSHOT_PATH="$(echo "${SNAPSHOT}" | tr '@' '/').zfs"
 
   echo "Creating snapshot: $SNAPSHOT"

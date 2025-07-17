@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: bluetooth-processor
-  namespace: bluetooth-processors
+  namespace: processors
   labels:
     app: bluetooth-processor
 spec:

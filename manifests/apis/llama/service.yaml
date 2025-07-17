@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: llama-api
+  namespace: apis
+spec:
+  type: LoadBalancer
+  selector:
+    app: llama-api
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080

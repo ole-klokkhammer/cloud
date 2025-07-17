@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: go2rtc
-  namespace: camera-bridge
+  namespace: bridges
   labels:
     app: go2rtc
 spec:

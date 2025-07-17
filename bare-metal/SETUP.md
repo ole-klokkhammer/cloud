@@ -6,6 +6,8 @@
 libraries that needs bluetooth:
 * sudo apt install bluez
 ### gpu deps
+* nvidia
+* amd
 
 ### aws cli
 * setup aws cli and add profiles
@@ -19,4 +21,5 @@ libraries that needs bluetooth:
 ## etcd
 ## postgres
 ## Setup backup
+## run ollama
 ## run k3s

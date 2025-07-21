@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: bluetooth-kafka
+  name: bluetooth2kafka
   namespace: bridges
   labels:
-    app: bluetooth-kafka
+    app: bluetooth2kafka
 spec:
   revisionHistoryLimit: 0
   selector:
     matchLabels:
-      app: bluetooth-kafka
+      app: bluetooth2kafka
   template:
     metadata:
       labels:
-        app: bluetooth-kafka
+        app: bluetooth2kafka
     spec:
       affinity:
         nodeAffinity:
@@ -25,19 +25,27 @@ spec:
                     values:
                       - master0
       containers:
-        - name: bluetooth-kafka
-          image: olklokk/bluetooth-kafka:1.0.46
+        - name: bluetooth2kafka
+          image: ghcr.io/ole-klokkhammer/bluetooth2kafka:1.0.29
+          # livenessProbe:
+          #   exec:
+          #     command:
+          #       - /bin/sh
+          #       - -c
+          #       - bluetoothctl list | grep -q '^Controller'
+          #   initialDelaySeconds: 10
+          #   periodSeconds: 30
           env:
             - name: LOG_LEVEL
               value: "info"
             - name: KAFKA_BROKER
               value: "kafka-kafka-bootstrap.kafka:9092"
             - name: CRON_GENERIC_BLE_SCAN
-              value: "0 * * * *" 
+              value: "0 * * * *"
             - name: CRON_AIRTHINGS_WAVE_PLUS_SENSOR_DATA
-              value: "*/15 * * * *"
+              value: "*/15 * * * *" # /15
             - name: CRON_AIRTHINGS_WAVE_PLUS_BATTERY
-              value: "0 0 * * *" 
+              value: "0 0 * * *"
             - name: AIRTHINGS_WAVE_PLUS_BASEMENT
               value: "F4:60:77:6D:33:C0"
             - name: AIRTHINGS_WAVE_PLUS_LIVING_ROOM

@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cam2mqtt
+  namespace: bridges
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cam2mqtt
+  template:
+    metadata:
+      labels:
+        app: cam2mqtt
+    spec:
+      containers:
+        - name: cam2mqtt
+          image: acasal/cam2mqtt:latest
+          ports: 
+            - containerPort: 8080 # only needed for webhook subscriptions
+          env:
+            - name: TZ
+              value: Europe/Oslo
+          volumeMounts:
+            - name: config
+              mountPath: /config.yml
+              subPath: config.yml
+      volumes:
+        - name: config
+          secret:
+            secretName: cam2mqtt-config

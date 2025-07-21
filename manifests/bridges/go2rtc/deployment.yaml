@@ -66,6 +66,7 @@ spec:
             - name: go2rtc-config
               mountPath: /config/go2rtc.yaml
               subPath: go2rtc.yaml  
+              
         - name: neolink
           image: quantumentangledandy/neolink
           ports:

@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: zigbee2mqtt
+  namespace: bridges
+  labels:
+    app: zigbee2mqtt
+spec:
+  replicas: 1
+  serviceName: zigbee2mqtt
+  selector:
+    matchLabels:
+      app: zigbee2mqtt
+  template:
+    metadata:
+      namespace: bridges
+      labels:
+        app: zigbee2mqtt
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - master0 
+      initContainers:
+        - name: check-fs-mount
+          image: busybox
+          command: ['sh', '-c', 'test -f /fs/mounted.txt || (echo "File mount missing" && exit 1)']
+          volumeMounts:
+            - mountPath: /fs
+              name: zigbee2mqtt-data
+      containers:
+        - name: zigbee2mqtt
+          image: ghcr.io/koenkk/zigbee2mqtt
+          securityContext:
+            privileged: true
+            capabilities:
+              add:
+                - NET_ADMIN
+                - NET_RAW
+                - SYS_ADMIN
+          ports:
+            - containerPort: 8080
+          env:
+            - name: TZ
+              value: "Europe/Oslo"
+          volumeMounts:
+            - name: zigbee2mqtt-data
+              mountPath: /app/data
+            - name: zigbee-usb
+              mountPath: /dev/ttyACM0
+      volumes:
+        - name: zigbee2mqtt-data
+          persistentVolumeClaim:
+            claimName: zigbee2mqtt-data-pvc
+        - name: zigbee-usb
+          hostPath:
+            path: /dev/serial/by-id/usb-1a86_USB_Serial-if00-port0
+            type: CharDevice

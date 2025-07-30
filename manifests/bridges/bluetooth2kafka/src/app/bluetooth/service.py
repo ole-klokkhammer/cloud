@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import asyncio
+import logging
 import struct
 import uuid
 from typing import Any, Optional, Dict, List
@@ -17,111 +18,99 @@ from bleak.backends.device import BLEDevice
 from bleak.backends.scanner import AdvertisementData
 
 
-class BluetoothService:
-    _instance = None
+scan_lock = asyncio.Lock()
 
-    # ensure singleton instance
-    def __new__(cls, *args, **kwargs):
-        if cls._instance is None:
-            cls._instance = super().__new__(cls)
-        return cls._instance
+async def scan(timeout: int):
+    async with scan_lock:
+        devices: Dict[
+            str, tuple[BLEDevice, AdvertisementData]
+        ] = await BleakScanner.discover(
+            return_adv=True, timeout=timeout
+        )  # type: ignore
 
-    def __init__(self):
-        if not hasattr(self, "scan_lock"):
-            self.scan_lock = asyncio.Lock()
+        return [
+            {
+                "name": device.name,
+                "address": device.address,
+                "rssi": ad_data.rssi,
+                "manufacturer_data": {
+                    k: utils.bytes_as_str(v)
+                    for k, v in ad_data.manufacturer_data.items()
+                },
+            }
+            for device, ad_data in devices.values()
+        ]
 
-    async def scan(self, timeout: int):
-        async with self.scan_lock:
-            devices: Dict[
-                str, tuple[BLEDevice, AdvertisementData]
-            ] = await BleakScanner.discover(
-                return_adv=True, timeout=timeout
-            )  # type: ignore
+async def connect(address: str) -> BLEDeviceResponse:
+    async with scan_lock:
+        result = BLEDeviceResponse()
+        try:
+            async with BleakClient(address) as client:
+                for service in client.services:
+                    service_info = Service(description=service.description)
+                    for characteristic in service.characteristics:
+                        char_value = Characteristic(
+                            description=characteristic.description,
+                            properties=characteristic.properties,
+                        )
+                        try:
+                            if "read" in characteristic.properties:
+                                gatt_value = await client.read_gatt_char(
+                                    characteristic.uuid
+                                )
+                                char_value.value = Value(
+                                    hex=utils.bytes_as_str(gatt_value),
+                                    utf8=gatt_value.decode(
+                                        "utf-8", errors="ignore"
+                                    ),
+                                )
+                            else:
+                                char_value.value = None
+                        except BleakError as e:
+                            char_value.error = str(e)
 
-            return [
-                {
-                    "name": device.name,
-                    "address": device.address,
-                    "rssi": ad_data.rssi,
-                    "manufacturer_data": {
-                        k: utils.bytes_as_str(v)
-                        for k, v in ad_data.manufacturer_data.items()
-                    },
-                }
-                for device, ad_data in devices.values()
-            ]
-
-    async def connect(self, address: str) -> BLEDeviceResponse:
-        async with self.scan_lock:
-            result = BLEDeviceResponse()
-            try:
-                async with BleakClient(address) as client:
-                    for service in client.services:
-                        service_info = Service(description=service.description)
-                        for characteristic in service.characteristics:
-                            char_value = Characteristic(
-                                description=characteristic.description,
-                                properties=characteristic.properties,
+                        for descriptor in characteristic.descriptors:
+                            desc_value = Descriptor(
+                                description=descriptor.description
                             )
                             try:
-                                if "read" in characteristic.properties:
-                                    gatt_value = await client.read_gatt_char(
-                                        characteristic.uuid
-                                    )
-                                    char_value.value = Value(
-                                        hex=utils.bytes_as_str(gatt_value),
-                                        utf8=gatt_value.decode(
-                                            "utf-8", errors="ignore"
-                                        ),
-                                    )
-                                else:
-                                    char_value.value = None
-                            except BleakError as e:
-                                char_value.error = str(e)
-
-                            for descriptor in characteristic.descriptors:
-                                desc_value = Descriptor(
-                                    description=descriptor.description
+                                desc_data = await client.read_gatt_descriptor(
+                                    descriptor.handle
                                 )
-                                try:
-                                    desc_data = await client.read_gatt_descriptor(
-                                        descriptor.handle
-                                    )
-                                    desc_value.value = Value(
-                                        hex=utils.bytes_as_str(desc_data),
-                                        utf8=desc_data.decode("utf-8", errors="ignore"),
-                                    )
-                                except BleakError as e:
-                                    desc_value.error = str(e)
-                                char_value.descriptors[descriptor.uuid] = desc_value
+                                desc_value.value = Value(
+                                    hex=utils.bytes_as_str(desc_data),
+                                    utf8=desc_data.decode("utf-8", errors="ignore"),
+                                )
+                            except BleakError as e:
+                                desc_value.error = str(e)
+                            char_value.descriptors[descriptor.uuid] = desc_value
 
-                            service_info.characteristics[characteristic.uuid] = (
-                                char_value
-                            )
+                        service_info.characteristics[characteristic.uuid] = (
+                            char_value
+                        )
 
-                        result.services[service.uuid] = service_info
-            except BleakDBusError as e:
-                raise
-            except Exception as e:
-                print(f"An unexpected error occurred: {e}")
-                raise
-            return result
+                    result.services[service.uuid] = service_info
+        except BleakDBusError as e:
+            raise
+        except Exception as e:
+            logging.error(f"An unexpected error occurred: {e}")
+            raise
+        return result
 
-    async def send_command(
-        self,
-        address: str,
-        characteristic: uuid.UUID,
-        command: bytearray,
-        format_type: str,
-    ) -> Optional[bytearray]:
-        async with self.scan_lock:
-            notification = NotificationReceiver(characteristic, format_type)
-            async with BleakClient(address) as client:
-                await client.start_notify(characteristic, notification)
-                await client.write_gatt_char(characteristic, command)
-                await notification.wait_for_message(5)
-                await client.stop_notify(characteristic)
-            return notification.message
+async def send_command( 
+    address: str,
+    characteristic: uuid.UUID,
+    command: bytearray,
+    format_type: str,
+) -> Optional[bytearray]:
+    async with scan_lock:
+        notification = NotificationReceiver(characteristic, format_type)
+        async with BleakClient(address) as client:
+            await client.start_notify(characteristic, notification)
+            await client.write_gatt_char(characteristic, command)
+            await notification.wait_for_message(5)
+            await client.stop_notify(characteristic)
+        return notification.message
 
 
 class NotificationReceiver:

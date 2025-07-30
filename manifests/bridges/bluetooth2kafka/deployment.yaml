@@ -23,35 +23,10 @@ spec:
                   - key: kubernetes.io/hostname
                     operator: In
                     values:
-                      - master0
+                      - master0 
       containers:
         - name: bluetooth2kafka
-          image: ghcr.io/ole-klokkhammer/bluetooth2kafka:1.0.29
-          # livenessProbe:
-          #   exec:
-          #     command:
-          #       - /bin/sh
-          #       - -c
-          #       - bluetoothctl list | grep -q '^Controller'
-          #   initialDelaySeconds: 10
-          #   periodSeconds: 30
-          env:
-            - name: LOG_LEVEL
-              value: "info"
-            - name: KAFKA_BROKER
-              value: "kafka-kafka-bootstrap.kafka:9092"
-            - name: CRON_GENERIC_BLE_SCAN
-              value: "0 * * * *"
-            - name: CRON_AIRTHINGS_WAVE_PLUS_SENSOR_DATA
-              value: "*/15 * * * *" # /15
-            - name: CRON_AIRTHINGS_WAVE_PLUS_BATTERY
-              value: "0 0 * * *"
-            - name: AIRTHINGS_WAVE_PLUS_BASEMENT
-              value: "F4:60:77:6D:33:C0"
-            - name: AIRTHINGS_WAVE_PLUS_LIVING_ROOM
-              value: "F4:60:77:70:58:EA"
-            - name: AIRTHINGS_WAVE_PLUS_BEDROOM
-              value: "A4:DA:32:28:C4:2F"
+          image: ghcr.io/ole-klokkhammer/bluetooth2kafka:1.0.50
           securityContext:
             capabilities:
               add:
@@ -59,11 +34,33 @@ spec:
                 - NET_RAW
             appArmorProfile:
               type: Unconfined
+          livenessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - bluetoothctl list | grep -q 'Controller' && exit 0 || exit 1
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          env:
+            - name: LOG_LEVEL
+              value: "info"
+            - name: KAFKA_BROKER
+              value: "kafka-kafka-bootstrap.kafka:9092"
+            - name: SCHEDULES_FILE
+              value: "/app/schedules.yaml"
           volumeMounts:
             - mountPath: /var/run/dbus
               name: dbus-socket
+            - mountPath: /app/schedules.yaml
+              name: schedules
+              subPath: schedules.yaml
+              readOnly: true
       volumes:
         - name: dbus-socket
           hostPath:
             path: /var/run/dbus
-            type: Directory
+            type: Directory 
+        - name: schedules
+          configMap:
+            name: bluetooth2kafka-schedules

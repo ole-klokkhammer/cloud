@@ -56,8 +56,8 @@ EOF
 #### setup
 * aws configure
 * aws s3 ls --profile etcd-backup s3://etcd --endpoint-url https://j8t7.ldn203.idrivee2-94.com | tail -n 1
-* aws s3 cp --profile etcd-backup s3://etcd/etcd-snapshot-1750624565 /temp --endpoint-url https://j8t7.ldn203.idrivee2-94.com
-* etcdctl snapshot restore /temp/etcd-snapshot-1750624565 --endpoints=https://127.0.0.1:2379 --data-dir /mnt/databases/etcd/data
+* aws s3 cp --profile etcd-backup --endpoint-url https://j8t7.ldn203.idrivee2-94.com s3://etcd/xxx /tmp/xxx
+* etcdctl snapshot restore /tmp/etcd-snapshot-1750624565 --endpoints=https://127.0.0.1:2379 --data-dir /mnt/databases/etcd/data
 
 
 ## ui client

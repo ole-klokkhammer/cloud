@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sftpgo
+  namespace: apis
+spec:
+  replicas: 1
+  revisionHistoryLimit: 0
+  selector:
+    matchLabels:
+      app: sftpgo
+  template:
+    metadata:
+      labels:
+        app: sftpgo
+    spec:
+      containers:
+        - name: sftpgo
+          image: drakkan/sftpgo:latest
+          ports:
+            - containerPort: 8080
+            - containerPort: 2121 # FTP
+            - containerPort: 2022 # SFTP
+          envFrom:
+            - secretRef:
+                name: sftpgo-secrets

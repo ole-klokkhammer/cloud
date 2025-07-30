@@ -1,0 +1,253 @@
+{
+    "services": {
+        "b42e1c08-ade7-11e4-89d3-123b93f75cba": {
+            "description": "Unknown",
+            "characteristics": {
+                "b42e2fc2-ade7-11e4-89d3-123b93f75cba": {
+                    "description": "Unknown",
+                    "properties": [
+                        "notify"
+                    ],
+                    "value": null,
+                    "error": null,
+                    "descriptors": {
+                        "00002902-0000-1000-8000-00805f9b34fb": {
+                            "description": "Client Characteristic Configuration",
+                            "value": {
+                                "hex": "0000",
+                                "utf8": "\u0000\u0000"
+                            },
+                            "error": null
+                        },
+                        "00002901-0000-1000-8000-00805f9b34fb": {
+                            "description": "Characteristic User Description",
+                            "value": {
+                                "hex": "53656e736f72205265636f726473496d67204964656e74696679",
+                                "utf8": "Sensor RecordsImg Identify"
+                            },
+                            "error": null
+                        }
+                    }
+                },
+                "b42e2d06-ade7-11e4-89d3-123b93f75cba": {
+                    "description": "Unknown",
+                    "properties": [
+                        "write-without-response",
+                        "write",
+                        "indicate"
+                    ],
+                    "value": null,
+                    "error": null,
+                    "descriptors": {
+                        "00002902-0000-1000-8000-00805f9b34fb": {
+                            "description": "Client Characteristic Configuration",
+                            "value": {
+                                "hex": "0000",
+                                "utf8": "\u0000\u0000"
+                            },
+                            "error": null
+                        },
+                        "00002901-0000-1000-8000-00805f9b34fb": {
+                            "description": "Characteristic User Description",
+                            "value": {
+                                "hex": "41636365737320436f6e74726f6c20506f696e74272a44a101",
+                                "utf8": "Access Control Point'*D\u0001"
+                            },
+                            "error": null
+                        }
+                    }
+                },
+                "b42e2a68-ade7-11e4-89d3-123b93f75cba": {
+                    "description": "Unknown",
+                    "properties": [
+                        "read"
+                    ],
+                    "value": {
+                        "hex": "016e01700d002b00ae0afec4b5014e000000de26",
+                        "utf8": "\u0001n\u0001p\r\u0000+\u0000\nĵ\u0001N\u0000\u0000\u0000&"
+                    },
+                    "error": null,
+                    "descriptors": {
+                        "00002901-0000-1000-8000-00805f9b34fb": {
+                            "description": "Characteristic User Description",
+                            "value": {
+                                "hex": "43757272656e742053656e736f722056616c7565734f414420457874656e64656420436f6e74726f6c",
+                                "utf8": "Current Sensor ValuesOAD Extended Control"
+                            },
+                            "error": null
+                        }
+                    }
+                }
+            }
+        },
+        "00001801-0000-1000-8000-00805f9b34fb": {
+            "description": "Generic Attribute Profile",
+            "characteristics": {}
+        },
+        "f000ffc0-0451-4000-b000-000000000000": {
+            "description": "Unknown",
+            "characteristics": {
+                "f000ffc5-0451-4000-b000-000000000000": {
+                    "description": "Unknown",
+                    "properties": [
+                        "write-without-response",
+                        "notify"
+                    ],
+                    "value": null,
+                    "error": null,
+                    "descriptors": {
+                        "00002901-0000-1000-8000-00805f9b34fb": {
+                            "description": "Characteristic User Description",
+                            "value": {
+                                "hex": "4f414420457874656e64656420436f6e74726f6c",
+                                "utf8": "OAD Extended Control"
+                            },
+                            "error": null
+                        },
+                        "00002902-0000-1000-8000-00805f9b34fb": {
+                            "description": "Client Characteristic Configuration",
+                            "value": {
+                                "hex": "0000",
+                                "utf8": "\u0000\u0000"
+                            },
+                            "error": null
+                        }
+                    }
+                },
+                "f000ffc1-0451-4000-b000-000000000000": {
+                    "description": "Unknown",
+                    "properties": [
+                        "write-without-response",
+                        "write",
+                        "notify"
+                    ],
+                    "value": null,
+                    "error": null,
+                    "descriptors": {
+                        "00002901-0000-1000-8000-00805f9b34fb": {
+                            "description": "Characteristic User Description",
+                            "value": {
+                                "hex": "496d67204964656e74696679",
+                                "utf8": "Img Identify"
+                            },
+                            "error": null
+                        },
+                        "00002902-0000-1000-8000-00805f9b34fb": {
+                            "description": "Client Characteristic Configuration",
+                            "value": {
+                                "hex": "0000",
+                                "utf8": "\u0000\u0000"
+                            },
+                            "error": null
+                        }
+                    }
+                },
+                "f000ffc2-0451-4000-b000-000000000000": {
+                    "description": "Unknown",
+                    "properties": [
+                        "write-without-response",
+                        "write",
+                        "notify"
+                    ],
+                    "value": null,
+                    "error": null,
+                    "descriptors": {
+                        "00002902-0000-1000-8000-00805f9b34fb": {
+                            "description": "Client Characteristic Configuration",
+                            "value": {
+                                "hex": "0000",
+                                "utf8": "\u0000\u0000"
+                            },
+                            "error": null
+                        },
+                        "00002901-0000-1000-8000-00805f9b34fb": {
+                            "description": "Characteristic User Description",
+                            "value": {
+                                "hex": "496d6720426c6f636b",
+                                "utf8": "Img Block"
+                            },
+                            "error": null
+                        }
+                    }
+                }
+            }
+        },
+        "0000180a-0000-1000-8000-00805f9b34fb": {
+            "description": "Device Information",
+            "characteristics": {
+                "00002a29-0000-1000-8000-00805f9b34fb": {
+                    "description": "Manufacturer Name String",
+                    "properties": [
+                        "read"
+                    ],
+                    "value": {
+                        "hex": "4169727468696e6773204153",
+                        "utf8": "Airthings AS"
+                    },
+                    "error": null,
+                    "descriptors": {}
+                },
+                "00002a23-0000-1000-8000-00805f9b34fb": {
+                    "description": "System ID",
+                    "properties": [
+                        "read"
+                    ],
+                    "value": {
+                        "hex": "2fc428000032daa4",
+                        "utf8": "/(\u0000\u00002ڤ"
+                    },
+                    "error": null,
+                    "descriptors": {}
+                },
+                "00002a24-0000-1000-8000-00805f9b34fb": {
+                    "description": "Model Number String",
+                    "properties": [
+                        "read"
+                    ],
+                    "value": {
+                        "hex": "32393330",
+                        "utf8": "2930"
+                    },
+                    "error": null,
+                    "descriptors": {}
+                },
+                "00002a27-0000-1000-8000-00805f9b34fb": {
+                    "description": "Hardware Revision String",
+                    "properties": [
+                        "read"
+                    ],
+                    "value": {
+                        "hex": "5245562041",
+                        "utf8": "REV A"
+                    },
+                    "error": null,
+                    "descriptors": {}
+                },
+                "00002a26-0000-1000-8000-00805f9b34fb": {
+                    "description": "Firmware Revision String",
+                    "properties": [
+                        "read"
+                    ],
+                    "value": {
+                        "hex": "472d424c452d322e322e302d6d61737465722b30",
+                        "utf8": "G-BLE-2.2.0-master+0"
+                    },
+                    "error": null,
+                    "descriptors": {}
+                },
+                "00002a25-0000-1000-8000-00805f9b34fb": {
+                    "description": "Serial Number String",
+                    "properties": [
+                        "read"
+                    ],
+                    "value": {
+                        "hex": "303138393139",
+                        "utf8": "018919"
+                    },
+                    "error": null,
+                    "descriptors": {}
+                }
+            }
+        }
+    }
+}

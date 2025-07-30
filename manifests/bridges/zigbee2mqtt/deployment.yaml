@@ -52,7 +52,10 @@ spec:
             - name: zigbee2mqtt-data
               mountPath: /app/data
             - name: zigbee-usb
-              mountPath: /dev/ttyACM0
+              mountPath: /dev/ttyUSB0
+            - name: udev
+              mountPath: /run/udev
+              readOnly: true
       volumes:
         - name: zigbee2mqtt-data
           persistentVolumeClaim:
@@ -61,3 +64,7 @@ spec:
           hostPath:
             path: /dev/serial/by-id/usb-1a86_USB_Serial-if00-port0
             type: CharDevice
+        - name: udev
+          hostPath:
+            path: /run/udev
+            type: Directory

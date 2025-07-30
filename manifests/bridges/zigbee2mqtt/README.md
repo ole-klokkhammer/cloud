@@ -13,4 +13,10 @@ Use volumeMode: Filesystem for datasets
 * sudo zfs create -o quota=500M k3s/zigbee2mqtt-data  
 * sudo zfs list -o name,volsize,used,available k3s/homeassistant-data
 
+## disable usb sleep!
+* sudo nano /etc/default/grub
+* GRUB_CMDLINE_LINUX_DEFAULT="... usbcore.autosuspend=-1"
+* sudo update-grub
+  
 ## setup
+

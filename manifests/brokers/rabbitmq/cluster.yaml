@@ -1,0 +1,62 @@
+apiVersion: rabbitmq.com/v1beta1
+kind: RabbitmqCluster
+metadata:
+  name: rabbitmq
+  namespace: brokers
+spec:
+  replicas: 1
+  rabbitmq:
+    additionalPlugins:
+      - rabbitmq_management
+      - rabbitmq_mqtt
+      - rabbitmq_web_mqtt
+      - rabbitmq_auth_backend_oauth2
+    additionalConfig: |
+      mqtt.allow_anonymous = true
+      mqtt.listeners.ssl = none  
+      mqtt.vhost = /
+      mqtt.exchange = amq.topic
+      mqtt.retained_message_store = rabbit_mqtt_retained_msg_store_dets
+
+      management.oauth_enabled = true
+      management.oauth_client_id = rabbitmq
+      
+      management.oauth_scopes = openid profile rabbitmq.tag:management
+      management.oauth_provider_url = https://auth.linole.org/realms/master
+      management.oauth_disable_basic_auth = false
+ 
+      # AUTHENTICATION
+      # The token's aud field must have a value that is equal to or includes the resource_server_id value.
+      # must match the scope prefix (e.g. rabbitmq in rabbitmq.read:*/*).
+      
+      auth_oauth2.verify_aud = true
+      auth_oauth2.resource_server_id = rabbitmq
+      auth_oauth2.preferred_username_claims.1 = preferred_username
+      auth_oauth2.issuer = https://auth.linole.org/realms/master
+      auth_oauth2.jwks_url  = https://auth.linole.org/realms/master/protocol/openid-connect/certs
+ 
+      auth_oauth2.additional_scopes_key = roles realm_access.roles resource_access.rabbitmq.roles
+
+  persistence:
+    storageClassName: local-path
+    storage: "1Gi"
+  override:
+    service:
+      spec:
+        type: LoadBalancer
+        ports:
+          - name: mqtt-port
+            protocol: TCP
+            port: 1883
+            targetPort: 1883
+
+    statefulSet:
+      spec:
+        template:
+          spec:
+            containers:
+              - name: rabbitmq
+                ports:
+                  - containerPort: 1883
+                    name: mqtt-port
+                    protocol: TCP

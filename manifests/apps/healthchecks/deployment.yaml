@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: healthchecks
-  namespace: healthchecks
+  namespace: apps
 spec:
   revisionHistoryLimit: 0
   selector:

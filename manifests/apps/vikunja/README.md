@@ -12,10 +12,8 @@ https://vikunja.io/docs/full-docker-example/
 * sudo zfs create -o quota=500M k3s/vikunja-data  
 * sudo zfs list -o name,volsize,used,available k3s/vikunja-data
 
-## setup
-* kubectl create namespace vikunja
-* kubectl create secret generic -n vikunja  vikunja-secrets --from-env-file=.env
-* kubectl -n vikunja create configmap vikunja-config --from-file=config.yml=./config.yml
+## setup 
+* kubectl create secret generic -n apps  vikunja-secrets --from-env-file=.env 
 * kubectl create -f ./storage.yaml
 * kubectl create -f ./deployment.yaml
 * kubectl create -f ./service.yaml

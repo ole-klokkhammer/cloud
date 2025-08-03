@@ -23,7 +23,7 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE O
 
 ## kubernetes
 * kubectl create namespace healthchecks
-* kubectl create secret generic -n healthchecks  healthchecks-secrets --from-env-file=.env
+* kubectl create secret generic -n apps  healthchecks-secrets --from-env-file=.env
 * kubectl apply -f deployment.yaml
 * enter pod, then:
     * manage.py migrate # create tables

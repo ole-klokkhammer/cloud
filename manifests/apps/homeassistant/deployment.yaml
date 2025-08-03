@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: homeassistant
-  namespace: homeassistant
+  namespace: apps
   labels:
     app: homeassistant
 spec:
@@ -13,7 +13,7 @@ spec:
       app: homeassistant
   template:
     metadata:
-      namespace: homeassistant
+      namespace: apps
       labels:
         app: homeassistant
     spec:

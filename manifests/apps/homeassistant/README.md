@@ -15,7 +15,7 @@ Use volumeMode: Filesystem for datasets
 
 ## setup
 * kubectl create namespace homeassistant
-* kubectl create secret generic -n homeassistant  homeassistant-secrets --from-env-file=.env
+* kubectl create secret generic -n apps  homeassistant-secrets --from-env-file=.env
 * kubectl create -f ./deployment.yaml
 * kubectl create -f ./service.yaml
 

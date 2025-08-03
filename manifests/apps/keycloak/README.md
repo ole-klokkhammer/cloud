@@ -1,7 +1,7 @@
 # keycloak
 
 * kubectl create namespace keycloak
-* kubectl create secret generic keycloak-config --from-env-file=.env -n keycloak
+* kubectl create secret generic keycloak-config --from-env-file=.env -n apps
 * kubectl apply -f configmap.yaml
 * kubectl apply -f service.yaml
 

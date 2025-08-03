@@ -4,7 +4,7 @@
 https://docs.timescale.com/self-hosted/latest/install/installation-linux/#install-and-configure-timescaledb-on-postgresql
 
 ### install postgres with correct data path
-* sudo apt-get install postgresql postgresql-common 
+* sudo apt-get install postgresql-17 postgresql-common 
 * sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh
 * create appropriate data folders with permissions to postgres:postgres
   * sudo chown -R postgres:postgres /mnt/databases/postgresql/17/main
@@ -23,7 +23,7 @@ https://docs.timescale.com/self-hosted/latest/install/installation-linux/#instal
   * sudo nano /etc/apt/sources.list.d/timescaledb.sources
   * change plucky to jammy
 * sudo apt-get install timescaledb-2-postgresql-17 postgresql-client-17 
-* update postgresql.conf with: listen_addresses = '*'
+* update /etc/postgresql/17/main/postgresql.conf with: listen_addresses = '*'
 * set /etc/postgresql/17/main/pg_hba.conf:
 # Allow all users from local network with md5 password
 host    all             all              0.0.0.0/0                       md5

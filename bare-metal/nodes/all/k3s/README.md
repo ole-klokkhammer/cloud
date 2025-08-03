@@ -26,11 +26,16 @@ ulimit -n 65536
   * soft nofile 65536
   * hard nofile 65536 
 
+* echo "fs.inotify.max_user_instances=1024" | sudo tee -a /etc/sysctl.conf
+* sudo sysctl -p
+
 ### prevent service restart on apt-get install
 sudo systemctl edit k3s.service
 [Service]
 Restart=no
 sudo systemctl daemon-reload
+
+### ensure postgres is setup
 
 ## Install 
 `curl -sfL https://get.k3s.io | K3S_TOKEN_FILE=~/.k3s/k3s-server-token INSTALL_K3S_EXEC="\
@@ -40,9 +45,9 @@ server \
 '--disable' \
 'servicelb' \
 '--write-kubeconfig-mode' \
-'644' \ 
+'644' \
 '--datastore-endpoint' \
-'http://127.0.0.1:2379' \
+'postgres://k3s:<pass>@192.168.10.2:5432/k3s?sslmode=disable' \
 --cluster-init
 "  sh -
 `

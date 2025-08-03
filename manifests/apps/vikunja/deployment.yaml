@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: vikunja
-  namespace: vikunja
+  namespace: apps
 spec:
   replicas: 1
   selector:

@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: vikunja
-  namespace: vikunja
+  namespace: apps
 spec:
   type: LoadBalancer
   

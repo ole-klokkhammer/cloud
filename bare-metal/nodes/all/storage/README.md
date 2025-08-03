@@ -1,9 +1,9 @@
 # Storage
 
+* ubuntu under lvm. use the rest as a big buffer + auto provisioned k3s volumes
 * zfs for k3s pool that should be backed up
-* lvm k3s volumes with auto provision with local-path
-* postgres at /mnt/databases/postgres
-* etcd at /mnt/databases/etcd
+* zfs k3s volumes that are manually allocated, but temporary
+* postgres at /mnt/databases/postgres 
 
 ## NOTICE
 mount disks with UUID for reliability

@@ -19,10 +19,9 @@
 ## ipv6
 https://support.nordvpn.com/hc/en-us/articles/20164669224337-How-to-disable-IPv6-on-Linux
 
-## setup
-* kubectl create namespace torrent
+## setup 
 * sudo zfs create -o quota=500M k3s/torrent-config 
-* kubectl create secret generic -n torrent  torrent-secrets --from-env-file=.env
+* kubectl create secret generic -n apps  torrent-secrets --from-env-file=.env
 * kubectl apply -f storage.yaml
 * kubectl apply -f deployment.yaml
 * kubectl apply -f service.yaml

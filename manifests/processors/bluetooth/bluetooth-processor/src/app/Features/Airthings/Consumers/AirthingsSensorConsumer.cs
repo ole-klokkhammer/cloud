@@ -12,10 +12,11 @@ public class AirthingsSensorConsumer(
     HomeassistantService homeassistantService
 ) : BackgroundService
 {
+    private const string Exchange = "bluetooth";
     private const string QueueName = "bluetooth.airthings.sensor";
+    private const string RoutingKey = "airthings.sensor";
     private const string DeadLetterQueue = QueueName + ".dlx";
     private const string DeadLetterExchange = "bluetooth.dlx";
-    private const string DeadLetterRoutingKey = "airthings.sensor";
     private const string MqttAirthingsTopicPrefix = "bluetooth/airthings";
 
     protected override async Task ExecuteAsync(CancellationToken token)
@@ -23,7 +24,7 @@ public class AirthingsSensorConsumer(
         var connection = rabbitMqConnectionService.GetConnection();
         using var channel = await connection.CreateChannelAsync();
 
-
+        // DEAD LETTER EXCHANGE AND QUEUE   
         await channel.ExchangeDeclareAsync(
             exchange: DeadLetterExchange,
             type: "topic",
@@ -32,13 +33,22 @@ public class AirthingsSensorConsumer(
 
         await channel.QueueDeclareAsync(
             queue: DeadLetterQueue,
-            durable: true
+            durable: true,
+            exclusive: false,
+            autoDelete: false
         );
 
         await channel.QueueBindAsync(
             queue: DeadLetterQueue,
             exchange: DeadLetterExchange,
-            routingKey: DeadLetterRoutingKey
+            routingKey: RoutingKey
+        );
+
+        // MAIN EXCHANGE AND QUEUE
+        await channel.ExchangeDeclareAsync(
+            exchange: Exchange,
+            type: "topic",
+            durable: true
         );
 
         await channel.QueueDeclareAsync(
@@ -49,8 +59,14 @@ public class AirthingsSensorConsumer(
             arguments: new Dictionary<string, object?>
             {
                 { "x-dead-letter-exchange", DeadLetterExchange },
-                { "x-dead-letter-routing-key", DeadLetterRoutingKey }
+                { "x-dead-letter-routing-key", RoutingKey }
             }
+        );
+
+        await channel.QueueBindAsync(
+            queue: QueueName,
+            exchange: Exchange,
+            routingKey: RoutingKey
         );
 
         var consumer = new AsyncEventingBasicConsumer(channel);
@@ -58,8 +74,9 @@ public class AirthingsSensorConsumer(
         {
             var body = ea.Body.ToArray();
             var message = Encoding.UTF8.GetString(body);
-            if (ea.BasicProperties.Headers?.TryGetValue("address", out var address) == true && address is string addressString)
+            if (ea.BasicProperties.Headers?.TryGetValue("address", out var address) == true && address is byte[] addressBytes)
             {
+                var addressString = Encoding.UTF8.GetString(addressBytes);
                 await HandleConnectPayload(addressString, message);
                 await channel.BasicAckAsync(deliveryTag: ea.DeliveryTag, multiple: false);
             }

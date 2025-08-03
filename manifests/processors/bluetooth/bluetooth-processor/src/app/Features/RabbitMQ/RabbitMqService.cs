@@ -63,21 +63,24 @@ public class RabbitMqService : IDisposable
         }
     }
 
-    public async Task PublishMqttAsync(string topic, string payload)
+    public async Task PublishMqttAsync(string topic, string payload, bool retain = true, int qos = 0)
     {
         try
         {
             using var channel = await GetProducerConnection().CreateChannelAsync();
-            await channel.ExchangeDeclareAsync("mqtt.topic", "topic", durable: true, autoDelete: false, arguments: null);
             await channel.BasicPublishAsync(
-                exchange: "mqtt.topic",
+                exchange: "amq.topic",
                 routingKey: topic,
                 body: Encoding.UTF8.GetBytes(payload),
                 basicProperties: new BasicProperties
                 {
-                    Persistent = true
+                    Headers = new Dictionary<string, object?>
+                    {
+                        { "x-mqtt-retain", retain },
+                        { "x-mqtt-qos", qos }
+                    }
                 },
-                mandatory: true
+                mandatory: false
             );
         }
         catch (Exception ex)

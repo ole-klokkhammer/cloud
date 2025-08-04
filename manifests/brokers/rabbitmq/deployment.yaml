@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: rabbitmq
+  namespace: brokers
+  labels:
+    app: rabbitmq
+spec:
+  replicas: 1
+  serviceName: rabbitmq
+  selector:
+    matchLabels:
+      app: rabbitmq
+  template:
+    metadata:
+      labels:
+        app: rabbitmq
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - master0
+      initContainers:
+        - name: check-fs-mount
+          image: busybox
+          command:
+            [
+              "sh",
+              "-c",
+              'test -f /fs/mounted.txt || (echo "File mount missing" && exit 1)',
+            ]
+          volumeMounts:
+            - mountPath: /fs
+              name: rabbitmq-data
+      containers:
+        - name: rabbitmq
+          image: rabbitmq:4.1-management
+          ports:
+            - containerPort: 5672 # AMQP
+            - containerPort: 15672 # Management UI
+            - containerPort: 1883 # mqtt
+          env:
+            - name: RABBITMQ_DEFAULT_USER
+              value: guest
+            - name: RABBITMQ_DEFAULT_PASS
+              value: guest
+          volumeMounts:
+            - name: rabbitmq-data
+              mountPath: /var/lib/rabbitmq
+            - name: enabled-plugins
+              mountPath: /etc/rabbitmq/enabled_plugins
+              subPath: enabled_plugins
+            - name: rabbitmq-config
+              mountPath: /etc/rabbitmq/rabbitmq.conf
+              subPath: rabbitmq.conf
+      volumes:
+        - name: rabbitmq-data
+          persistentVolumeClaim:
+            claimName: rabbitmq-data-pvc
+        - name: enabled-plugins
+          configMap:
+            name: rabbitmq-enabled-plugins
+        - name: rabbitmq-config
+          configMap:
+            name: rabbitmq-config

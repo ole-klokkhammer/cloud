@@ -3,24 +3,10 @@
 - https://github.com/bitnami/charts/blob/main/bitnami/rabbitmq/values.yaml
 - https://docs.bitnami.com/virtual-machine/infrastructure/rabbitmq/administration/connect-remotely/
   
-## setup operator
-- https://www.rabbitmq.com/kubernetes/operator/quickstart-operator
-* kubectl apply -f "https://github.com/rabbitmq/cluster-operator/releases/latest/download/cluster-operator.yml" 
-
-
-
-## install cluster
-* kubectl apply -f cluster.yaml
-
-## login
-* username is: admin  
-* password:
-  * kubectl get secret rabbitmq -n brokers -o jsonpath="{.data.rabbitmq-password}" | base64 --decode
-
-## upgrade
-* helm upgrade rabbitmq oci://registry-1.docker.io/bitnamicharts/rabbitmq-cluster-operator \
-  --namespace brokers \
-  -f values.yaml
+## setup 
+* sudo zfs create -o quota=1G k3s/rabbitmq-data
+* kubectl apply -f storage.yaml
+* kubectl apply -f deployment.yaml
 
 
 

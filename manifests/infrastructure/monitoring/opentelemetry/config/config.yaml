@@ -1,9 +1,8 @@
 receivers:
-
-#  otlp:
-#    protocols:
-#      grpc:
-#      http:
+  #  otlp:
+  #    protocols:
+  #      grpc:
+  #      http:
 
   # kubeletstats:
   #   collection_interval: 10s
@@ -15,24 +14,24 @@ receivers:
   #     - pod
   #     - container
 
-#  k8s_cluster:
-#    auth_type: serviceAccount
-#    node_conditions_to_report:
-#      - Ready
-#      - MemoryPressure
-#    allocatable_types_to_report:
-#      - cpu
-#      - memory
-#
-#  hostmetrics:
-#    collection_interval: 30s
-#    scrapers:
-#      cpu:
-#      load:
-#      memory:
-#      disk:
-#      filesystem:
-#      network:
+  #  k8s_cluster:
+  #    auth_type: serviceAccount
+  #    node_conditions_to_report:
+  #      - Ready
+  #      - MemoryPressure
+  #    allocatable_types_to_report:
+  #      - cpu
+  #      - memory
+  #
+  #  hostmetrics:
+  #    collection_interval: 30s
+  #    scrapers:
+  #      cpu:
+  #      load:
+  #      memory:
+  #      disk:
+  #      filesystem:
+  #      network:
 
   filelog:
     include:
@@ -58,14 +57,20 @@ extensions:
   zpages:
 
 exporters:
-  kafka:
-    encoding: otlp_json
-    producer:
-      compression: gzip
-    brokers:
-      - kafka-kafka-bootstrap.kafka:9091
-      - kafka-kafka-bootstrap.kafka:9092
-      - kafka-kafka-bootstrap.kafka:9093
+  rabbitmq: 
+    connection:
+      vhost: /
+      endpoint: amqp://rabbitmq.brokers:5672/
+      tls:
+        insecure_skip_verify: true
+      auth:
+        plain:
+          username: guest
+          password: guest
+    durable: true
+    routing:
+      exchange: logs
+      routing_key: k3s.otel-logs
 
 service:
   extensions: [health_check, pprof, zpages]
@@ -75,6 +80,6 @@ service:
     #   processors: [ batch ]
     #   exporters: [ kafka ]
     logs:
-      receivers: [ filelog ]
-      processors: [ batch ]
-      exporters: [ kafka ]
+      receivers: [filelog]
+      processors: [batch]
+      exporters: [rabbitmq]

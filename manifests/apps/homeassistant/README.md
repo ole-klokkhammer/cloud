@@ -14,13 +14,18 @@ Use volumeMode: Filesystem for datasets
 * sudo zfs list -o name,volsize,used,available k3s/homeassistant-data
 
 ## setup
-* kubectl create namespace homeassistant
 * kubectl create secret generic -n apps  homeassistant-secrets --from-env-file=.env
 * kubectl create -f ./deployment.yaml
 * kubectl create -f ./service.yaml
 
 https://github.com/freol35241/ltss
 
+
+# update configmap
+* kubectl create configmap homeassistant-mqttsensors \
+  --from-file=config/sensors/mqtt/ \
+  -n apps \
+  --dry-run=client -o yaml > homeassistant-mqttsensors.yaml
 
 ## webrtc
 https://github.com/AlexxIT/WebRTC

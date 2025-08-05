@@ -7,6 +7,7 @@ metadata:
     app: homeassistant
 spec:
   replicas: 1
+  revisionHistoryLimit: 0
   serviceName: homeassistant
   selector:
     matchLabels:
@@ -40,7 +41,7 @@ spec:
             - containerPort: 8123
           volumeMounts:
             - mountPath: /config
-              name: homeassistant-data
+              name: homeassistant-data 
           env:
             - name: HA_DB_URL
               valueFrom:
@@ -50,4 +51,4 @@ spec:
       volumes:
         - name: homeassistant-data
           persistentVolumeClaim:
-            claimName: homeassistant-data-pvc
+            claimName: homeassistant-data-pvc 

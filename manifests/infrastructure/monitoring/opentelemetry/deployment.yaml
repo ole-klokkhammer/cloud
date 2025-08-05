@@ -34,7 +34,6 @@ spec:
               readOnly: true
             - mountPath: /etc/otelcol-contrib/
               name: otel-collector-config
-              readOnly: true
       volumes:
         # Typically the collector will want access to pod logs and container logs
         - name: varlogpods

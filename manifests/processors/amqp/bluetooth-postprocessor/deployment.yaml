@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bluetooth-postprocessor
+  namespace: processors
+  labels:
+    app: bluetooth-postprocessor
+    role: postprocessor
+spec:
+  revisionHistoryLimit: 0
+  selector:
+    matchLabels:
+      app: bluetooth-postprocessor
+      role: postprocessor
+  template:
+    metadata:
+      labels:
+        app: bluetooth-postprocessor
+        role: postprocessor
+    spec:
+      containers:
+        - name: bluetooth-postprocessor
+          image: ghcr.io/ole-klokkhammer/bluetooth-postprocessor:1.0.12
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: LOG_LEVEL
+              value: "info"
+            - name: RABBITMQ_HOST
+              value: "rabbitmq.brokers"
+            - name: RABBITMQ_USER
+              value: "guest"
+            - name: RABBITMQ_PASSWORD
+              value: "guest"
+            - name: DB_HOST
+              value: "postgres.postgres-external"
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              value: "linole"
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: bluetooth-postprocessor-config
+                  key: DB_USER
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: bluetooth-postprocessor-config
+                  key: DB_PASSWORD

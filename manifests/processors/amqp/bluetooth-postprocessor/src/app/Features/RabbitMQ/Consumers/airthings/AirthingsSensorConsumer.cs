@@ -4,7 +4,7 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
 
-public class AirthingsSensorPostProcessor : RabbitMqConsumerBase<AirthingsSensorPostProcessor>
+public class AirthingsSensorConsumer : RabbitMqConsumerBase<AirthingsSensorConsumer>
 {
     protected override string Exchange => "bluetooth";
     protected override string InboxRoutingKey => "airthings.sensor.parsed";
@@ -13,17 +13,20 @@ public class AirthingsSensorPostProcessor : RabbitMqConsumerBase<AirthingsSensor
 
     private readonly AirthingsRepository airthingsRepository;
     private readonly HomeassistantService homeassistantService;
+    private readonly MqttService mqttService;
 
-    public AirthingsSensorPostProcessor(
+    public AirthingsSensorConsumer(
         JsonUtil json,
-        ILogger<AirthingsSensorPostProcessor> logger,
-        RabbitMqService rabbitMqConnectionService,
+        ILogger<AirthingsSensorConsumer> logger,
+        RabbitMqService rabbitmq,
         HomeassistantService homeassistantService,
-        AirthingsRepository airthingsRepository
-    ) : base(json, logger, rabbitMqConnectionService)
+        AirthingsRepository airthingsRepository,
+        MqttService mqttService
+    ) : base(json, logger, rabbitmq)
     {
         this.airthingsRepository = airthingsRepository;
         this.homeassistantService = homeassistantService;
+        this.mqttService = mqttService;
     }
 
     protected override async Task OnMessage(object model, BasicDeliverEventArgs ea)
@@ -60,8 +63,8 @@ public class AirthingsSensorPostProcessor : RabbitMqConsumerBase<AirthingsSensor
         {
             var airthingsSensorData = sensor.SensorData;
             var airthingsDevice = sensor.DeviceInfo;
-            await rabbitMqConnectionService.PublishMqttAsync($"{MqttAirthingsTopicPrefix}/{airthingsDevice.Serial}/data", json.Serialize(airthingsSensorData));
-            await rabbitMqConnectionService.PublishMqttAsync($"{MqttAirthingsTopicPrefix}/{airthingsDevice.Serial}/device", json.Serialize(airthingsDevice));
+            await mqttService.PublishAsync($"{MqttAirthingsTopicPrefix}/{airthingsDevice.Serial}/data", json.Serialize(airthingsSensorData));
+            await mqttService.PublishAsync($"{MqttAirthingsTopicPrefix}/{airthingsDevice.Serial}/device", json.Serialize(airthingsDevice));
             await homeassistantService.TryHomeAssistantAutoDiscoveryAirthingsSensor(sensor);
         }
         catch (Exception ex)

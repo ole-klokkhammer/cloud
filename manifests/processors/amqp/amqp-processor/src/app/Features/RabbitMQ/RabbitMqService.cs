@@ -1,16 +1,16 @@
-
-using System.Text;
+using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 
-public class RabbitMqService : IHostedService
+public class RabbitMqService : IDisposable
 {
+
     private readonly ConnectionFactory factory;
     private readonly ILogger<RabbitMqService> logger;
 
-    private IConnection consumerConnection = null!;
-    private IConnection producerConnection = null!;
+    private IConnection? connection = null;
+    private readonly SemaphoreSlim connectionSemaphore = new(1, 1);
 
     public RabbitMqService(ILogger<RabbitMqService> logger)
     {
@@ -19,70 +19,73 @@ public class RabbitMqService : IHostedService
         {
             HostName = AppEnvironment.RabbitMqHost,
             UserName = AppEnvironment.RabbitMqUser,
-            Password = AppEnvironment.RabbitMqPassword
+            Password = AppEnvironment.RabbitMqPassword,
+            AutomaticRecoveryEnabled = true,
+            NetworkRecoveryInterval = TimeSpan.FromSeconds(10),
         };
     }
 
-    public async Task StartAsync(CancellationToken cancellationToken)
+
+    public void Dispose()
     {
-        consumerConnection = await factory.CreateConnectionAsync();
-        producerConnection = await factory.CreateConnectionAsync();
+        connection?.Dispose();
     }
 
-    public Task StopAsync(CancellationToken cancellationToken)
+    public async Task<IChannel> CreateChannelAsync()
     {
-        consumerConnection?.Dispose();
-        producerConnection?.Dispose();
-        return Task.CompletedTask;
+        var conn = await GetConnection();
+        return await conn.CreateChannelAsync();
     }
-
-    public IConnection GetConnection() => consumerConnection;
-    private IConnection GetProducerConnection() => producerConnection;
 
 
     public async Task PublishAsync(string exchange, string routingKey, ReadOnlyMemory<byte> body)
     {
         try
         {
-            using var channel = await GetProducerConnection().CreateChannelAsync();
-
+            var channel = await CreateChannelAsync();
             await channel.BasicPublishAsync(
                 exchange: exchange,
                 routingKey: routingKey,
                 body: body
             );
+            await channel.CloseAsync();
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Error publishing message to RabbitMQ");
+            throw;
         }
     }
 
-    public async Task PublishMqttAsync(string topic, string payload, bool retain = true, int qos = 0)
+    private async Task<IConnection> CreateConnectionAsync()
     {
+        await connectionSemaphore.WaitAsync();
         try
         {
-            using var channel = await GetProducerConnection().CreateChannelAsync();
-            await channel.BasicPublishAsync(
-                exchange: "amq.topic",
-                routingKey: topic,
-                body: Encoding.UTF8.GetBytes(payload),
-                basicProperties: new BasicProperties
-                {
-                    Headers = new Dictionary<string, object?>
-                    {
-                        { "x-mqtt-retain", retain },
-                        { "x-mqtt-qos", qos }
-                    }
-                },
-                mandatory: true
-            );
+            if (connection == null || !connection.IsOpen)
+            {
+                connection = await factory.CreateConnectionAsync();
+            }
+            return connection;
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error publishing Mqtt message to RabbitMQ");
+            logger.LogError(ex, "Failed to create RabbitMQ connection.");
+            throw;
+        }
+        finally
+        {
+            connectionSemaphore.Release();
         }
     }
 
+    private async Task<IConnection> GetConnection()
+    {
+        if (connection == null || !connection.IsOpen)
+        {
+            connection = await CreateConnectionAsync();
+        }
 
+        return connection;
+    }
 }

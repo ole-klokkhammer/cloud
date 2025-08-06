@@ -4,18 +4,21 @@ using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
-public class AirthingsBatteryPostProcessor : RabbitMqConsumerBase<AirthingsBatteryPostProcessor>
+public class AirthingsBatteryConsumer : RabbitMqConsumerBase<AirthingsBatteryConsumer>
 {
 
     private readonly AirthingsRepository airthingsRepository;
+    private readonly MqttService mqttService;
 
-    public AirthingsBatteryPostProcessor(
+    public AirthingsBatteryConsumer(
         JsonUtil json,
-        ILogger<AirthingsBatteryPostProcessor> logger,
-        RabbitMqService rabbitMqConnectionService,
-        AirthingsRepository airthingsRepository
-    ) : base(json, logger, rabbitMqConnectionService)
+        ILogger<AirthingsBatteryConsumer> logger,
+        RabbitMqService rabbitmq,
+        AirthingsRepository airthingsRepository,
+        MqttService mqttService
+    ) : base(json, logger, rabbitmq)
     {
+        this.mqttService = mqttService;
         this.airthingsRepository = airthingsRepository;
     }
 
@@ -44,6 +47,7 @@ public class AirthingsBatteryPostProcessor : RabbitMqConsumerBase<AirthingsBatte
         }
 
         await airthingsRepository.InsertBatteryDataAsync(airthingsBatteryData, serial.Value);
+
         await TryHandleMqttPublish(airthingsBatteryData, serial.Value);
     }
 
@@ -55,8 +59,8 @@ public class AirthingsBatteryPostProcessor : RabbitMqConsumerBase<AirthingsBatte
             var batteryVolt = sensor.Voltage;
             var batteryLevel = sensor.BatteryLevel;
             logger.LogInformation($"Publishing MQTT for Airthings battery with serial: {serial}, MAC: {mac}, Voltage: {batteryVolt}, Level: {batteryLevel}");
-            await rabbitMqConnectionService.PublishMqttAsync($"{MqttAirthingsTopicPrefix}/{serial}/battery/voltage", batteryVolt.ToString());
-            await rabbitMqConnectionService.PublishMqttAsync($"{MqttAirthingsTopicPrefix}/{serial}/battery/percentage", batteryLevel.ToString());
+            await mqttService.PublishAsync($"{MqttAirthingsTopicPrefix}/{serial}/battery/voltage", batteryVolt.ToString());
+            await mqttService.PublishAsync($"{MqttAirthingsTopicPrefix}/{serial}/battery/percentage", batteryLevel.ToString());
         }
         catch (Exception ex)
         {

@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: amqp-processor
-          image: ghcr.io/ole-klokkhammer/amqp-processor:1.0.12
+          image: ghcr.io/ole-klokkhammer/amqp-processor:1.0.17
           imagePullPolicy: IfNotPresent
           env:
             - name: LOG_LEVEL

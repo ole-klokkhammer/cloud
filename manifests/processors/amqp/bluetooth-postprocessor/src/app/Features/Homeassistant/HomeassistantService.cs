@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 public class HomeassistantService(
     JsonUtil json,
     ILogger<HomeassistantService> logger,
-    RabbitMqService rabbitMqService
+    MqttService mqttService
 )
 {
 
@@ -12,7 +12,7 @@ public class HomeassistantService(
         try
         {
             var serial = sensor.DeviceInfo.Serial;
-
+            
             object device = new
             {
                 identifiers = new[] { $"airthings_wave_plus{serial}" },
@@ -29,11 +29,11 @@ public class HomeassistantService(
                 sw = "1.0.0",
                 url = "https://github.com/oleklokkhammer/bluetooth-postprocessor"
             };
-
             var configs = new List<(string Key, string Topic, object Payload)>
             {
                 ("humidity", $"homeassistant/sensor/airthings_wave_plus_{serial}/humidity/config", new {
                     device,
+                    name = $"Humidity",
                     device_class = "humidity",
                     enabled_by_default = true,
                     object_id = $"airthings_{serial}_humidity",
@@ -46,6 +46,7 @@ public class HomeassistantService(
                 }),
                 ("illuminance", $"homeassistant/sensor/airthings_wave_plus_{serial}/illuminance/config", new {
                     device,
+                    name = $"Illuminance",
                     device_class = "illuminance",
                     enabled_by_default = true,
                     object_id = $"airthings_{serial}_illuminance",
@@ -58,6 +59,7 @@ public class HomeassistantService(
                 }),
                 ("radon_1day_avg", $"homeassistant/sensor/airthings_wave_plus_{serial}/radon_1day_avg/config", new {
                     device,
+                    name = $"Radon 1 Day Avg",
                     enabled_by_default = true,
                     object_id = $"airthings_{serial}_radon_1day_avg",
                     origin,
@@ -70,6 +72,7 @@ public class HomeassistantService(
                 }),
                 ("radon_longterm_avg", $"homeassistant/sensor/airthings_wave_plus_{serial}/radon_longterm_avg/config", new {
                     device,
+                    name = $"Radon Longterm Avg",
                     enabled_by_default = true,
                     object_id = $"airthings_{serial}_radon_longterm_avg",
                     origin,
@@ -82,6 +85,7 @@ public class HomeassistantService(
                 }),
                 ("temperature", $"homeassistant/sensor/airthings_wave_plus_{serial}/temperature/config", new {
                     device,
+                    name = $"Temperature",
                     device_class = "temperature",
                     enabled_by_default = true,
                     object_id = $"airthings_{serial}_temperature",
@@ -94,6 +98,7 @@ public class HomeassistantService(
                 }),
                 ("pressure", $"homeassistant/sensor/airthings_wave_plus_{serial}/pressure/config", new {
                     device,
+                    name = $"Pressure",
                     device_class = "pressure",
                     enabled_by_default = true,
                     object_id = $"airthings_{serial}_pressure",
@@ -106,6 +111,7 @@ public class HomeassistantService(
                 }),
                 ("co2", $"homeassistant/sensor/airthings_wave_plus_{serial}/co2/config", new {
                     device,
+                    name = $"CO2",
                     device_class = "carbon_dioxide",
                     enabled_by_default = true,
                     object_id = $"airthings_{serial}_co2",
@@ -118,6 +124,7 @@ public class HomeassistantService(
                 }),
                 ("voc", $"homeassistant/sensor/airthings_wave_plus_{serial}/voc/config", new {
                     device,
+                    name = $"VOC",
                     enabled_by_default = true,
                     object_id = $"airthings_{serial}_voc",
                     origin,
@@ -132,7 +139,7 @@ public class HomeassistantService(
 
             foreach (var (key, topic, payload) in configs)
             {
-                await rabbitMqService.PublishMqttAsync(topic, json.Serialize(payload));
+                await mqttService.PublishAsync(topic, json.Serialize(payload));
             }
             return true;
         }
@@ -141,16 +148,5 @@ public class HomeassistantService(
             logger.LogError(ex, "Failed to publish Airthings sensor configs");
             return false;
         }
-    }
-
-    private string MapSerialToRoom(int serial)
-    {
-        return serial switch
-        {
-            151076 => "basement",
-            18919 => "bedroom",
-            145104 => "livingroom",
-            _ => "unknown_location"
-        };
     }
 }

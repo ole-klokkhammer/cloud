@@ -22,9 +22,8 @@ public class App
                 services.AddSingleton<JsonUtil>();
                 services.AddSingleton<RabbitMqService>();
 
-                services.AddHostedService(provider => provider.GetRequiredService<RabbitMqService>());
-                services.AddHostedService<AirthingsBatteryProcessor>();
-                services.AddHostedService<AirthingsSensorProcessor>();
+                services.AddHostedService<AirthingsBatteryConsumer>();
+                services.AddHostedService<AirthingsSensorConsumer>();
             })
             .Build();
 

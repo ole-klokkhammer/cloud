@@ -16,16 +16,26 @@ spec:
       containers:
         - name: cam2mqtt
           image: acasal/cam2mqtt:latest
+          command: ["/bin/sh"]
+          args:
+            - -c
+            - |
+              apk update && apk add gettext
+              envsubst < /config-template.yml > /config.yml
+              exec ./bin/cam2mqtt --config /config.yml
           ports: 
             - containerPort: 8080 # only needed for webhook subscriptions
           env:
             - name: TZ
               value: Europe/Oslo
+          envFrom:
+            - secretRef:
+                name: cam2mqtt-secrets
           volumeMounts:
-            - name: config
-              mountPath: /config.yml
+            - name: cam2mqtt-config
               subPath: config.yml
+              mountPath: /config-template.yml
       volumes:
-        - name: config
-          secret:
-            secretName: cam2mqtt-config
+        - name: cam2mqtt-config
+          configMap: 
+            name: cam2mqtt-config

@@ -3,17 +3,17 @@ using System.Text;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client.Events;
 
-public class BluetoothScanPostProcessor : RabbitMqConsumerBase<BluetoothScanPostProcessor>
+public class BluetoothScanConsumer : RabbitMqConsumerBase<BluetoothScanConsumer>
 {
 
     private readonly BluetoothRepository bluetoothRepository;
 
-    public BluetoothScanPostProcessor(
+    public BluetoothScanConsumer(
         JsonUtil json,
-        ILogger<BluetoothScanPostProcessor> logger,
-        RabbitMqService rabbitMqConnectionService,
+        ILogger<BluetoothScanConsumer> logger,
+        RabbitMqService rabbitmq,
         BluetoothRepository bluetoothRepository
-    ) : base(json, logger, rabbitMqConnectionService)
+    ) : base(json, logger, rabbitmq)
     {
         this.bluetoothRepository = bluetoothRepository;
     }

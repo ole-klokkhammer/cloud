@@ -28,4 +28,6 @@ public static class AppEnvironment
 
     public static string DbName =>
         Environment.GetEnvironmentVariable("DB_NAME") ?? throw new InvalidOperationException("DB_NAME is not set.");
+    public static string MqttHost =>
+        Environment.GetEnvironmentVariable("MQTT_HOST") ?? throw new InvalidOperationException("MQTT_HOST is not set.");
 }

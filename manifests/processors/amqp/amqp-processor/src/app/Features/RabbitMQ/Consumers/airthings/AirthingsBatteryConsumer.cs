@@ -5,11 +5,11 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
 
-public class AirthingsBatteryProcessor : RabbitMqConsumerBase<AirthingsBatteryProcessor>
+public class AirthingsBatteryConsumer : RabbitMqConsumerBase<AirthingsBatteryConsumer>
 {
-    public AirthingsBatteryProcessor(
+    public AirthingsBatteryConsumer(
         JsonUtil json,
-        ILogger<AirthingsBatteryProcessor> logger,
+        ILogger<AirthingsBatteryConsumer> logger,
         RabbitMqService rabbitMqConnectionService
     ) : base(json, logger, rabbitMqConnectionService) { }
 

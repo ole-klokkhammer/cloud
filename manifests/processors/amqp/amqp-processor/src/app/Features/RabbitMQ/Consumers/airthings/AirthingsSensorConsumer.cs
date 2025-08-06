@@ -4,15 +4,15 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
 
-public class AirthingsSensorProcessor : RabbitMqConsumerBase<AirthingsSensorProcessor>
+public class AirthingsSensorConsumer : RabbitMqConsumerBase<AirthingsSensorConsumer>
 {
     protected override string Exchange => "bluetooth";
     protected override string InboxRoutingKey => "airthings.sensor.raw";
     protected override string OutboxRoutingKey => "airthings.sensor.parsed";
 
-    public AirthingsSensorProcessor(
+    public AirthingsSensorConsumer(
         JsonUtil json,
-        ILogger<AirthingsSensorProcessor> logger,
+        ILogger<AirthingsSensorConsumer> logger,
         RabbitMqService rabbitMqConnectionService
     ) : base(json, logger, rabbitMqConnectionService) { }
 

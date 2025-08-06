@@ -25,12 +25,13 @@ public class App
                 services.AddSingleton<BluetoothRepository>();
                 services.AddSingleton<RabbitMqService>();
                 services.AddSingleton<PostgresService>();
+                services.AddSingleton<MqttService>();
 
-                services.AddHostedService(provider => provider.GetRequiredService<RabbitMqService>());
                 services.AddHostedService(provider => provider.GetRequiredService<PostgresService>());
-                services.AddHostedService<BluetoothScanPostProcessor>();
-                services.AddHostedService<AirthingsBatteryPostProcessor>();
-                services.AddHostedService<AirthingsSensorPostProcessor>();
+                services.AddHostedService(provider => provider.GetRequiredService<MqttService>());
+                services.AddHostedService<BluetoothScanConsumer>();
+                services.AddHostedService<AirthingsBatteryConsumer>();
+                services.AddHostedService<AirthingsSensorConsumer>();
             })
             .Build();
 

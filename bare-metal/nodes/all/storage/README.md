@@ -4,6 +4,7 @@
 * zfs for k3s pool that should be backed up
 * zfs k3s volumes that are manually allocated, but temporary
 * postgres at /mnt/databases/postgres 
+* zfs pool for surveillance storage
 
 ## NOTICE
 mount disks with UUID for reliability

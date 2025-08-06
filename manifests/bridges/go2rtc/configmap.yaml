@@ -19,15 +19,10 @@ data:
     streams:
       entrance_roof: 
         - "ffmpeg:http://${CAMERA_ENTRANCE_ROOF_IP}/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=${CAMERA_ENTRANCE_ROOF_USER}&password=${CAMERA_ENTRANCE_ROOF_PASSWORD}#video=copy#audio=opus"
-        - rtsp://192.168.10.68:8554/incoming#backchannel=1#audio=pcma
-      entrance_roof_rtsp: 
-        - "ffmpeg:rtsp://${CAMERA_OFFICE_USER}:${CAMERA_OFFICE_PASSWORD}@${CAMERA_ENTRANCE_ROOF_IP}/Preview_01_main#video=copy#audio=opus"
-        - "onvif://${CAMERA_ENTRANCE_ROOF_USER}:${CAMERA_ENTRANCE_ROOF_PASSWORD}@${CAMERA_ENTRANCE_ROOF_IP}:8000/onvif/device_service"
-        - rtsp://192.168.10.68:8554/incoming#backchannel=1#audio=pcma
+      entrance_roof_sub: 
+        - "ffmpeg:http://${CAMERA_ENTRANCE_ROOF_IP}/flv?port=1935&app=bcs&stream=channel0_sub.bcs&user=${CAMERA_ENTRANCE_ROOF_USER}&password=${CAMERA_ENTRANCE_ROOF_PASSWORD}#video=copy#audio=opus"
       office: 
         - "ffmpeg:http://${CAMERA_OFFICE_IP}/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=${CAMERA_OFFICE_USER}&password=${CAMERA_OFFICE_PASSWORD}#video=copy#audio=opus"
-      office_detector: 
-        - rtsp://127.0.0.1:8554/office_detector
 ---
 apiVersion: v1
 kind: ConfigMap

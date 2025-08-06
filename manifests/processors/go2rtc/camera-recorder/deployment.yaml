@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: camera-recorder
+  namespace: processors
+  labels:
+    app: camera-recorder
+    role: processor
+spec:
+  replicas: 1
+  revisionHistoryLimit: 0
+  selector:
+    matchLabels:
+      app: camera-recorder
+  template:
+    metadata:
+      labels:
+        app: camera-recorder
+        role: processor
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - master0
+      initContainers:
+        - name: check-fs-mount
+          image: busybox
+          command:
+            [
+              "sh",
+              "-c",
+              'test -f /fs/mounted.txt || (echo "File mount missing" && exit 1)',
+            ]
+          volumeMounts:
+            - mountPath: /fs
+              name: camera-recorder-data-entranceroof
+      containers:
+        - name: camera-recorder
+          image: ghcr.io/ole-klokkhammer/camera-recorder:1.0.15
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: LOG_LEVEL
+              value: "debug"
+            - name: OUTPUT_DIRECTORY
+              value: "/app/recordings"
+            - name: RTSP_URL
+              value: "rtsp://go2rtc.bridges:8554/entrance_roof_sub"
+          volumeMounts:
+            - mountPath: /app/recordings
+              name: camera-recorder-data-entranceroof
+      volumes:
+        - name: camera-recorder-data-entranceroof
+          persistentVolumeClaim:
+            claimName: camera-recorder-data-entranceroof-pvc

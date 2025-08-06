@@ -4,7 +4,14 @@
 - https://github.com/kubernetes/dashboard
 
 - helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
-- helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard --create-namespace --namespace kubernetes-dashboard --set kong.admin.tls.enabled=false
+- helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard \
+--create-namespace \
+--namespace kubernetes-dashboard \
+--set kong.image.repository=kong \
+--set kong.image.tag="3.9.0"
+- faulty kong crash on reboot, use 3.9.0?
+  - https://github.com/kubernetes/dashboard/issues/9955
+
 
 ## docs:
 - https://github.com/kubernetes/dashboard/tree/master/docs

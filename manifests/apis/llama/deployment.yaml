@@ -32,7 +32,7 @@ spec:
             [
               "sh",
               "-c",
-              'test -f /fs/mounted.txt || (echo "File mount missing" && exit 1)',
+              'test -f /fs/.mounted || (echo "File mount missing" && exit 1)',
             ]
           volumeMounts:
             - mountPath: /fs

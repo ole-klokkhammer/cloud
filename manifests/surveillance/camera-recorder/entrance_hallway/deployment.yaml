@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: camera-recorder
-  namespace: processors
+  namespace: surveillance
   labels:
     app: camera-recorder
     role: processor
@@ -34,14 +34,14 @@ spec:
             [
               "sh",
               "-c",
-              'test -f /fs/mounted.txt || (echo "File mount missing" && exit 1)',
+              'test -f /fs/.mounted || (echo "File mount missing" && exit 1)',
             ]
           volumeMounts:
             - mountPath: /fs
               name: camera-recorder-data-entranceroof
       containers:
         - name: camera-recorder
-          image: ghcr.io/ole-klokkhammer/camera-recorder:1.0.15
+          image: ghcr.io/ole-klokkhammer/camera-recorder:1.0.60
           imagePullPolicy: IfNotPresent
           env:
             - name: LOG_LEVEL
@@ -50,10 +50,20 @@ spec:
               value: "/app/recordings"
             - name: RTSP_URL
               value: "rtsp://go2rtc.bridges:8554/entrance_roof_sub"
+            - name: FOOTAGE_DIR
+              value: /media
+            - name: RETENTION_DAYS
+              value: "7"
+            - name: RETENTION_INTERVAL
+              value: "01:00:00"
+            - name: RETENTION_DRYRUN
+              value: "false"
           volumeMounts:
             - mountPath: /app/recordings
               name: camera-recorder-data-entranceroof
+
       volumes:
         - name: camera-recorder-data-entranceroof
           persistentVolumeClaim:
             claimName: camera-recorder-data-entranceroof-pvc
+---

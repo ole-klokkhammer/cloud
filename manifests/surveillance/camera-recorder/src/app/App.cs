@@ -20,8 +20,6 @@ public class App
                     builder.SetMinimumLevel(AppEnvironment.LogLevel == "debug" ? LogLevel.Debug : LogLevel.Information);
                 });
 
-
-                services.AddSingleton<FfmpegService>();
                 services.AddHostedService<FfmpegService>();
             })
             .Build();

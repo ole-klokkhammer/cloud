@@ -24,35 +24,40 @@ public class FfmpegService : BackgroundService
         {
             Directory.CreateDirectory(outputDir);
         }
-        string outputFile = $"{outputDir}/index.m3u8";
-
-        string segmentDir = $"{outputDir}/segments";
-        if (!Directory.Exists(segmentDir))
-        {
-            Directory.CreateDirectory(segmentDir);
-        }
-        string segmentPattern = $"{segmentDir}/segment%03d.ts";
-        logger.LogDebug($"Segment files will be: {segmentPattern}");
+        string pattern = Path.Combine(outputDir, "%Y%m%dT%H%M%S.mkv");
 
         string ffmpegArgs = string.Join(" ", new[]
         {
+            "-hide_banner -y",
+            "-loglevel error",
+
+            // Input
             "-rtsp_transport tcp",
+            "-use_wallclock_as_timestamps 1",
             $"-i {rtspUrl}",
-            "-c:v h264",
-            "-c:a aac",
-            "-f hls",
-            "-hls_time 4",
-            "-hls_list_size 151200",
-            "-hls_flags delete_segments+append_list",
-            $"-hls_segment_filename {segmentPattern}",
-            outputFile
+
+            // Copy codecs
+            "-c:v copy",
+            "-c:a copy",
+            "-flags +global_header",
+
+            // Segment muxer options
+            "-f segment",
+            "-reset_timestamps 1",
+            "-strftime 1",
+            "-segment_time 900",
+            "-segment_atclocktime 1",
+            "-segment_format mkv",
+
+            // **Final: a single filename pattern with strftime**
+            $"\"{pattern}\""
         });
+
         ffmpegProcess = Process.Start(new ProcessStartInfo
         {
             FileName = "/usr/bin/ffmpeg",
             Arguments = ffmpegArgs,
             RedirectStandardError = true,
-            RedirectStandardOutput = true,
             UseShellExecute = false,
             CreateNoWindow = true
         });
@@ -79,5 +84,9 @@ public class FfmpegService : BackgroundService
             ffmpegProcess.Kill();
             await ffmpegProcess.WaitForExitAsync(token);
         }
+        logger.LogInformation("FFmpeg process has exited.");
+
+        // ensure pod is restarted if FFmpeg stops unexpectedly
+        throw new OperationCanceledException("FFmpeg service has been stopped.");
     }
 }

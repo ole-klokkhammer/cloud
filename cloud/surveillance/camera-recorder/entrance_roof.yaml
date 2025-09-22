@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: camera-recorder-entranceroof
+  namespace: surveillance
+  labels:
+    app: camera-recorder-entranceroof
+    role: processor
+spec:
+  replicas: 1
+  revisionHistoryLimit: 0
+  selector:
+    matchLabels:
+      app: camera-recorder-entranceroof
+  template:
+    metadata:
+      labels:
+        app: camera-recorder-entranceroof
+        role: processor
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - master0
+      initContainers:
+        - name: check-fs-mount
+          image: busybox
+          command:
+            [
+              "sh",
+              "-c",
+              'test -f /fs/.mounted || (echo "File mount missing" && exit 1)',
+            ]
+          volumeMounts:
+            - mountPath: /fs
+              name: surveillance-data-pvc
+      containers:
+        - name: camera-recorder
+          image: ghcr.io/ole-klokkhammer/camera-recorder:1.0.70
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: LOG_LEVEL
+              value: "debug"
+            - name: OUTPUT_DIRECTORY
+              value: "/app/recordings"
+            - name: RTSP_URL
+              value: "rtsp://go2rtc.bridges:8554/entrance_roof_sub"
+            - name: FOOTAGE_DIR
+              value: /media
+            - name: RETENTION_DAYS
+              value: "7"
+            - name: RETENTION_INTERVAL
+              value: "01:00:00"
+            - name: RETENTION_DRYRUN
+              value: "false"
+          volumeMounts:
+            - name: surveillance-data-pvc
+              subPath: entrance_roof
+              mountPath: /app/recordings
+
+      volumes:
+        - name: surveillance-data-pvc
+          persistentVolumeClaim:
+            claimName: surveillance-data-pvc

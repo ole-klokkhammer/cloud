@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webdav-entranceroof
+  namespace: surveillance
+  labels:
+    app: webdav-entranceroof
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webdav-entranceroof
+  template:
+    metadata:
+      labels:
+        app: webdav-entranceroof
+    spec:
+      containers:
+        - name: webdav
+          image: rclone/rclone:latest
+          args:
+            [
+              "serve",
+              "webdav",
+              "/data",
+              "--addr",
+              ":8080",
+              "--user",
+              "USER",
+              "--pass",
+              "PASS",
+              "--read-only",
+            ]
+          ports:
+            - containerPort: 8080
+              name: http
+          volumeMounts:
+            - name: surveillance-data
+              mountPath: /data
+      volumes:
+        - name: surveillance-data
+          persistentVolumeClaim:
+            claimName: surveillance-data-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: webdav-entranceroof
+  namespace: surveillance
+spec:
+  type: LoadBalancer
+  selector:
+    app: webdav-entranceroof
+  ports:
+    - port: 8080
+      targetPort: 8080
+      name: http

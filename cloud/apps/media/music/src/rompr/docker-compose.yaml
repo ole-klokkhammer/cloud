@@ -1,0 +1,8 @@
+version: "3"
+services: 
+  rompr:
+    image: rawdlite/rompr
+    container_name: rompr
+    restart: always
+    ports:
+      - "80:80"

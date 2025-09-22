@@ -15,6 +15,7 @@ sudo modprobe zfs
 
 * sudo zpool create k3s /dev/nvme0n1p1
 * sudo zpool create k3s-temp /dev/nvme0n1p2
+* sudo zpool create media /dev/sdb
 
 ### 4. Create a ZFS Filesystem
 sudo zfs create mypool/mydataset

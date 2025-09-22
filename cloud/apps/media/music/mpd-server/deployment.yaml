@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mpd-server
+  namespace: apps
+  labels:
+    app: mpd-server
+spec:
+  replicas: 1
+  revisionHistoryLimit: 0
+  selector:
+    matchLabels:
+      app: mpd-server
+  template:
+    metadata:
+      labels:
+        app: mpd-server
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - master0
+      containers:
+        - name: mpd
+          image: ghcr.io/ole-klokkhammer/mpd:0.24.5
+          command: ["mpd"]
+          args: ["--no-daemon", "/etc/mpd.conf"]
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 6600
+          volumeMounts:
+            - name: mpd-server-config
+              mountPath: /etc/mpd.conf
+              subPath: mpd.conf
+              readOnly: true
+            - name: mpd-data
+              mountPath: /var/lib/mpd
+            - name: music
+              mountPath: /media/music
+      volumes:
+        - name: mpd-server-config
+          configMap:
+            name: mpd-server-config
+        - name: music
+          hostPath:
+            path: /mnt/data/data/media/music
+        - name: mpd-data
+          persistentVolumeClaim:
+            claimName: mpd-data-pvc

@@ -1,0 +1,29 @@
+# Minimal snapserver image built from upstream .deb package
+FROM debian:12-slim
+
+ARG SNAPCAST_VERSION
+ARG TARGETARCH
+ARG DEBIAN_DIST=bookworm  # override if you need bullseye, jammy, etc.
+
+RUN set -eux; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends ca-certificates curl; \
+    rm -rf /var/lib/apt/lists/*; \ 
+    base="https://github.com/badaix/snapcast/releases/download/v${SNAPCAST_VERSION}"; \
+    url="${base}/snapserver_${SNAPCAST_VERSION}-1_${TARGETARCH}_${DEBIAN_DIST}.deb"; \
+    curl -fL "$url" -o /tmp/snapserver.deb; \
+    apt-get update; \ 
+    dpkg -i /tmp/snapserver.deb || apt-get -y -f install; \
+    rm -rf /tmp/snapserver.deb /var/lib/apt/lists/*;
+
+RUN mkdir -p /var/run /var/log/snapserver /etc/snapserver;
+
+# Default config (override via ConfigMap/volume in k8s)
+COPY snapserver.conf /etc/snapserver/snapserver.conf 
+
+# Use HTTP UI for healthcheck (no bash needed)
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s CMD curl -fsS http://0.0.0.0:1780/ || exit 1
+
+EXPOSE 1704/tcp 1780/tcp
+ENTRYPOINT ["/usr/bin/snapserver"]
+CMD ["-c", "/etc/snapserver/snapserver.conf"]

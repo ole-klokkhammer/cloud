@@ -1,0 +1,5 @@
+rx
+opencv-python-headless 
+# tflite-runtime
+ai_edge_litert
+numpy<2 # numpy 2.0.0 is not compatible with tflite-runtime 

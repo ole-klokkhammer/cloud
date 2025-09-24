@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: webdav-entranceroof
+  name: webdav-surveillance
   namespace: surveillance
   labels:
-    app: webdav-entranceroof
+    app: webdav-surveillance
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: webdav-entranceroof
+      app: webdav-surveillance
   template:
     metadata:
       labels:
-        app: webdav-entranceroof
+        app: webdav-surveillance
     spec:
       containers:
         - name: webdav
@@ -45,12 +45,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: webdav-entranceroof
+  name: webdav-surveillance
   namespace: surveillance
 spec:
   type: LoadBalancer
   selector:
-    app: webdav-entranceroof
+    app: webdav-surveillance
   ports:
     - port: 8080
       targetPort: 8080

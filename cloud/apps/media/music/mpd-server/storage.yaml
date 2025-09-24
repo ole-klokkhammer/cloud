@@ -1,18 +1,32 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mpd-music-pvc
+  namespace: apps
+spec:
+  storageClassName: local-path
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 4Ti
+  volumeName: mpd-music
+--- 
+# Volumes:
 ---
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: mpd-data
-  namespace: apps
+  name: mpd-music
 spec:
   capacity:
-    storage: 5Gi
+    storage: 4Ti
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
   storageClassName: local-path
   local:
-    path: /k3s/mpd-data  # <-- your ZFS mount point
+    path: /hdd/music
   nodeAffinity:
     required:
       nodeSelectorTerms:
@@ -21,17 +35,4 @@ spec:
               operator: In
               values:
                 - master0
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: mpd-data-pvc
-  namespace: apps
-spec:
-  accessModes:
-    - ReadWriteOnce
-  storageClassName: local-path
-  resources:
-    requests:
-      storage: 5Gi
-  volumeName: mpd-data
+ 

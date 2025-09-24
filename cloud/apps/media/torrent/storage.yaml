@@ -1,8 +1,59 @@
 apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: torrent-music-pvc
+  namespace: apps
+spec:
+  storageClassName: local-path
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 4Ti
+  volumeName: torrent-music
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: torrent-config-pvc
+  namespace: apps
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 500Mi
+  volumeName: torrent-config
+---
+# Volumes:
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: torrent-music
+spec:
+  capacity:
+    storage: 4Ti
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-path
+  local:
+    path: /hdd/music # <-- your ZFS mount point
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - master0
+---
+apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: torrent-config
-  namespace: apps
 spec:
   capacity:
     storage: 500Mi
@@ -20,17 +71,3 @@ spec:
               operator: In
               values:
                 - master0
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: torrent-config-pvc
-  namespace: apps
-spec:
-  accessModes:
-    - ReadWriteOnce
-  storageClassName: local-path
-  resources:
-    requests:
-      storage: 500Mi
-  volumeName: torrent-config

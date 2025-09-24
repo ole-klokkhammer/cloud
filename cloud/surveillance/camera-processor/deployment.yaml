@@ -42,7 +42,7 @@ spec:
           volumeMounts:
             - name: camera-processor-data
               subPath: entrance_roof
-              mountPath: /data 
+              mountPath: /data
         - name: office
           image: ghcr.io/ole-klokkhammer/camera-processor:1.0.50
           securityContext:
@@ -62,7 +62,7 @@ spec:
             - name: camera-processor-data
               subPath: office
               mountPath: /data
-              
+
         - name: go2rtc
           image: alexxit/go2rtc
           ports:
@@ -76,11 +76,11 @@ spec:
 
       volumes:
         - name: camera-processor-data
-          hostPath:
-            path: /mnt/data/camera
+          persistentVolumeClaim:
+            claimName: surveillance-data-pvc
         - name: go2rtc-config
           configMap:
-            name: go2rtc-config 
+            name: go2rtc-config
 ---
 apiVersion: v1
 kind: ConfigMap

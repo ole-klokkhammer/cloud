@@ -25,18 +25,6 @@ spec:
                     operator: In
                     values:
                       - master0
-      initContainers:
-        - name: check-fs-mount
-          image: busybox
-          command:
-            [
-              "sh",
-              "-c",
-              'test -f /fs/.mounted || (echo "File mount missing" && exit 1)',
-            ]
-          volumeMounts:
-            - mountPath: /fs
-              name: rabbitmq-data
       containers:
         - name: rabbitmq
           image: rabbitmq:4.1-management

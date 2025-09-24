@@ -12,7 +12,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: local-path
   local:
-    path: /surveillance/cameras  # <-- your ZFS mount point
+    path: /hdd/surveillance  # <-- your ZFS mount point
   nodeAffinity:
     required:
       nodeSelectorTerms:

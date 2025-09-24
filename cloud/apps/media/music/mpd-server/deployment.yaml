@@ -29,26 +29,19 @@ spec:
         - name: mpd
           image: ghcr.io/ole-klokkhammer/mpd:0.24.5
           command: ["mpd"]
-          args: ["--no-daemon", "/etc/mpd.conf"]
-          imagePullPolicy: Always
+          args: ["--no-daemon", "/hdd/music/mpd/server/mpd.conf"]
+          # imagePullPolicy: Always
           ports:
             - containerPort: 6600
-          volumeMounts:
-            - name: mpd-server-config
-              mountPath: /etc/mpd.conf
-              subPath: mpd.conf
-              readOnly: true
+          volumeMounts: 
             - name: mpd-data
+              mountPath: /hdd/music
+            - name: mpd-temp
               mountPath: /var/lib/mpd
-            - name: music
-              mountPath: /media/music
-      volumes:
-        - name: mpd-server-config
-          configMap:
-            name: mpd-server-config
-        - name: music
-          hostPath:
-            path: /mnt/data/data/media/music
+      volumes: 
+        - name: mpd-temp
+          emptyDir: {}
         - name: mpd-data
           persistentVolumeClaim:
-            claimName: mpd-data-pvc
+            claimName: mpd-music-pvc 
+ 

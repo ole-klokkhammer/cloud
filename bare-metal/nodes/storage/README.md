@@ -98,7 +98,8 @@ is hdd fast enough for k3s volumes?
 
 
 ### HDD mirror 4TB for surveillance, music etc
-* sudo zpool create hdd /dev/sdX
+* sudo wipefs -a /dev/sdX
+* sudo zpool create -f -O atime=off -O compression=lz4 hdd /dev/sdX
 * sudo zfs create hdd/music
 * sudo zfs create hdd/surveillance
 * ...

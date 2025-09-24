@@ -23,13 +23,6 @@ spec:
                     operator: In
                     values:
                       - master0
-      initContainers:
-        - name: check-vikunja-data-mount
-          image: busybox
-          command: ['sh', '-c', 'test -f /fs/.mounted || (echo "File mount missing" && exit 1)']
-          volumeMounts:
-            - mountPath: /fs
-              name: vikunja-data
       containers: 
         - name: vikunja
           image: vikunja/vikunja:unstable

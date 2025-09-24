@@ -1,0 +1,17 @@
+version: "3.8"
+services:
+  mpd:
+    image: ghcr.io/ole-klokkhammer/mpd:0.24.5
+    command: ["mpd", "--no-daemon", "/hdd/music/mpd/ole/mpd.conf"]
+    container_name: mpd-satellite
+    restart: unless-stopped
+    ports:
+      - "6600:6600/tcp"
+    devices:
+      - /dev/snd:/dev/snd
+    group_add:
+      - "audio"
+    cap_add:
+      - SYS_NICE
+    volumes: 
+      - /mnt/music:/hdd/music:ro

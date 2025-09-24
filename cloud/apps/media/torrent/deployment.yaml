@@ -17,18 +17,16 @@ spec:
         app: torrent-stack
     spec:
       restartPolicy: Always
-      initContainers:
-        - name: check-torrent-config-mount # CHECK ZFS MOUNT
-          image: busybox
-          command:
-            [
-              "sh",
-              "-c",
-              'test -f /fs/.mounted || (echo "File mount missing" && exit 1)',
-            ]
-          volumeMounts:
-            - mountPath: /fs
-              name: torrent-config
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - master0
+      initContainers: 
         - name: apply-sysctl # DISABLE IPV6
           image: busybox
           command: ["sh", "-c", "sysctl -p /etc/sysctl.conf || true"]
@@ -37,7 +35,7 @@ spec:
           volumeMounts:
             - name: torrent-config
               subPath: nordvpn/etc/sysctl.conf
-              mountPath: /etc/sysctl.conf 
+              mountPath: /etc/sysctl.conf
         - name: set-ulimit # Set proper ulimits
           image: busybox
           command: ["sh", "-c", "ulimit -n 65536"]
@@ -50,7 +48,7 @@ spec:
           volumeMounts:
             - name: lib-modules
               mountPath: /lib/modules
-              readOnly: true 
+              readOnly: true
           # sysctls and other advanced options may require privileged DaemonSet or host networking
           env:
             - name: PUID
@@ -90,7 +88,7 @@ spec:
               protocol: TCP
             - containerPort: 6881
               protocol: UDP
-            - containerPort: 8080 
+            - containerPort: 8080
           volumeMounts:
             - name: torrent-data
               subPath: downloads
@@ -155,8 +153,8 @@ spec:
             - name: torrent-config
               subPath: lidarr
               mountPath: /config
-            - name: torrent-data
-              subPath: music
+            - name: torrent-music-data
+              subPath: data
               mountPath: /music
             - name: torrent-data
               subPath: downloads
@@ -207,9 +205,13 @@ spec:
         - name: torrent-data
           hostPath:
             path: /mnt/big/media
+        - name: torrent-music-data
+          persistentVolumeClaim:
+            claimName: torrent-music-pvc
         - name: torrent-config
           persistentVolumeClaim:
             claimName: torrent-config-pvc
         - name: lib-modules
           hostPath:
             path: /lib/modules
+ 

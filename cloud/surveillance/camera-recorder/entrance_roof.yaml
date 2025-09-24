@@ -26,19 +26,7 @@ spec:
                   - key: kubernetes.io/hostname
                     operator: In
                     values:
-                      - master0
-      initContainers:
-        - name: check-fs-mount
-          image: busybox
-          command:
-            [
-              "sh",
-              "-c",
-              'test -f /fs/.mounted || (echo "File mount missing" && exit 1)',
-            ]
-          volumeMounts:
-            - mountPath: /fs
-              name: surveillance-data-pvc
+                      - master0 
       containers:
         - name: camera-recorder
           image: ghcr.io/ole-klokkhammer/camera-recorder:1.0.70

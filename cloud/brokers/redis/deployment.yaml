@@ -24,14 +24,7 @@ spec:
                   - key: kubernetes.io/hostname
                     operator: In
                     values:
-                      - master0 
-      initContainers:
-        - name: check-fs-mount
-          image: busybox
-          command: ['sh', '-c', 'test -f /fs/.mounted || (echo "File mount missing" && exit 1)']
-          volumeMounts:
-            - mountPath: /fs
-              name: redis-data
+                      - master0  
       containers:
       - image: redis:alpine
         name: redis

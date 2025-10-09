@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "x6M5uxGUpU0=",
+  "success": true,
+  "projectFilePath": "/home/ole/workspace/oleklokkhammer/projects/k3s/cloud/apps/media/torrent/src/LidarrFeeder/LidarrFeeder.csproj",
+  "expectedPackageFiles": [
+    "/home/ole/.nuget/packages/system.servicemodel.syndication/9.0.9/system.servicemodel.syndication.9.0.9.nupkg.sha512"
+  ],
+  "logs": []
+}

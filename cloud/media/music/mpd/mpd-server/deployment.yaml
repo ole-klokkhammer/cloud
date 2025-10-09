@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: mpd-server
-  namespace: apps
+  namespace: media
   labels:
     app: mpd-server
 spec:

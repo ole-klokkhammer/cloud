@@ -1,0 +1,30 @@
+
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: lidarrfeeder
+  namespace: media
+spec:
+  schedule: "0 2 * * *" # daily at 02:00
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      template:
+        spec:
+          restartPolicy: Never 
+          containers: 
+            - name: lidarrfeeder
+              image: ghcr.io/ole-klokkhammer/lidarrfeeder:1.0.5 
+              env:
+                - name: LIDARR_URL
+                  value: "http://localhost:8686"
+                - name: LIDARR_API_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: torrent-secrets
+                      key: LIDARR_API_KEY
+                - name: RSS_URL
+                  value: "https://rss.marketingtools.apple.com/api/v2/no/music/most-played/100/albums.rss"

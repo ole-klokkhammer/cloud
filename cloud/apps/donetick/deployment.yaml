@@ -33,6 +33,7 @@ spec:
               value: "selfhosted"
             - name: DT_SERVER_CORS__ALLOW__ORIGINS
               value: "*"
+            # DATABASE
             - name: DT_DATABASE_TYPE
               value: "postgres"
             - name: DT_DATABASE_HOST

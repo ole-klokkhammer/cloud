@@ -2,7 +2,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: mpd-music-pvc
-  namespace: apps
+  namespace: media
 spec:
   storageClassName: local-path
   accessModes:

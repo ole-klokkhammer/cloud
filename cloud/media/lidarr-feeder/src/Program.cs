@@ -1,68 +1,49 @@
-﻿using System;
-using System.Net.Http;
-using System.ServiceModel.Syndication;
-using System.Threading.Tasks;
-using System.Xml;
-using System.Text.Json;
+﻿
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
-class Program
+internal static class Program
 {
-    private static readonly HttpClient http = new HttpClient();
-
-    private const int LidarrQualityProfile = 3; // lossless
-
-    private const string LidarrRootFolder = "/music";
-
-    static async Task Main()
+    static async Task<int> Main(string[] args)
     {
-        string rssUrl = AppEnvironment.RssUrl; // https://rss.marketingtools.apple.com/api/v2/no/music/most-played/100/albums.rss
-
-        using var reader = XmlReader.Create(rssUrl);
-        var feed = SyndicationFeed.Load(reader);
-
-        foreach (var item in feed.Items)
-        {
-            string artist = item.Authors.Count > 0 ? item.Authors[0].Name : "";
-            string album = item.Title.Text;
-
-            Console.WriteLine($"Found: {album} by {artist}");
-
-            string mbid = await LookupMusicBrainzArtist(artist);
-            if (!string.IsNullOrEmpty(mbid))
+        using var host = Host.CreateDefaultBuilder(args)
+            .ConfigureServices((context, services) =>
             {
-                await AddArtistToLidarr(mbid);
-            }
-        }
-    }
+                services.AddLogging(builder =>
+                {
+                    builder.AddSimpleConsole(options =>
+                    {
+                        options.TimestampFormat = "[yyyy-MM-dd HH:mm:ss] ";
+                        options.IncludeScopes = false;
+                    });
+                    builder.SetMinimumLevel(LogLevel.Information);
+                    builder.AddFilter("System.Net.Http", LogLevel.Warning);
+                });
+                services.AddHttpClient();
+                services.AddSingleton<App>();
+            })
+            .Build();
 
-    static async Task<string> LookupMusicBrainzArtist(string artist)
-    {
-        string url = $"https://musicbrainz.org/ws/2/artist/?query={Uri.EscapeDataString(artist)}&fmt=json";
-        var resp = await http.GetStringAsync(url);
-        using var doc = JsonDocument.Parse(resp);
-        if (doc.RootElement.TryGetProperty("artists", out var artists) && artists.GetArrayLength() > 0)
+        var logger = host.Services.GetRequiredService<ILogger<App>>();
+        var app = host.Services.GetRequiredService<App>();
+
+        try
         {
-            return artists[0].GetProperty("id").GetString();
+            await host.StartAsync();
+            var result = await app.RunOnceAsync();
+            await host.StopAsync(CancellationToken.None);
+            return result;
         }
-        return null;
-    }
-
-    static async Task AddArtistToLidarr(string mbid)
-    {
-        var payload = new
+        catch (OperationCanceledException)
         {
-            foreignArtistId = mbid,
-            qualityProfileId = LidarrQualityProfile,
-            rootFolderPath = LidarrRootFolder,
-            monitored = true,
-            addOptions = new { monitor = "all" }
-        };
-
-        var content = new StringContent(JsonSerializer.Serialize(payload),
-                                        System.Text.Encoding.UTF8,
-                                        "application/json");
-
-        var resp = await http.PostAsync($"{AppEnvironment.LidarrUrl}/api/v1/artist?apikey={AppEnvironment.LidarrApiKey}", content);
-        Console.WriteLine($"Lidarr response: {resp.StatusCode}");
+            logger.LogInformation("Cancelled");
+            return 130;
+        }
+        catch (Exception ex)
+        {
+            logger.LogCritical(ex, "Unhandled error");
+            return 1;
+        }
     }
 }

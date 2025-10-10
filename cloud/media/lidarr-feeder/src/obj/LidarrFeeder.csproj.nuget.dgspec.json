@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/home/ole/workspace/oleklokkhammer/projects/k3s/cloud/apps/media/torrent/src/LidarrFeeder/LidarrFeeder.csproj": {}
+    "/home/ole/workspace/oleklokkhammer/projects/k3s/cloud/media/lidarr-feeder/src/LidarrFeeder.csproj": {}
   },
   "projects": {
-    "/home/ole/workspace/oleklokkhammer/projects/k3s/cloud/apps/media/torrent/src/LidarrFeeder/LidarrFeeder.csproj": {
+    "/home/ole/workspace/oleklokkhammer/projects/k3s/cloud/media/lidarr-feeder/src/LidarrFeeder.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/ole/workspace/oleklokkhammer/projects/k3s/cloud/apps/media/torrent/src/LidarrFeeder/LidarrFeeder.csproj",
+        "projectUniqueName": "/home/ole/workspace/oleklokkhammer/projects/k3s/cloud/media/lidarr-feeder/src/LidarrFeeder.csproj",
         "projectName": "LidarrFeeder",
-        "projectPath": "/home/ole/workspace/oleklokkhammer/projects/k3s/cloud/apps/media/torrent/src/LidarrFeeder/LidarrFeeder.csproj",
+        "projectPath": "/home/ole/workspace/oleklokkhammer/projects/k3s/cloud/media/lidarr-feeder/src/LidarrFeeder.csproj",
         "packagesPath": "/home/ole/.nuget/packages/",
-        "outputPath": "/home/ole/workspace/oleklokkhammer/projects/k3s/cloud/apps/media/torrent/src/LidarrFeeder/obj/",
+        "outputPath": "/home/ole/workspace/oleklokkhammer/projects/k3s/cloud/media/lidarr-feeder/src/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/home/ole/.nuget/NuGet/NuGet.Config"
@@ -44,6 +44,18 @@
         "net9.0": {
           "targetAlias": "net9.0",
           "dependencies": {
+            "Microsoft.Extensions.DependencyInjection": {
+              "target": "Package",
+              "version": "[9.0.9, )"
+            },
+            "Microsoft.Extensions.Hosting": {
+              "target": "Package",
+              "version": "[9.0.9, )"
+            },
+            "Microsoft.Extensions.Http": {
+              "target": "Package",
+              "version": "[9.0.9, )"
+            },
             "System.ServiceModel.Syndication": {
               "target": "Package",
               "version": "[9.0.9, )"

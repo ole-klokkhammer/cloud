@@ -17,7 +17,7 @@ spec:
           restartPolicy: Never 
           containers: 
             - name: lidarrfeeder
-              image: ghcr.io/ole-klokkhammer/lidarrfeeder:1.0.34
+              image: ghcr.io/ole-klokkhammer/lidarrfeeder:1.0.35
               imagePullPolicy: Always
               env:
                 - name: LIDARR_URL

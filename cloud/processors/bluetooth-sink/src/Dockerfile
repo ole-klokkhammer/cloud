@@ -2,15 +2,15 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 
 # Copy csproj and restore as distinct layers
-COPY ./app/BluetoothPostProcessor.csproj ./app/
-RUN dotnet restore ./app/BluetoothPostProcessor.csproj
+COPY ./app/BluetoothSink.csproj ./app/
+RUN dotnet restore ./app/BluetoothSink.csproj
 
 # Copy the rest of the source code
 COPY ./app ./app
 
 # Build the application
 WORKDIR /app
-RUN dotnet publish BluetoothPostProcessor.csproj -c Release -o /app/publish
+RUN dotnet publish BluetoothSink.csproj -c Release -o /app/publish
 
 # ---- Runtime Stage ----
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
@@ -20,4 +20,4 @@ WORKDIR /app
 COPY --from=build /app/publish .
 
 # Run the application
-ENTRYPOINT ["dotnet", "BluetoothPostProcessor.dll"]
+ENTRYPOINT ["dotnet", "BluetoothSink.dll"]

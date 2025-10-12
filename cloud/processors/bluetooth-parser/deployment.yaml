@@ -1,25 +1,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: amqp-processor
+  name: bluetooth-parser
   namespace: processors
   labels:
-    app: amqp-processor
+    app: bluetooth-parser
     role: processor
 spec:
   revisionHistoryLimit: 0
   selector:
     matchLabels:
-      app: amqp-processor
+      app: bluetooth-parser
   template:
     metadata:
       labels:
-        app: amqp-processor
+        app: bluetooth-parser
         role: processor
     spec:
       containers:
-        - name: amqp-processor
-          image: ghcr.io/ole-klokkhammer/amqp-processor:1.0.17
+        - name: bluetooth-parser
+          image: ghcr.io/ole-klokkhammer/bluetooth-parser:1.0.1
           imagePullPolicy: IfNotPresent
           env:
             - name: LOG_LEVEL

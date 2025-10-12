@@ -67,6 +67,4 @@ BUILD_PLATFORMS="${BUILD_PLATFORMS:-linux/amd64}"
 # perform buildx build + push
 docker buildx build --platform "$BUILD_PLATFORMS" -t "${IMAGE_FULL}" --push .
 
-echo "Built and pushed ${IMAGE_FULL} via buildx"
-
-echo "Done. New image:
+echo "Built and pushed ${IMAGE_FULL} via buildx" 

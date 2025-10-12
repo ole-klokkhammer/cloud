@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("LidarrFeeder")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f2ea91a279f50b1527b8ef5d9ddef95a05a14807")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+adbc22e133dbd11e2a3ba88ba7511e23fbf1fe24")]
 [assembly: System.Reflection.AssemblyProductAttribute("LidarrFeeder")]
 [assembly: System.Reflection.AssemblyTitleAttribute("LidarrFeeder")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

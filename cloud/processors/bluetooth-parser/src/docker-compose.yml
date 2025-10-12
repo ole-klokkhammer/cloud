@@ -1,5 +1,5 @@
 services:
-  amqp-processor:
+  bluetooth-parser:
     build:
       context: .
       dockerfile: Dockerfile 

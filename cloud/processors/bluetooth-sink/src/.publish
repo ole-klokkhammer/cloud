@@ -1,0 +1,2 @@
+IMAGE=ghcr.io/ole-klokkhammer/bluetooth-sink
+TAG=1.0.1

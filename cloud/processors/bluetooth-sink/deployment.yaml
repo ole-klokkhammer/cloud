@@ -1,26 +1,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: bluetooth-postprocessor
+  name: bluetooth-sink
   namespace: processors
   labels:
-    app: bluetooth-postprocessor
+    app: bluetooth-sink
     role: postprocessor
 spec:
   revisionHistoryLimit: 0
   selector:
     matchLabels:
-      app: bluetooth-postprocessor
+      app: bluetooth-sink
       role: postprocessor
   template:
     metadata:
       labels:
-        app: bluetooth-postprocessor
+        app: bluetooth-sink
         role: postprocessor
     spec:
       containers:
-        - name: bluetooth-postprocessor
-          image: ghcr.io/ole-klokkhammer/bluetooth-postprocessor:1.0.24
+        - name: bluetooth-sink
+          image: ghcr.io/ole-klokkhammer/bluetooth-sink:1.0.1
           imagePullPolicy: IfNotPresent
           env:
             - name: LOG_LEVEL
@@ -42,10 +42,10 @@ spec:
             - name: DB_USER
               valueFrom:
                 secretKeyRef:
-                  name: bluetooth-postprocessor-config
+                  name: bluetooth-sink-config
                   key: DB_USER
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: bluetooth-postprocessor-config
+                  name: bluetooth-sink-config
                   key: DB_PASSWORD

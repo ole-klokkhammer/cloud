@@ -1,6 +1,6 @@
 # sensor
 
-* kubectl create secret generic bluetooth-postprocessor-config --from-env-file=./src/.env -n processors
+* kubectl create secret generic bluetooth-sink-config --from-env-file=./src/.env -n processors
 
 
 ## database setup

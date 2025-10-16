@@ -94,9 +94,20 @@ public class App
             logger.LogWarning("Could not find a MusicBrainz release for album '{Album}' by {Artist}", album, artist);
             return;
         }
-
         logger.LogInformation("Found release MBID {Release} for album '{Album}', adding album", releaseMbid, album);
-        await AddAlbumToLidarr(artistMbid, releaseMbid);
+
+        bool albumExistsInLidarr = await AlbumExistsInLidarrByMbid(releaseMbid);
+        if (!albumExistsInLidarr)
+        {
+            logger.LogInformation("Adding album with MBID: {MBID}", releaseMbid);
+            await AddAlbumToLidarr(artistMbid, releaseMbid);
+        }
+        else
+        {
+            logger.LogInformation("Album with MBID {MBID} already exists in Lidarr", releaseMbid);
+        }
+
+        logger.LogInformation("Done processing album '{Album}' by {Artist}", album, artist);
     }
 
     async Task<string?> LookupMusicBrainzArtist(string artist)
@@ -278,6 +289,43 @@ public class App
         catch (Exception ex)
         {
             logger.LogWarning(ex, "Failed to query Lidarr when checking for existing artist");
+        }
+
+        return false;
+    }
+
+    async Task<bool> AlbumExistsInLidarrByMbid(string foreignAlbumMbid)
+    {
+        try
+        {
+            string url = $"{AppEnvironment.LidarrUrl}/api/v1/album?apikey={AppEnvironment.LidarrApiKey}";
+            var resp = await http.GetAsync(url, appCt);
+            resp.EnsureSuccessStatusCode();
+
+            var text = await resp.Content.ReadAsStringAsync(appCt);
+            using var doc = JsonDocument.Parse(text);
+
+            if (doc.RootElement.ValueKind == JsonValueKind.Array)
+            {
+                foreach (var el in doc.RootElement.EnumerateArray())
+                {
+                    // primary property used when adding albums in your app
+                    if (el.TryGetProperty("foreignAlbumId", out var fa) && fa.GetString() == foreignAlbumMbid)
+                        return true;
+
+                    // some Lidarr responses may include other foreign id keys (fallbacks)
+                    if (el.TryGetProperty("foreignReleaseId", out var fr) && fr.GetString() == foreignAlbumMbid)
+                        return true;
+
+                    if (el.TryGetProperty("releaseGroupId", out var rg) && rg.GetString() == foreignAlbumMbid)
+                        return true;
+                }
+            }
+        }
+        catch (OperationCanceledException) { throw; }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Failed to query Lidarr when checking for existing album");
         }
 
         return false;

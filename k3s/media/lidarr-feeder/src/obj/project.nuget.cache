@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "w3fLAMOA1Zs=",
+  "dgSpecHash": "qclyf2Uk41Q=",
   "success": true,
-  "projectFilePath": "/home/ole/workspace/oleklokkhammer/projects/k3s/cloud/media/lidarr-feeder/src/LidarrFeeder.csproj",
+  "projectFilePath": "/home/ole/workspace/oleklokkhammer/projects/cloud/k3s/media/lidarr-feeder/src/LidarrFeeder.csproj",
   "expectedPackageFiles": [
     "/home/ole/.nuget/packages/microsoft.extensions.configuration/9.0.9/microsoft.extensions.configuration.9.0.9.nupkg.sha512",
     "/home/ole/.nuget/packages/microsoft.extensions.configuration.abstractions/9.0.9/microsoft.extensions.configuration.abstractions.9.0.9.nupkg.sha512",

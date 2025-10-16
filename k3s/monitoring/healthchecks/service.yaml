@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: healthchecks-public
-  namespace: apps
+  namespace: monitoring
 spec:
   selector:
     app: healthchecks

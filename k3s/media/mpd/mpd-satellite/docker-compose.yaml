@@ -1,4 +1,3 @@
-version: "3.8"
 services:
   mpd:
     image: ghcr.io/ole-klokkhammer/mpd:0.24.5

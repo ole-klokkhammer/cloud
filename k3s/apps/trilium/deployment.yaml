@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: trilium
+  namespace: apps
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: trilium
+  template:
+    metadata:
+      labels:
+        app: trilium
+    spec: 
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - master0
+      containers:
+        - name: trilium
+          image: triliumnext/trilium:latest
+          ports:
+            - containerPort: 8080 
+          env:
+            - name: TZ
+              value: "Europe/Oslo"
+          volumeMounts:
+            - name: trilium-data
+              mountPath: /home/node/trilium-data 
+      volumes:
+        - name: trilium-data
+          persistentVolumeClaim:
+            claimName: trilium-data-pvc

@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rompr
+  namespace: media
+  labels:
+    app: rompr
+spec:
+  replicas: 1
+  revisionHistoryLimit: 0
+  selector:
+    matchLabels:
+      app: rompr
+  template:
+    metadata:
+      labels:
+        app: rompr
+    spec:
+      containers:
+        - name: rompr
+          image: rawdlite/rompr
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+          env:
+            - name: MPD_HOST
+              value: "192.168.10.98"
+            - name: MPD_PORT
+              value: "6600" 

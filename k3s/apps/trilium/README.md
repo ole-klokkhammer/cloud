@@ -2,6 +2,7 @@
 
 ## prereq
 
-* sudo zfs create -o quota=5G k3s/trilium-data  
+* sudo zfs create -o quota=500M k3s/trilium-common-data  
+* sudo zfs create -o quota=500M k3s/trilium-ole-data  
 
 ## deploy

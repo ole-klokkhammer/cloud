@@ -1,16 +1,16 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: trilium
+  name: trilium-common
   namespace: apps
   labels:
-    app: trilium
+    app: trilium-common
 spec:
   type: LoadBalancer
+  selector:
+    app: trilium-common
   ports:
     - port: 8080
       targetPort: 8080
       protocol: TCP
       name: http
-  selector:
-    app: trilium

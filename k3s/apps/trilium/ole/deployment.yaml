@@ -1,17 +1,17 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: trilium
+  name: trilium-ole
   namespace: apps
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: trilium
+      app: trilium-ole
   template:
     metadata:
       labels:
-        app: trilium
+        app: trilium-ole
     spec: 
       affinity:
         nodeAffinity:
@@ -23,7 +23,7 @@ spec:
                     values:
                       - master0
       containers:
-        - name: trilium
+        - name: trilium-ole
           image: triliumnext/trilium:latest
           ports:
             - containerPort: 8080 
@@ -31,9 +31,9 @@ spec:
             - name: TZ
               value: "Europe/Oslo"
           volumeMounts:
-            - name: trilium-data
+            - name: trilium-ole-data
               mountPath: /home/node/trilium-data 
       volumes:
-        - name: trilium-data
+        - name: trilium-ole-data
           persistentVolumeClaim:
-            claimName: trilium-data-pvc
+            claimName: trilium-ole-data-pvc

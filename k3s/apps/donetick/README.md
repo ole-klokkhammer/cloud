@@ -14,4 +14,4 @@ https://docs.donetick.com/getting-started/
 * kubectl create secret generic -n apps  donetick-secrets --from-env-file=.env 
 * kubectl apply -f deployment.yaml
 
-## pfsense haproxy
+## setup mfa plz

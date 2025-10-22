@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: trilium-common
+  namespace: apps
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: trilium-common
+  template:
+    metadata:
+      labels:
+        app: trilium-common
+    spec: 
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - master0
+      containers:
+        - name: trilium-common
+          image: triliumnext/trilium:latest
+          ports:
+            - containerPort: 8080 
+          env:
+            - name: TZ
+              value: "Europe/Oslo"
+          volumeMounts:
+            - name: trilium-common-data
+              mountPath: /home/node/trilium-data 
+      volumes:
+        - name: trilium-common-data
+          persistentVolumeClaim:
+            claimName: trilium-common-data-pvc

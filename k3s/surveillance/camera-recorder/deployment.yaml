@@ -1,9 +1,0 @@
-# dummy - only used to maintain versioning
-metadata:
-  labels:
-    app: camera-recorder
-spec: 
-  template: 
-    spec: 
-      containers:
-        - image: ghcr.io/ole-klokkhammer/camera-recorder:1.0.70

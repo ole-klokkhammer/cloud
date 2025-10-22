@@ -28,6 +28,7 @@ public class FfmpegService : BackgroundService
             CreateNoWindow = true
         };
 
+        // Global options
         psi.ArgumentList.Add("-hide_banner");
         psi.ArgumentList.Add("-y");
         psi.ArgumentList.Add("-loglevel");
@@ -36,8 +37,6 @@ public class FfmpegService : BackgroundService
         // Input
         psi.ArgumentList.Add("-rtsp_transport");
         psi.ArgumentList.Add("tcp");
-        psi.ArgumentList.Add("-use_wallclock_as_timestamps");
-        psi.ArgumentList.Add("1");
         psi.ArgumentList.Add("-i");
         psi.ArgumentList.Add(rtspUrl);
 
@@ -45,11 +44,9 @@ public class FfmpegService : BackgroundService
         psi.ArgumentList.Add("-c:v");
         psi.ArgumentList.Add("copy");
 
-        // Audio and container
+        // Audio
         psi.ArgumentList.Add("-c:a");
         psi.ArgumentList.Add("copy");
-        psi.ArgumentList.Add("-flags");
-        psi.ArgumentList.Add("+global_header");
 
         // metadata
         var utcNow = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"); // RFC3339 UTC
@@ -57,17 +54,27 @@ public class FfmpegService : BackgroundService
         psi.ArgumentList.Add("-metadata"); psi.ArgumentList.Add($"date={utcNow}");        // extra tag some players use
         psi.ArgumentList.Add("-metadata"); psi.ArgumentList.Add("title=Entrance Roof");   // optional
 
+        // flags
+        psi.ArgumentList.Add("-flags");
+        psi.ArgumentList.Add("+global_header");
+
+        // handle broken timestamps from some cameras 
+        psi.ArgumentList.Add("-use_wallclock_as_timestamps");
+        psi.ArgumentList.Add("1");
+        psi.ArgumentList.Add("-reset_timestamps");
+        psi.ArgumentList.Add("1");
+        psi.ArgumentList.Add("-segment_atclocktime");
+        psi.ArgumentList.Add("1");
+
+        // allow strftime-style filenames (e.g. %Y%m%dT%H%M%S)
+        psi.ArgumentList.Add("-strftime");
+        psi.ArgumentList.Add("1");
+
         // Segment muxer
         psi.ArgumentList.Add("-f");
         psi.ArgumentList.Add("segment");
-        psi.ArgumentList.Add("-reset_timestamps");
-        psi.ArgumentList.Add("1");
-        psi.ArgumentList.Add("-strftime");
-        psi.ArgumentList.Add("1");
         psi.ArgumentList.Add("-segment_time");
         psi.ArgumentList.Add("900");
-        psi.ArgumentList.Add("-segment_atclocktime");
-        psi.ArgumentList.Add("1");
         psi.ArgumentList.Add("-segment_format");
         psi.ArgumentList.Add("mkv");
 

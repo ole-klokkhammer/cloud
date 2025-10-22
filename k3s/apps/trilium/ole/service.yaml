@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: trilium-ole
+  namespace: apps
+  labels:
+    app: trilium-ole
+spec:
+  type: LoadBalancer
+  selector:
+    app: trilium-ole
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+      name: http

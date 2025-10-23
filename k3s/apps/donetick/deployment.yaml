@@ -26,28 +26,7 @@ spec:
             - name: DT_SERVER_CORS_ALLOW_ORIGINS
               value: "tasks.linole.org" 
             - name: DT_DATABASE_TYPE
-              value: "postgres"
-            - name: DT_DATABASE_HOST
-              value: "postgres.postgres-external"
-            - name: DT_DATABASE_PORT
-              value: "5432"
-            - name: DT_DATABASE_NAME
-              valueFrom:
-                secretKeyRef:
-                  name: donetick-secrets
-                  key: DB_NAME
-            - name: DT_DATABASE_USER
-              valueFrom:
-                secretKeyRef:
-                  name: donetick-secrets
-                  key: DB_USER
-            - name: DT_DATABASE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: donetick-secrets
-                  key: DB_PASSWORD
-            - name: DT_JWT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: donetick-secrets
-                  key: JWT_SECRET
+              value: "postgres" 
+          envFrom:
+          - secretRef:
+              name: donetick-secrets

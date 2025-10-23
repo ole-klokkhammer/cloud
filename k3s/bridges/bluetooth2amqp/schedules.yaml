@@ -1,41 +1,41 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: bluetooth2kafka-schedules
+  name: bluetooth2amqp-schedules
   namespace: bridges
 data:
   schedules.yaml: |
     scan:
       cron: "0 * * * *"
-      kafka_topic: "scan"
+      routing_key: "generic.scan"
 
     connect:
       - cron: "*/15 * * * *"
-        address: "XX:XX:XX:XX:XX:01"
-        manufacturer: "820"
+        address: "F4:60:77:6D:33:C0"
+        routing_key: "airthings.sensor"
       - cron: "*/15 * * * *"
-        address: "XX:XX:XX:XX:XX:02"
-        manufacturer: "820"
+        address: "F4:60:77:70:58:EA"
+        routing_key: "airthings.sensor"
       - cron: "*/15 * * * *"
-        address: "XX:XX:XX:XX:XX:03"
-        manufacturer: "820"
+        address: "A4:DA:32:28:C4:2F"
+        routing_key: "airthings.sensor"
 
     command:
       - cron: "0 0 * * *"
-        address: "XX:XX:XX:XX:XX:01"
-        manufacturer: "820"
+        address: "F4:60:77:6D:33:C0"
         characteristic: "b42e2d06-ade7-11e4-89d3-123b93f75cba"
         command: "\x6d"
         format_type: "<L2BH2B9H"
+        routing_key: "airthings.battery"
       - cron: "0 0 * * *"
-        address: "XX:XX:XX:XX:XX:02"
-        manufacturer: "820"
+        address: "F4:60:77:70:58:EA"
         characteristic: "b42e2d06-ade7-11e4-89d3-123b93f75cba"
         command: "\x6d"
         format_type: "<L2BH2B9H"
+        routing_key: "airthings.battery"
       - cron: "0 0 * * *"
-        address: "XX:XX:XX:XX:XX:01"
-        manufacturer: "820"
+        address: "F4:60:77:6D:33:C0"
         characteristic: "b42e2d06-ade7-11e4-89d3-123b93f75cba"
         command: "\x6d"
         format_type: "<L2BH2B9H"
+        routing_key: "airthings.battery"

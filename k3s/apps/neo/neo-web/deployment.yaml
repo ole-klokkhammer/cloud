@@ -37,43 +37,6 @@ spec:
                 secretKeyRef:
                   name: neo-config
                   key: AUTH_URL
-            - name: AUTH_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: neo-config
-                  key: AUTH_SECRET
-            - name: KEYCLOAK_CLIENT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: neo-config
-                  key: KEYCLOAK_CLIENT_ID
-            - name: KEYCLOAK_CLIENT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: neo-config
-                  key: KEYCLOAK_CLIENT_SECRET
-            - name: KEYCLOAK_ISSUER
-              valueFrom:
-                secretKeyRef:
-                  name: neo-config
-                  key: KEYCLOAK_ISSUER
-            - name: KEYCLOAK_MOBILE_CLIENT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: neo-config
-                  key: KEYCLOAK_MOBILE_CLIENT_ID
-            - name: KEYCLOAK_MOBILE_CLIENT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: neo-config
-                  key: KEYCLOAK_MOBILE_CLIENT_SECRET
-            - name: KEYCLOAK_MOBILE_AUTHORIZE_ENDPOINT
-              valueFrom:
-                secretKeyRef:
-                  name: neo-config
-                  key: KEYCLOAK_MOBILE_AUTHORIZE_ENDPOINT
-            - name: KEYCLOAK_MOBILE_TOKEN_ENDPOINT
-              valueFrom:
-                secretKeyRef:
-                  name: neo-config
-                  key: KEYCLOAK_MOBILE_TOKEN_ENDPOINT
+          envFrom:
+          - secretRef:
+              name: neo-secrets

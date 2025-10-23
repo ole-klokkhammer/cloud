@@ -39,43 +39,6 @@ spec:
           value: "true"
         - name: KC_FEATURES
           value: "scripts"
-        - name: KC_HOSTNAME
-          valueFrom:
-            secretKeyRef:
-              name: keycloak-config
-              key: KC_HOSTNAME
-        - name: KC_BOOTSTRAP_ADMIN_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: keycloak-config
-              key: KC_BOOTSTRAP_ADMIN_PASSWORD
-        - name: KC_BOOTSTRAP_ADMIN_USERNAME
-          valueFrom:
-            secretKeyRef:
-              name: keycloak-config
-              key: KC_BOOTSTRAP_ADMIN_USERNAME
-        - name: KC_DB
-          valueFrom:
-            secretKeyRef:
-              name: keycloak-config
-              key: KC_DB
-        - name: KC_DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: keycloak-config
-              key: KC_DB_PASSWORD
-        - name: KC_DB_URL_HOST
-          valueFrom:
-            secretKeyRef:
-              name: keycloak-config
-              key: KC_DB_URL_HOST
-        - name: KC_DB_URL_PORT
-          valueFrom:
-            secretKeyRef:
-              name: keycloak-config
-              key: KC_DB_URL_PORT
-        - name: KC_DB_USERNAME
-          valueFrom:
-            secretKeyRef:
-              name: keycloak-config
-              key: KC_DB_USERNAME 
+        envFrom:
+        - secretRef:
+            name: keycloak-secrets

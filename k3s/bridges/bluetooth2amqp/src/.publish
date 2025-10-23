@@ -1,0 +1,2 @@
+IMAGE=ghcr.io/ole-klokkhammer/bluetooth2amqp
+TAG=1.0.64

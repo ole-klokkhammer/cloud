@@ -31,42 +31,13 @@ spec:
             - containerPort: 1984 # Web UI/API
             - containerPort: 8554 # RTSP
             - containerPort: 8555 # WebRTC
-          env: 
-            - name: CAMERA_ENTRANCE_ROOF_IP
-              valueFrom:
-                secretKeyRef:
-                  name: go2rtc-secrets
-                  key: CAMERA_ENTRANCE_ROOF_IP
-            - name: CAMERA_ENTRANCE_ROOF_USER
-              valueFrom:
-                secretKeyRef:
-                  name: go2rtc-secrets
-                  key: CAMERA_ENTRANCE_ROOF_USER
-            - name: CAMERA_ENTRANCE_ROOF_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: go2rtc-secrets
-                  key: CAMERA_ENTRANCE_ROOF_PASSWORD
-            - name: CAMERA_OFFICE_IP
-              valueFrom:
-                secretKeyRef:
-                  name: go2rtc-secrets
-                  key: CAMERA_OFFICE_IP
-            - name: CAMERA_OFFICE_USER
-              valueFrom:
-                secretKeyRef:
-                  name: go2rtc-secrets
-                  key: CAMERA_OFFICE_USER
-            - name: CAMERA_OFFICE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: go2rtc-secrets
-                  key: CAMERA_OFFICE_PASSWORD
+          envFrom:
+          - secretRef:
+              name: go2rtc-secrets
           volumeMounts:
             - name: go2rtc-config
               mountPath: /config/go2rtc.yaml
-              subPath: go2rtc.yaml  
-              
+              subPath: go2rtc.yaml
         - name: neolink
           image: quantumentangledandy/neolink
           ports:

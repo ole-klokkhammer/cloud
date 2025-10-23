@@ -1,0 +1,6 @@
+APScheduler 
+bleak
+paho-mqtt
+aio-pika
+pika
+pyyaml

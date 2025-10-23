@@ -1,0 +1,21 @@
+apiVersion: external-secrets.io/v1
+kind: ClusterSecretStore # cluster wide 
+metadata:
+  name: vault-backend 
+  namespace: "external-secrets"
+spec:
+  provider:
+    vault:
+      server: "http://vault.vault:8200"
+      path: "secret"
+      # Version is the Vault KV secret engine version.
+      # This can be either "v1" or "v2", defaults to "v2"
+      version: "v2"
+      auth:
+        # points to a secret that contains a vault token
+        # https://www.vaultproject.io/docs/auth/token
+        tokenSecretRef:
+          name: "vault-token"
+          key: "token"
+          namespace: "external-secrets"
+--- 

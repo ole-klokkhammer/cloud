@@ -24,9 +24,6 @@ spec:
           env:
             - name: LOG_LEVEL
               value: "info"
-            - name: RABBITMQ_HOST
-              value: "rabbitmq.brokers"
-            - name: RABBITMQ_USER
-              value: "guest"
-            - name: RABBITMQ_PASSWORD
-              value: "guest"
+          envFrom:
+          - secretRef:
+              name: bluetooth-parser-secrets

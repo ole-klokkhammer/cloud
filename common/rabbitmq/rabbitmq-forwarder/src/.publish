@@ -1,0 +1,2 @@
+IMAGE=ghcr.io/ole-klokkhammer/rabbitmq-forwarder
+TAG=1.0.1

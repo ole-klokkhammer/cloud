@@ -25,27 +25,8 @@ spec:
           env:
             - name: LOG_LEVEL
               value: "info"
-            - name: MQTT_HOST
-              value: "hivemq.brokers"
-            - name: RABBITMQ_HOST
-              value: "rabbitmq.brokers"
-            - name: RABBITMQ_USER
-              value: "guest"
-            - name: RABBITMQ_PASSWORD
-              value: "guest"
-            - name: DB_HOST
-              value: "postgres.postgres-external"
-            - name: DB_PORT
-              value: "5432"
             - name: DB_NAME
               value: "linole"
-            - name: DB_USER
-              valueFrom:
-                secretKeyRef:
-                  name: bluetooth-sink-config
-                  key: DB_USER
-            - name: DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: bluetooth-sink-config
-                  key: DB_PASSWORD
+          envFrom:
+          - secretRef:
+              name: bluetooth-sink-secrets

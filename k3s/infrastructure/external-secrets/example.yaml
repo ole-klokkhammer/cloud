@@ -1,0 +1,17 @@
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: bluetooth-parser-secrets
+  namespace: processors
+spec:
+  refreshInterval: "15s"
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: vault-backend
+  target:
+    name: bluetooth-parser-secrets 
+  data:
+  - secretKey: RABBITMQ_HOST
+    remoteRef:
+      key: rabbitmq
+      property: RABBITMQ_HOST

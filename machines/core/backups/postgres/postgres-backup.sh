@@ -15,7 +15,7 @@ if [ $PG_STATUS -ne 0 ]; then
 fi
 
 echo "Notify healthchecks on success"
-curl -fsS http://192.168.10.204:8000/ping/74a0c89c-ef1b-4af2-bd3e-0fd967152111
+curl -fsS http://192.168.10.201:8000/ping/74a0c89c-ef1b-4af2-bd3e-0fd967152111
 
 echo "backup completed successfully."
 exit 0

@@ -1,0 +1,30 @@
+name: plex
+description: "Plex container profile"
+config:
+  limits.cpu: "4"                 # adjust if you want fewer/more cores
+  limits.memory: 16GB              # adjust for your RAM
+  linux.kernel_modules: ip_tables, ip6_tables, netlink_diag, nf_nat, overlay
+  security.nesting: "true"
+  # security.privileged: "true"   # uncomment if GPU passthrough is needed
+  raw.lxc: |
+    lxc.apparmor.profile=unconfined
+    lxc.cap.drop=
+devices:
+  eth0:
+    name: eth0
+    network: lxdbr0               # created by `lxd init`
+    type: nic
+  root:
+    type: disk
+    path: /
+    pool: zpool                   # use your ZFS pool name here
+  media:
+    type: disk
+    path: /mnt/media              # inside container
+    source: /mnt/big/media        # on host
+  config:
+    type: disk
+    path: /var/lib/plexmediaserver
+    source: /ssd/lxd-configs/plex     # on host (ZFS dataset)
+  # gpu:
+  #   type: gpu                   # uncomment if you later add GPU transcoding

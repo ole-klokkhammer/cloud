@@ -11,7 +11,7 @@ ZFS_POOL="k3s"
 SNAPSHOT_PREFIX="snapshot" 
 SNAPSHOT_KEEP=7
 ENDPOINT_URL="https://j8t7.ldn203.idrivee2-94.com"
-HEALTHCHECKS_URL="http://192.168.10.204:8000/ping/f049b364-9bd6-4d87-b748-5876a9e297fc"
+HEALTHCHECKS_URL="http://192.168.10.201:8000/ping/f049b364-9bd6-4d87-b748-5876a9e297fc"
  
 echo "List all ZFS volumes (zvols) and filesystems in the pool: $ZFS_POOL"
 for volume in $(zfs list -H -o name -t filesystem,volume | grep "^$ZFS_POOL/"); do

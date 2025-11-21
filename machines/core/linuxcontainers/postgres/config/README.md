@@ -4,7 +4,11 @@
 https://docs.timescale.com/self-hosted/latest/install/installation-linux/#install-and-configure-timescaledb-on-postgresql
 
 ### install postgres with correct data path
-* sudo apt-get install postgresql-17 postgresql-common 
+* apt install wget ca-certificates -y
+wget -qO - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo tee /etc/apt/trusted.gpg.d/pgdg.asc
+echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | \
+  sudo tee /etc/apt/sources.list.d/pgdg.list
+* sudo apt install postgresql-17 postgresql-common 
 * sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh
 * create appropriate data folders with permissions to postgres:postgres
   * sudo chown -R postgres:postgres /mnt/databases/postgresql/17/main
@@ -18,11 +22,11 @@ https://docs.timescale.com/self-hosted/latest/install/installation-linux/#instal
 * sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh
 * echo "deb https://packagecloud.io/timescale/timescaledb/ubuntu/ $(lsb_release -c -s) main" | sudo tee /etc/apt/sources.list.d/timescaledb.list
 * wget --quiet -O - https://packagecloud.io/timescale/timescaledb/gpgkey | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/timescaledb.gpg
-* sudo apt-get update
+* sudo apt update
 * if timescaledb isnt found:
   * sudo nano /etc/apt/sources.list.d/timescaledb.sources
   * change plucky to jammy
-* sudo apt-get install timescaledb-2-postgresql-17 postgresql-client-17 
+* sudo apt install timescaledb-2-postgresql-17 postgresql-client-17 
 * update /etc/postgresql/17/main/postgresql.conf with: listen_addresses = '*'
 * set /etc/postgresql/17/main/pg_hba.conf:
 # Allow all users from local network with md5 password
@@ -33,8 +37,8 @@ host    all             all              ::/0                            md5
 
 ## pgbackrest
  
-* sudo apt-get update
-* sudo apt-get install pgbackrest
+* sudo apt update
+* sudo apt install pgbackrest
 * update /etc/postgresql/17/main/postgresql.conf
 archive_mode = on
 archive_command = 'pgbackrest --stanza=main archive-push %p'
@@ -63,7 +67,7 @@ repo1-s3-key-secret=<s3_secret>
 [main]
 pg1-port=5432
 pg1-host-user=postgres
-pg1-path=/mnt/databases/postgresql/17/main
+pg1-path=/var/lib/postgresql/17/main
 pg1-socket-path=/var/run/postgresql
 
 [global:archive-push]

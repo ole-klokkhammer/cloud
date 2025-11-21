@@ -1,0 +1,31 @@
+name: plex
+description: Plex container profile
+config:
+  limits.cpu: "4"
+  limits.memory: 16GB
+  linux.kernel_modules: ip_tables, ip6_tables, netlink_diag, nf_nat, overlay
+  raw.lxc: |
+    lxc.apparmor.profile=unconfined
+    lxc.cap.drop=
+  security.nesting: "true"
+devices:
+  eth0:
+    name: eth0
+    nictype: bridged
+    parent: br0
+    type: nic
+  config:
+    path: /var/lib/plexmediaserver
+    source: /ssd/lxd-configs/plex
+    type: disk
+  media:
+    path: /mnt/media
+    source: /mnt/big/media
+    type: disk
+  root:
+    path: /
+    pool: zpool
+    type: disk
+used_by:
+  - /1.0/instances/plex
+project: default

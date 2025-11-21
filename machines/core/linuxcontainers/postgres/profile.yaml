@@ -1,0 +1,28 @@
+name: postgres
+description: Postgres container profile
+config:
+  limits.cpu: "8"
+  limits.memory: 64GB
+  linux.kernel_modules: ip_tables, ip6_tables, netlink_diag, nf_nat, overlay
+  raw.lxc: |
+    lxc.apparmor.profile=unconfined
+    lxc.cap.drop=
+  security.nesting: "true"
+devices:
+  eth0:
+    name: eth0
+    nictype: bridged
+    parent: br0 
+    type: nic  
+  root:
+    path: /
+    pool: zpool
+    type: disk
+  pgdata:
+    type: disk
+    path: /var/lib/postgresql/17/main
+    source: /db/postgres/17/main
+    shift: "true"
+project: default
+
+

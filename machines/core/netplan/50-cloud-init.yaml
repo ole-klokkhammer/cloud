@@ -1,0 +1,21 @@
+network:
+  version: 2
+  renderer: networkd
+
+  ethernets:
+    enp66s0f0: {}        # your physical NIC, no IP here
+    enp66s0f1: {}        # your physical NIC, no IP here
+
+  bridges:
+    br0:
+      interfaces: [enp66s0f0]
+      dhcp4: true
+      parameters:
+        stp: false
+        forward-delay: 0
+    br1:
+      interfaces: [enp66s0f1]
+      dhcp4: true
+      parameters:
+        stp: false
+        forward-delay: 0

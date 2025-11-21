@@ -42,4 +42,4 @@ for backup
 ## restoring volumes 
 
 * aws s3 cp --profile k3s-volume-backup s3://k3s-volumes/k3s/homeassistant-data/snapshot-1752566019.zfs /tmp --endpoint-url https://j8t7.ldn203.idrivee2-94.com
-* sudo zfs receive k3s/homeassistant-data < /tmp/snapshot-1752566019.zfs
+* sudo zfs receive ssd/k3s/homeassistant-data < /tmp/snapshot-1752566019.zfs

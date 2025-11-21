@@ -27,7 +27,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: local-path
   local:
-    path: /k3s/vault-data  # <-- your ZFS mount point
+    path: /ssd/k3s/vault-data  # <-- your ZFS mount point
   nodeAffinity:
     required:
       nodeSelectorTerms:

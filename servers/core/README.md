@@ -39,6 +39,9 @@
   - add hdd pool
   - add db pool
 - LAN BRIDGE: create a real bridge for networking on the host, use this for exposing the services on local ips issued by the main dhcp
+  - see netplan
+  - br0 -> eth0
+  - br1 -> eth1
 - install lxd:
   - sudo apt install apparmor apparmor-utils
   - sudo aa-status
@@ -50,6 +53,8 @@
   - create seperate pool for config storage: ssd/lxd-configs 
 - install gpu deps
   - nvidia
+- install k3s
+  - 
 - aws cli
   - setup aws cli and add profiles
 - other storage, big and direct mount

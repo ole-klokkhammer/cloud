@@ -1,8 +1,8 @@
-name: k3s
-description: K3s container profile
+name: postgres
+description: Postgres container profile
 config:
   limits.cpu: "8"
-  limits.memory: 48GB
+  limits.memory: 64GB
   linux.kernel_modules: ip_tables, ip6_tables, netlink_diag, nf_nat, overlay
   raw.lxc: |
     lxc.apparmor.profile=unconfined
@@ -12,14 +12,18 @@ devices:
   eth0:
     name: eth0
     nictype: bridged
-    parent: br0
-    type: nic
+    parent: br0 
+    type: nic  
+    hwaddr: 00:16:3e:da:9c:e0
   root:
     path: /
     pool: zpool
     type: disk
-  # homeassistant-data:
-  #   type: disk
-  #   source: /ssd/k3s/homeassistant-data
-  #   path: /mnt/homeassistant-data
+  pgdata:
+    type: disk
+    path: /var/lib/postgresql/17/main
+    source: /db/postgres/17/main
+    shift: "true"
 project: default
+
+

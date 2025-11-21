@@ -20,7 +20,7 @@ spec:
   capacity:
     storage: 500Mi
   local:
-    path: /k3s-temp/redis
+    path: /ssd/k3s-temp/redis
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

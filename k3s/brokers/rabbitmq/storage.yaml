@@ -12,7 +12,7 @@ spec:
   capacity:
     storage: 500Mi
   local:
-    path: /k3s/rabbitmq-data
+    path: /ssd/k3s/rabbitmq-data
   nodeAffinity:
     required:
       nodeSelectorTerms:

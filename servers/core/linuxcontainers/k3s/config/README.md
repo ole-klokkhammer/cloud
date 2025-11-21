@@ -47,12 +47,13 @@ server \
 '--write-kubeconfig-mode' \
 '644' \
 '--datastore-endpoint' \
-'postgres://k3s:<pass>@192.168.10.2:5432/k3s?sslmode=disable' \
+'postgres://k3s:<pass>@postgres.home.lan:5432/k3s?sslmode=disable' \
 --cluster-init
 "  sh -
 `
 
 ### set ulimit
+
 * sudo systemctl edit k3s.service
 * [Service]
 LimitNOFILE=65536
@@ -60,6 +61,7 @@ LimitNOFILE=65536
 * sudo systemctl restart k3s.service
 
 ## on clients 
+
 * copy certificates: sudo cat /etc/rancher/k3s/k3s.yaml > ~/.kube/config
 * replace ip with actual
 

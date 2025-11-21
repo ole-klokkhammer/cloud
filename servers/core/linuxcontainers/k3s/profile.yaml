@@ -1,0 +1,92 @@
+name: k3s
+description: K3s container profile
+config:
+  limits.cpu: "8"
+  limits.memory: 64GB
+  security.nesting: "true"
+  linux.kernel_modules: "overlay, nf_conntrack, ip_tables, netlink_diag"
+  raw.lxc: |
+    lxc.apparmor.profile = unconfined
+    lxc.cap.drop =
+    lxc.mount.auto = cgroup:rw
+devices:
+  eth0:
+    name: eth0
+    nictype: bridged
+    parent: br0
+    type: nic
+    hwaddr: 00:16:3e:f0:ca:09
+  root:
+    path: /
+    pool: zpool
+    type: disk 
+  homeassistant-data:
+    type: disk
+    source: /ssd/k3s/homeassistant-data
+    path: /ssd/k3s/homeassistant-data
+    shift: "true"
+  mpd-data:
+    type: disk
+    source: /ssd/k3s/mpd-data
+    path: /ssd/k3s/mpd-data
+    shift: "true"
+  rabbitmq-data:
+    type: disk
+    source: /ssd/k3s/rabbitmq-data
+    path: /ssd/k3s/rabbitmq-data
+    shift: "true"
+  torrent-config:
+    type: disk
+    source: /ssd/k3s/torrent-config
+    path: /ssd/k3s/torrent-config
+    shift: "true"
+  trilium-common-data:
+    type: disk
+    source: /ssd/k3s/trilium-common-data
+    path: /ssd/k3s/trilium-common-data
+    shift: "true"
+  trilium-ole-data:
+    type: disk
+    source: /ssd/k3s/trilium-ole-data
+    path: /ssd/k3s/trilium-ole-data
+    shift: "true"
+  vault-data:
+    type: disk
+    source: /ssd/k3s/vault-data
+    path: /ssd/k3s/vault-data
+    shift: "true"
+  vikunja-data:
+    type: disk
+    source: /ssd/k3s/vikunja-data
+    path: /ssd/k3s/vikunja-data
+    shift: "true"
+  zigbee2mqtt-data:
+    type: disk
+    source: /ssd/k3s/zigbee2mqtt-data
+    path: /ssd/k3s/zigbee2mqtt-data
+    shift: "true"
+  hivemq:
+    type: disk
+    source: /ssd/k3s-temp/hivemq
+    path: /ssd/k3s-temp/hivemq
+    shift: "true"
+  redis:
+    type: disk
+    source: /ssd/k3s-temp/redis
+    path: /ssd/k3s-temp/redis
+    shift: "true"
+  surveillance:
+    type: disk
+    source: /hdd/surveillance
+    path: /hdd/surveillance
+    shift: "true"
+  music:
+    type: disk
+    source: /hdd/music
+    path: /hdd/music
+    shift: "true"
+  media:
+    type: disk
+    source: /mnt/big/media
+    path: /mnt/big/media
+project: default

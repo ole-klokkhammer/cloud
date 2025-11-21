@@ -12,7 +12,7 @@ spec:
   capacity:
     storage: 15Gi
   local:
-    path: /k3s-temp/llama
+    path: /ssd/k3s-temp/llama
   nodeAffinity:
     required:
       nodeSelectorTerms:

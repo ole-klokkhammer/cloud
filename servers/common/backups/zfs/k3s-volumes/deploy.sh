@@ -3,8 +3,8 @@
 set -e
 
 REMOTE_USER=ubuntu
-REMOTE_HOST=192.168.10.2
-SERVICE_NAME="postgres-backup"
+REMOTE_HOST=core.home.lan
+SERVICE_NAME="k3s-volume-backup"
 REMOTE_TMP_DIR="/tmp/${SERVICE_NAME}-install"
 
 SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}.service"

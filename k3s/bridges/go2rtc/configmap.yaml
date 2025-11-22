@@ -9,6 +9,9 @@ data:
     log:
       level: info
 
+    api:
+      listen: ":1984"
+
     webrtc:
       # Allow external access
       listen: :8555

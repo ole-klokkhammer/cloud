@@ -4,6 +4,7 @@ config:
   limits.cpu: "8"
   limits.memory: 64GB
   security.nesting: "true"
+  security.privileged: "true"
   linux.kernel_modules: "overlay, nf_conntrack, ip_tables, netlink_diag"
   raw.lxc: |
     lxc.apparmor.profile = unconfined
@@ -87,6 +88,6 @@ devices:
     shift: "true"
   media:
     type: disk
-    source: /mnt/big/media
-    path: /mnt/big/media
+    source: /hdd/media
+    path: /hdd/media
 project: default

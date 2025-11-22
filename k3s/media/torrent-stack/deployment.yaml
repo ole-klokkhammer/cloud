@@ -204,7 +204,7 @@ spec:
       volumes:
         - name: torrent-data
           hostPath:
-            path: /mnt/big/media
+            path: /hdd/media
         - name: torrent-music-data
           persistentVolumeClaim:
             claimName: torrent-music-pvc

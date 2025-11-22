@@ -48,9 +48,12 @@ server \
 '644' \
 '--datastore-endpoint' \
 'postgres://k3s:<pass>@postgres.home.lan:5432/k3s?sslmode=disable' \
+--kube-proxy-arg=proxy-mode=ipvs \
 --cluster-init
 "  sh -
 `
+
+
 
 ### set ulimit
 

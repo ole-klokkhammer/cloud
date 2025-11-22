@@ -20,8 +20,8 @@ devices:
     source: /ssd/lxd-configs/plex
     type: disk
   media:
-    path: /mnt/media
-    source: /mnt/big/media
+    path: /hdd/media
+    source: /hdd/media
     type: disk
   root:
     path: /

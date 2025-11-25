@@ -39,7 +39,7 @@
   sudo systemctl restart k3s
 
 ## temp fix for iptables on host
-- HOST miti:
+- HOST:
   sudo sysctl -w vm.overcommit_memory=1
   sudo sysctl -w kernel.panic=10
   sudo sysctl -w kernel.panic_on_oops=1

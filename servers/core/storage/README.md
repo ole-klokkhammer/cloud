@@ -103,7 +103,7 @@ is hdd fast enough for k3s volumes?
 * sudo zfs create hdd/music
 * sudo zfs create hdd/surveillance
 * ...
-* sudo zpool attach hdd /dev/sdX /dev/sdY
+* sudo zpool attach hdd /dev/sdX /dev/sdY (NOOOOO MOUNT by-id)
 * sudo zpool status
 
 ### SSD mirror 1TB for databases and k3s volumes that needs speed

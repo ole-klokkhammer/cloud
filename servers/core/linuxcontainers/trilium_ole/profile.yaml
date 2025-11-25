@@ -1,0 +1,34 @@
+name: trilium_ole
+description: trilium container profile
+config:
+  limits.cpu: "2"
+  limits.memory: 4GB
+  linux.kernel_modules: overlay, nf_conntrack, ip_tables, netlink_diag
+  raw.lxc: |
+    lxc.apparmor.profile = unconfined
+    lxc.cap.drop =
+    lxc.mount.auto = cgroup:rw
+  security.nesting: "false"
+  security.privileged: "false"
+devices:
+  eth0:
+    name: eth0
+    nictype: bridged
+    parent: br0
+    type: nic
+    hwaddr: 00:16:3e:85:4e:8c
+  trilium-data:
+    path: /root/.local/share/trilium-data
+    shift: "true"
+    source: /ssd/appdata/trilium-ole/data
+    type: disk
+  config:
+    path: /config
+    shift: "true"
+    source: /ssd/appdata/trilium-ole/config
+    type: disk
+  root:
+    path: /
+    pool: zpool
+    type: disk 
+project: default

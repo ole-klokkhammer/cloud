@@ -1,0 +1,21 @@
+name: homeassistant-vm
+description: homeassistant VM profile
+config:
+  limits.cpu: "2"
+  limits.memory: 4GB
+devices:
+  eth0:
+    name: eth0
+    nictype: bridged
+    parent: br0
+    type: nic
+    hwaddr: 00:16:3e:57:b5:7a
+  root:
+    path: /
+    pool: zpool
+    type: disk
+  homeassistant-data:
+    path: /config
+    source: /dev/zvol/ssd/appdata/homeassistant-zvol
+    type: disk
+project: default

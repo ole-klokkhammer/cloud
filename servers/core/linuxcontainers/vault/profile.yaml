@@ -1,0 +1,36 @@
+name: vault
+description: HashiCorp Vault container profile
+config:
+  limits.cpu: "2"
+  limits.memory: 4GB
+  security.nesting: "true"
+  security.privileged: "false"
+  linux.kernel_modules: "ip_tables, ip6_tables, netlink_diag, nf_nat, overlay"
+  raw.lxc: |
+    lxc.apparmor.profile=unconfined
+    lxc.cap.drop=
+devices:
+  eth0:
+    name: eth0
+    nictype: bridged
+    parent: br0
+    type: nic
+    hwaddr: 00:16:3e:c7:83:32
+  root:
+    path: /
+    pool: zpool
+    type: disk
+
+  vault-data:
+    type: disk
+    path: /var/lib/vault
+    source: /ssd/appdata/vault/data
+    shift: "true"
+
+  vault-config:
+    type: disk
+    path: /etc/vault.d            
+    source: /ssd/appdata/vault/config
+    shift: "true"
+
+project: default

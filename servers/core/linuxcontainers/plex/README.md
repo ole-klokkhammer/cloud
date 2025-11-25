@@ -21,4 +21,10 @@
 
     systemctl enable plexmediaserver
     systemctl restart plexmediaserver
-- 
+
+
+## file permissions
+- use shift
+- sudo chown -R plex:plex /var/lib/plexmediaserver
+  sudo chmod -R u+rwX /var/lib/plexmediaserver
+  sudo systemctl restart plexmediaserver

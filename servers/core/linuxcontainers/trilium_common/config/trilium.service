@@ -1,0 +1,14 @@
+[Unit]
+Description=Trilium
+After=syslog.target network.target
+
+[Service]
+Type=simple
+TimeoutStopSec=20
+# working dir needs to be same as where ./node/... is executed
+WorkingDirectory=/config/current
+ExecStart=/config/current/trilium.sh
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

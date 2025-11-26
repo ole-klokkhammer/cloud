@@ -43,3 +43,20 @@ sudo mkdir /mnt/haos-zvol
 sudo mount /dev/zvol/ssd/appdata/homeassistant-zvol /mnt/haos-zvol
 sudo cp -r /path/to/source/* /mnt/haos-zvol/
 sudo umount /mnt/haos-zvol
+
+# check if its usign postgres
+- in the vm
+  - netstat -an | grep 5432
+- or: SELECT client_addr, datname, usename, application_name FROM pg_stat_activity;
+
+## PFSENSE
+- https://forum.jellyfin.org/t-haproxy-on-pfsense-websocket-working-updated-dec24
+- haproxy -> backend -> Backend pass thru:
+  http-request set-header X-Forwarded-Port %[dst_port]
+
+  http-request add-header X-Forwarded-Proto https if { ssl_fc } 
+  server jf homeassistant.home.lan:8123 
+  http-response set-header Cache-Control "no-cache, no-store, must-revalidate" 
+  http-response del-header Server 
+  option http-server-close 
+  option forwardfor

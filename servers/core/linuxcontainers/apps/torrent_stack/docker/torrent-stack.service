@@ -6,9 +6,9 @@ Requires=docker.service
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-WorkingDirectory=/ssd/appdata/torrent-stack/docker
-ExecStart=/usr/local/bin/docker-compose up -d
-ExecStop=/usr/local/bin/docker-compose down
+WorkingDirectory=/docker
+ExecStart=docker compose up -d
+ExecStop=docker compose down
 TimeoutStartSec=0
 
 [Install]

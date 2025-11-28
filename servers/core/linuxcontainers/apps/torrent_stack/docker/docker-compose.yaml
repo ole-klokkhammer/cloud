@@ -26,6 +26,8 @@ services:
       - "8686:8686" # lidarr
       - "9117:9117" # jackett
       - "5055:5055" # jellyseerr
+    security_opt:
+      - apparmor:unconfined
 
   qbittorrent:
     image: ghcr.io/linuxserver/qbittorrent

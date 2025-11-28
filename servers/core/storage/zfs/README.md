@@ -43,3 +43,8 @@ for backup
 
 * aws s3 cp --profile k3s-volume-backup s3://k3s-volumes/k3s/homeassistant-data/snapshot-1752566019.zfs /tmp --endpoint-url https://j8t7.ldn203.idrivee2-94.com
 * sudo zfs receive ssd/k3s/homeassistant-data < /tmp/snapshot-1752566019.zfs
+
+## ARC CACHE size
+
+- sudo nano /etc/modprobe.d/zfs.conf
+  - options zfs zfs_arc_max=274877906944

@@ -1,0 +1,16 @@
+name: lxd-dashboard
+description: lxd-dashboard VM profile
+config:
+  limits.cpu: "1"
+  limits.memory: 4GB
+devices:
+  eth0:
+    name: eth0
+    nictype: bridged
+    parent: br0
+    type: nic
+  root:
+    path: /
+    pool: zpool
+    type: disk
+project: default

@@ -1,0 +1,17 @@
+[Unit]
+Description=HiveMQ MQTT Broker
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/hivemq
+Environment="HIVEMQ_DATA_FOLDER=/data"
+Environment="HIVEMQ_EXTENSION_FOLDER=/extensions"
+Environment="HIVEMQ_CONFIG_FOLDER=/config"
+ExecStart=/opt/hivemq/bin/run.sh
+User=hivemq
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

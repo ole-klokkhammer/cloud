@@ -1,0 +1,31 @@
+:hivemq-link: https://www.hivemq.com
+:hivemq-marketplace: {hivemq-link}/extensions/
+:hivemq-support: {hivemq-link}/support/
+
+= HiveMQ Allow All Extension
+
+image:https://img.shields.io/badge/Extension_Type-Security-orange?style=for-the-badge[Extension Type]
+image:https://img.shields.io/github/v/release/hivemq/hivemq-allow-all-extension?style=for-the-badge[GitHub release (latest by date),link=https://github.com/hivemq/hivemq-allow-all-extension/releases/latest]
+image:https://img.shields.io/github/license/hivemq/hivemq-allow-all-extension?style=for-the-badge&color=brightgreen[GitHub,link=LICENSE]
+image:https://img.shields.io/github/actions/workflow/status/hivemq/hivemq-allow-all-extension/check.yml?branch=master&style=for-the-badge[GitHub Workflow Status,link=https://github.com/hivemq/hivemq-allow-all-extension/actions/workflows/check.yml?query=branch%3Amaster]
+
+== Purpose
+
+This Extension allows all MQTT clients to connect to HiveMQ.
+Using this extension is not secure.
+For production usage, add an appropriate security extension and remove the hivemq-allow-all extension.
+You can download security extensions from the {hivemq-marketplace}[HiveMQ Marketplace].
+
+== Need Help?
+
+If you encounter any problems, we are happy to help.
+The best place to get in contact is our {hivemq-support}[support].
+
+== Contributing
+
+If you want to contribute to HiveMQ Allow All Extension, see the link:CONTRIBUTING.md[contribution guidelines].
+
+== License
+
+HiveMQ Allow All Extension is licensed under the `APACHE LICENSE, VERSION 2.0`.
+A copy of the license can be found link:LICENSE[here].

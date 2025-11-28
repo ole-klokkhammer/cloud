@@ -1,0 +1,6 @@
+{{- with secret "secret/data/apps/torrent-stack" -}}
+LIDARR_API_KEY={{ .Data.data.LIDARR_API_KEY }}
+PRIVATE_KEY={{ .Data.data.PRIVATE_KEY }}
+TOKEN={{ .Data.data.TOKEN }}
+USER={{ .Data.data.USER }}
+{{- end }}

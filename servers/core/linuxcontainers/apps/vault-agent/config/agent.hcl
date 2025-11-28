@@ -14,9 +14,9 @@ auto_auth {
       token_file_path = "/etc/vault.d/.vault-token"
     }
   }
-} 
+}
 
 template {
   source      = "/etc/vault.d/templates/homeassistant.ctmpl"
-  destination = "/etc/vault.d/env.sh"
+  destination = "/etc/secrets/homeassistant.env"
 }

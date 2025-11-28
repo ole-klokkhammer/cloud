@@ -7,7 +7,7 @@ echo "This script runs k3s-volume backups."
 BUCKET_NAME="k3s-volumes"
 AWS_PROFILE="k3s-volume-backup"
 TIMESTAMP=$(date +%s)
-ZFS_POOL="ssd/k3s"
+ZFS_POOL="ssd/appdata"
 SNAPSHOT_PREFIX="snapshot" 
 SNAPSHOT_KEEP=7
 ENDPOINT_URL="https://j8t7.ldn203.idrivee2-94.com"

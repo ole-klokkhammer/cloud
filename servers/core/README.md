@@ -11,10 +11,18 @@
 
 ### bios settings 
 
-- downclocked to 1600mhz 
-- bifurcation on the asrock hyper card
+- ram
+  - dram speed 800mhz
+  - dram power down enable: disabled
+- restore power on ac loss: last state 
+- pcie
+  - bifurcation on the asrock hyper card
 - prevent sleep on aspm
-
+- cmd2t: 2T
+- gear down mode: auto # OR ELSE it wont boot
+- above 4g decoding: enabled
+- sr-iov: disabled
+- disable prepare link for power down command: true 
 
 ### Ubuntu Server
 
@@ -38,6 +46,8 @@
   - add ssd pool
   - add hdd pool
   - add db pool
+  - install navidrome, aws cli? etc for backup
+  - lxd dashboard: https://lxdware.com/
 - LAN BRIDGE: create a real bridge for networking on the host, use this for exposing the services on local ips issued by the main dhcp
   - see netplan
   - br0 -> eth0
@@ -52,11 +62,7 @@
   - lxc profile device set default root pool zpool
   - create seperate pool for config storage: ssd/lxd-configs 
 - install gpu deps
-  - nvidia
-- install k3s
-  - 
-- aws cli
-  - setup aws cli and add profiles
+  - nvidia 
 - other storage, big and direct mount
   - see readme under storage  
 

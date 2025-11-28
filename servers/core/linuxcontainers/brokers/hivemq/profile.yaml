@@ -13,12 +13,27 @@ devices:
   eth0:
     name: eth0
     nictype: bridged
-    parent: br0 
+    parent: br0
     type: nic
+    hwaddr: 00:16:3e:74:a9:8e
   root:
     path: /
     pool: zpool
-    type: disk 
+    type: disk
+  hivemq-data:
+    type: disk
+    path: /data
+    source: /ssd/appdata/hivemq/data
+    shift: "true"
+  hivemq-extensions:
+    path: /extensions
+    source: /ssd/appdata/hivemq/extensions
+    shift: "true"
+  hivemq-config:
+    type: disk
+    path: /config
+    source: /ssd/appdata/hivemq/config
+    shift: "true"
 project: default
 
 

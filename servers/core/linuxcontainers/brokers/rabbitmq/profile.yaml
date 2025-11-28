@@ -22,7 +22,17 @@ devices:
     type: disk
   rabbitmq-data:
     type: disk
-    path: /var/lib/rabbitmq/mnesia
-    source: /ssd/appdata/rabbitmq/mnesia
+    path: /var/lib/rabbitmq
+    source: /ssd/appdata/rabbitmq/data
+    shift: "true"
+  enabled-plugins:
+    type: disk
+    path: /etc/rabbitmq/enabled_plugins
+    source: /ssd/appdata/rabbitmq/config/enabled_plugins
+    shift: "true"
+  rabbitmq-config:
+    type: disk
+    path: /etc/rabbitmq/rabbitmq.conf
+    source: /ssd/appdata/rabbitmq/config/rabbitmq.conf
     shift: "true"
 project: default

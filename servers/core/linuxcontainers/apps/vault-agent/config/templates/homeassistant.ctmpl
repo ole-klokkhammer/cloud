@@ -1,0 +1,3 @@
+{{- with secret "secret/data/apps/homeassistant" -}}
+HA_DB_URL={{ .Data.data.RECORDER_URL }}
+{{- end }}

@@ -29,9 +29,30 @@
 #### installation
 
 - create three partitions: 
-  - efi (by selecting disk as boot)
+  - efi (1gb by selecting disk as boot)
   - /boot (1GB ext4)
-  - / (200GB btrfs)
+  - / (826.8GB btrfs)
+  
+- AFTER BOOT ensure both disks are the same:
+  - sudo parted /dev/sdX
+    - resizepart 3 890GB
+    - quit
+  - sudo btrfs filesystem resize max /
+- backup:
+  - sudo dd if=/dev/sda1 of=/dev/sdb1 bs=4M status=progress
+  - sudo dd if=/dev/sda2 of=/dev/sdb2 bs=4M status=progress
+  - sudo mount /dev/sdb3 /mnt/backup_btrfs
+    - sudo btrfs subvolume snapshot -r / /snap-root
+    - sudo btrfs send /snap-root | sudo btrfs receive /mnt/backup_btrfs
+    - sudo btrfs subvolume snapshot /mnt/backup_btrfs/snap-root /mnt/backup_btrfs/@
+    - Set @ as the default subvolume on the backup disk:
+      - sudo btrfs subvolume set-default /mnt/backup_btrfs/@
+    - Now when /dev/sdb3 is mounted without subvol options, it will mount @ as /.
+    - optionally delete
+      - sudo btrfs subvolume delete /snap-root
+      - sudo btrfs subvolume delete /mnt/backup_btrfs/snap-root
+
+
 
 #### after boot
 
@@ -41,7 +62,51 @@
       - GRUB_CMDLINE_LINUX_DEFAULT="systemd.unified_cgroup_hierarchy=1"
     - sudo update-grub
     - sudo reboot 
-- duplicate the efi and boot, and create a mirror of root on a seperate disk
+- Setup OS disk backup
+  - duplicate the efi and boot, and create a mirror of root on a seperate disk
+    - sudo parted /dev/sdb
+      - mklabel gpt
+      - mkpart ESP fat32 1MiB 1025MiB
+      - set 1 boot off
+      - set 1 esp on
+      - mkpart boot ext4 1025MiB 2049MiB
+      - mkpart root btrfs 2049MiB 204801MiB
+      - quit
+    - sudo mkfs.fat -F32 /dev/sdb1
+    - sudo mkfs.ext4 /dev/sdb2
+    - sudo mkfs.btrfs /dev/sdb3
+    - Ensure GRUB on the backup points to the backup root
+      - # Mount backup root with subvol=@
+      - sudo mount -o subvol=@ /dev/sdb3 /mnt/backup_root
+      - sudo mount /dev/sdb1 /mnt/backup_root/boot/efi
+      - sudo mount /dev/sdb2 /mnt/backup_root/boot
+      - 
+      - sudo mount --bind /dev  /mnt/backup_root/dev
+      - sudo mount --bind /proc /mnt/backup_root/proc
+      - sudo mount --bind /sys  /mnt/backup_root/sys
+
+      - sudo chroot /mnt/backup_root /bin/bash
+
+        # inside chroot:
+      - grub-install /dev/sdb
+      - update-grub
+      - exit
+  - backup:
+    - sudo dd if=/dev/sda1 of=/dev/sdb1 bs=4M status=progress
+    - sudo dd if=/dev/sda2 of=/dev/sdb2 bs=4M status=progress
+    - sudo mount /dev/sdb3 /mnt/backup_btrfs
+      - sudo btrfs subvolume snapshot -r / /snap-root
+      - sudo btrfs send /snap-root | sudo btrfs receive /mnt/backup_btrfs
+      - sudo btrfs subvolume snapshot /mnt/backup_btrfs/snap-root /mnt/backup_btrfs/@
+      - Set @ as the default subvolume on the backup disk:
+        - sudo btrfs subvolume set-default /mnt/backup_btrfs/@
+      - Now when /dev/sdb3 is mounted without subvol options, it will mount @ as /.
+      - optionally delete
+        - sudo btrfs subvolume delete /snap-root
+        - sudo btrfs subvolume delete /mnt/backup_btrfs/snap-root
+  - NOW IN CASE OF DISK FAILURE:
+    Keep set 1 boot off on sdb1 normally.
+    When sda dies, go into BIOS, flip sdb1 to boot on using parted from a rescue stick, or just pick its EFI entry manually in the firmware menu.
 - setup zfs:
   - add ssd pool
   - add hdd pool

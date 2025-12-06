@@ -37,21 +37,7 @@
   - sudo parted /dev/sdX
     - resizepart 3 890GB
     - quit
-  - sudo btrfs filesystem resize max /
-- backup:
-  - sudo dd if=/dev/sda1 of=/dev/sdb1 bs=4M status=progress
-  - sudo dd if=/dev/sda2 of=/dev/sdb2 bs=4M status=progress
-  - sudo mount /dev/sdb3 /mnt/backup_btrfs
-    - sudo btrfs subvolume snapshot -r / /snap-root
-    - sudo btrfs send /snap-root | sudo btrfs receive /mnt/backup_btrfs
-    - sudo btrfs subvolume snapshot /mnt/backup_btrfs/snap-root /mnt/backup_btrfs/@
-    - Set @ as the default subvolume on the backup disk:
-      - sudo btrfs subvolume set-default /mnt/backup_btrfs/@
-    - Now when /dev/sdb3 is mounted without subvol options, it will mount @ as /.
-    - optionally delete
-      - sudo btrfs subvolume delete /snap-root
-      - sudo btrfs subvolume delete /mnt/backup_btrfs/snap-root
-
+  - sudo btrfs filesystem resize max / 
 
 
 #### after boot
@@ -62,51 +48,51 @@
       - GRUB_CMDLINE_LINUX_DEFAULT="systemd.unified_cgroup_hierarchy=1"
     - sudo update-grub
     - sudo reboot 
-- Setup OS disk backup
-  - duplicate the efi and boot, and create a mirror of root on a seperate disk
-    - sudo parted /dev/sdb
-      - mklabel gpt
-      - mkpart ESP fat32 1MiB 1025MiB
-      - set 1 boot off
-      - set 1 esp on
-      - mkpart boot ext4 1025MiB 2049MiB
-      - mkpart root btrfs 2049MiB 204801MiB
-      - quit
-    - sudo mkfs.fat -F32 /dev/sdb1
-    - sudo mkfs.ext4 /dev/sdb2
-    - sudo mkfs.btrfs /dev/sdb3
-    - Ensure GRUB on the backup points to the backup root
-      - # Mount backup root with subvol=@
-      - sudo mount -o subvol=@ /dev/sdb3 /mnt/backup_root
-      - sudo mount /dev/sdb1 /mnt/backup_root/boot/efi
-      - sudo mount /dev/sdb2 /mnt/backup_root/boot
-      - 
-      - sudo mount --bind /dev  /mnt/backup_root/dev
-      - sudo mount --bind /proc /mnt/backup_root/proc
-      - sudo mount --bind /sys  /mnt/backup_root/sys
-
-      - sudo chroot /mnt/backup_root /bin/bash
-
-        # inside chroot:
-      - grub-install /dev/sdb
-      - update-grub
-      - exit
-  - backup:
-    - sudo dd if=/dev/sda1 of=/dev/sdb1 bs=4M status=progress
-    - sudo dd if=/dev/sda2 of=/dev/sdb2 bs=4M status=progress
-    - sudo mount /dev/sdb3 /mnt/backup_btrfs
-      - sudo btrfs subvolume snapshot -r / /snap-root
-      - sudo btrfs send /snap-root | sudo btrfs receive /mnt/backup_btrfs
-      - sudo btrfs subvolume snapshot /mnt/backup_btrfs/snap-root /mnt/backup_btrfs/@
-      - Set @ as the default subvolume on the backup disk:
-        - sudo btrfs subvolume set-default /mnt/backup_btrfs/@
-      - Now when /dev/sdb3 is mounted without subvol options, it will mount @ as /.
-      - optionally delete
-        - sudo btrfs subvolume delete /snap-root
-        - sudo btrfs subvolume delete /mnt/backup_btrfs/snap-root
-  - NOW IN CASE OF DISK FAILURE:
-    Keep set 1 boot off on sdb1 normally.
-    When sda dies, go into BIOS, flip sdb1 to boot on using parted from a rescue stick, or just pick its EFI entry manually in the firmware menu.
+- Setup OS disk mirroring
+  - sda1 one time backup?
+    - 
+  - sda2 software mirror (/boot 1GB ext4 with mdadm RAID1):
+    - install mdadm:
+      - sudo apt install mdadm
+    - create RAID1 array using ONLY the backup partition first (sdb2):
+      - sudo mdadm --create /dev/md0 \
+          --level=1 \
+          --raid-devices=2 \
+          --metadata=0.90 \
+          /dev/sdb2 missing
+    - make filesystem on the new array:
+      - sudo mkfs.ext4 /dev/md0
+    - copy current /boot into the RAID (while still booted from sda2):
+      - sudo mount /dev/md0 /mnt/md0
+      - sudo rsync -aHAX /boot/ /mnt/md0
+      - sudo umount /mnt/md0
+    - switch /boot to use the RAID array:
+      - sudo mount /dev/md0 /boot
+    - add sda2 as the second RAID1 member (now that it’s not in use directly):
+      - sudo mdadm --add /dev/md127 /dev/sda2
+      - cat /proc/mdstat   # watch it resync
+    - fix /etc/fstab to mount /boot from the RAID:
+      - get UUID of md0:
+        - sudo blkid /dev/md0
+      - edit fstab:
+        - sudo nano /etc/fstab
+        - change /boot line to:
+          - UUID=<uuid-of-md0>  /boot  ext4  defaults  0  2
+        - remove any /boot entries using /dev/sda2 or /dev/sdb2 directly
+    - make mdadm config persistent and update initramfs:
+      - sudo mdadm --detail --scan | sudo tee /etc/mdadm/mdadm.conf
+      - sudo update-initramfs -u
+    - reboot and verify:
+      - sudo reboot
+      - after reboot:
+        - lsblk
+        - mount | grep ' /boot'
+        - cat /proc/mdstat
+        - # /boot should be on /dev/md0 (sda2+sdb2 [raid1])
+  - sda3 btrfs mirroring:
+    - sudo btrfs device add /dev/sdb3 /
+    - sudo btrfs balance start -dconvert=raid1 -mconvert=raid1 /
+    - sudo btrfs balance status /
 - setup zfs:
   - add ssd pool
   - add hdd pool

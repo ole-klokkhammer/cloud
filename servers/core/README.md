@@ -50,7 +50,15 @@
     - sudo reboot 
 - Setup OS disk mirroring
   - sda1 one time backup?
-    - 
+    - clone EFI from main to backup:
+      - sudo umount /dev/sdb1 2>/dev/null || true
+      - sudo dd if=/dev/sda1 of=/dev/sdb1 bs=4M status=progress
+      - sudo sync
+    - verify:
+      - sudo mkdir -p /mnt/efi2
+        sudo mount /dev/sdb1 /mnt/efi2
+        ls /mnt/efi2   # should show EFI/...
+        sudo umount /mnt/efi2
   - sda2 software mirror (/boot 1GB ext4 with mdadm RAID1):
     - install mdadm:
       - sudo apt install mdadm

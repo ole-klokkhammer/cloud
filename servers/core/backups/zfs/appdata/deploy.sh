@@ -4,7 +4,7 @@ set -e
 
 REMOTE_USER=ubuntu
 REMOTE_HOST=core.home.lan
-SERVICE_NAME="k3s-volume-backup"
+SERVICE_NAME="zfs-ssd-appdata-backup"
 REMOTE_TMP_DIR="/tmp/${SERVICE_NAME}-install"
 
 SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}.service"

@@ -14,6 +14,12 @@
 * sudo zfs allow ubuntu snapshot,send k3s
 * sudo zfs allow ubuntu snapshot,send ssd/appdata
 
+## sanoid
+- sudo apt update
+- sudo apt install sanoid
+
+## syncoid
+
 ## monitoring
 https://github.com/healthchecks/healthchecks
   

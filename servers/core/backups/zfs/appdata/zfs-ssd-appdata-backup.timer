@@ -1,5 +1,5 @@
 [Unit]
-Description=Run k3s-volume backup every day
+Description=Run zfs-ssd-appdata-backup
 
 [Timer]
 OnCalendar=*-*-* 01:00:00

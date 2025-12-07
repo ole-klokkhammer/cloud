@@ -2,10 +2,11 @@
 
 set -x
 
-echo "This script runs k3s-volume backups."
+echo "This script runs zfs ssd/appdata backups."
 
-BUCKET_NAME="k3s-volumes"
-AWS_PROFILE="k3s-volume-backup"
+BUCKET_NAME="appdata"
+BUCKET_PREFIX="core"
+AWS_PROFILE="appdata"
 TIMESTAMP=$(date +%s)
 ZFS_POOL="ssd/appdata"
 SNAPSHOT_PREFIX="snapshot" 
@@ -19,6 +20,7 @@ for volume in $(zfs list -H -o name -t filesystem,volume | grep "^$ZFS_POOL/"); 
   SNAPSHOT="${VOLUME_NAME}@${SNAPSHOT_PREFIX}-${TIMESTAMP}" 
   SNAPSHOT_PATH="/tmp/$(echo "${SNAPSHOT}" | tr '/:' '__').zfs"
   S3_SNAPSHOT_PATH="$(echo "${SNAPSHOT}" | tr '@' '/').zfs"
+  S3_OBJECT_KEY="${BUCKET_PREFIX}/${S3_SNAPSHOT_PATH}"
 
   echo "Creating snapshot: $SNAPSHOT"
   zfs_snapshot_output=$(
@@ -44,11 +46,11 @@ for volume in $(zfs list -H -o name -t filesystem,volume | grep "^$ZFS_POOL/"); 
     exit $ZFS_SEND_STATUS
   fi
 
-  echo "Uploading $SNAPSHOT_PATH to S3"
+  echo "Uploading $SNAPSHOT_PATH to S3 as $S3_OBJECT_KEY"
   aws_output=$(
     aws s3api put-object \
       --bucket "$BUCKET_NAME" \
-      --key "$S3_SNAPSHOT_PATH" \
+      --key "$S3_OBJECT_KEY" \
       --body "$SNAPSHOT_PATH" \
       --profile "$AWS_PROFILE" \
       --endpoint-url "$ENDPOINT_URL"
@@ -71,7 +73,7 @@ for volume in $(zfs list -H -o name -t filesystem,volume | grep "^$ZFS_POOL/"); 
     --profile "$AWS_PROFILE" \
     --endpoint-url "$ENDPOINT_URL" \
     --query 'Contents[].Key' \
-    --output json | jq -r ".[] | select(startswith(\"$VOLUME_NAME\"))" | sort -n
+    --output json | jq -r ".[] | select(startswith(\"${BUCKET_PREFIX}/${VOLUME_NAME}\"))" | sort -n
   )
   SNAPSHOT_COUNT=$(echo "$SNAPSHOT_LIST" | wc -l)
 

@@ -25,6 +25,7 @@ services:
       - "8989:8989" # sonarr
       - "8686:8686" # lidarr
       - "9117:9117" # jackett
+      - "8191:8191" # flaresolverr
       - "5055:5055" # jellyseerr
     security_opt:
       - apparmor:unconfined
@@ -107,5 +108,19 @@ services:
       - PORT=5055
     volumes:
       - /config/jellyseerr:/app/config
+    security_opt:
+      - apparmor:unconfined
+
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:v3.3.16
+    depends_on: [vpn]
+    network_mode: "service:vpn"
+    environment:
+      - LOG_LEVEL=debug
+      - TZ=Europe/Oslo
+      - HOST=0.0.0.0
+      - PORT=8191
+      - HEADLESS=true
+      - BROWSER_TIMEOUT=55000
     security_opt:
       - apparmor:unconfined

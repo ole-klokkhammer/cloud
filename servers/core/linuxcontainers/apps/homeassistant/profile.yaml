@@ -16,6 +16,6 @@ devices:
     type: disk
   homeassistant-data:
     path: /config
-    source: /dev/zvol/ssd/appdata/homeassistant-zvol
+    source: /dev/zvol/ssd/vm/homeassistant-zvol
     type: disk
 project: default

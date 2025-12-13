@@ -1,0 +1,13 @@
+[Unit]
+Description=Healthchecks (SQLite)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+WorkingDirectory=/opt/healthchecks
+EnvironmentFile=/opt/healthchecks/.env
+ExecStart=/opt/healthchecks/.venv/bin/gunicorn -b 0.0.0.0:8080 hc.wsgi:application
+Restart=always 
+
+[Install]
+WantedBy=multi-user.target

@@ -21,13 +21,13 @@ cd /opt/healthchecks
 sudo -u www-data python3 -m venv .venv
 sudo -u www-data bash -lc '. .venv/bin/activate && pip install -U pip wheel && pip install -r requirements.txt gunicorn'
 
-- DEBUG=False
-SECRET_KEY=$(openssl rand -hex 32)
-ALLOWED_HOSTS=healthchecks.home.lan,localhost,127.0.0.1
+- DEBUG="True"
+SECRET_KEY="xxxxxx"
+#ALLOWED_HOSTS=healthchecks.home.lan,localhost,127.0.0.1
 DB=sqlite:////ssd/appdata/healthchecks/hc.sqlite
-SITE_ROOT=http://healthchecks.home.lan
-EMAIL_USE_VERIFICATION=False
-TIME_ZONE=Europe/Oslo
+SITE_ROOT="http://healthchecks.home.lan"
+EMAIL_USE_VERIFICATION="False"
+TIME_ZONE="Europe/Oslo"
 - cd /opt/healthchecks
 sudo -u www-data bash -lc '. .venv/bin/activate && ./manage.py migrate && ./manage.py createsuperuser && ./manage.py collectstatic --noinput'
 

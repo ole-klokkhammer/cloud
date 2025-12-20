@@ -128,3 +128,11 @@
 ## postgres
 ## Setup backup 
 ## k3s
+
+sudo apt update && sudo apt install -y rasdaemon
+sudo systemctl enable --now rasdaemon
+
+sudo ras-mc-ctl --summarize
+sudo ras-mc-ctl --error-count
+
+journalctl -k | grep -i 'edac\|ecc'

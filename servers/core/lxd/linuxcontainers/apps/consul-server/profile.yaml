@@ -1,0 +1,24 @@
+name: consul-server
+description: Consul Server container profile
+config:
+  limits.cpu: "2"
+  limits.memory: 4GB
+  security.nesting: "false"
+  security.privileged: "false"
+devices:
+  eth0:
+    name: eth0
+    nictype: bridged
+    parent: br0
+    type: nic
+    hwaddr: 00:16:3e:4a:9a:8c
+  consul-data:
+    path: /opt/consul
+    shift: "true"
+    source: /ssd/appdata/consul
+    type: disk
+  root:
+    path: /
+    pool: zpool
+    type: disk 
+project: default

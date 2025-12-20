@@ -12,8 +12,8 @@ ZFS_POOL="ssd/appdata"
 SNAPSHOT_PREFIX="snapshot" 
 SNAPSHOT_KEEP=7
 ENDPOINT_URL="https://j8t7.ldn203.idrivee2-94.com"
-HEALTHCHECKS_URL="http://healthchecks.home.lan/ping/f049b364-9bd6-4d87-b748-5876a9e297fc"
- 
+HEALTHCHECKS_URL="http://healthchecks.home.lan/ping/0246fd61-880e-484e-8ba1-43e5aea2c152"
+
 echo "List all ZFS volumes (zvols) and filesystems in the pool: $ZFS_POOL"
 for volume in $(zfs list -H -o name -t filesystem,volume | grep "^$ZFS_POOL/"); do
   VOLUME_NAME=$volume 

@@ -1,3 +1,6 @@
+[Install]
+WantedBy=multi-user.target
+
 [Unit]
 Description=Postgres backup - type determined in script (full on Sunday, incremental other days)
 

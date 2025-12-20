@@ -1,14 +1,15 @@
-name: lxd-dashboard
-description: lxd-dashboard VM profile
+name: nomad-stateless-vm
+description: Nomad stateless VM profile
 config:
-  limits.cpu: "1"
-  limits.memory: 4GB
+  limits.cpu: "4"
+  limits.memory: 64GB
 devices:
   eth0:
     name: eth0
     nictype: bridged
     parent: br0
     type: nic
+    hwaddr: 00:16:3e:74:7a:40
   root:
     path: /
     pool: zpool

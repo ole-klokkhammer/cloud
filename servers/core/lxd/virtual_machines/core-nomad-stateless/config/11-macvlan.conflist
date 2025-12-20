@@ -1,0 +1,14 @@
+{
+  "cniVersion": "1.0.0",
+  "name": "macvlan-lan",
+  "plugins": [
+    {
+      "type": "macvlan",
+      "master": "enp5s0",      
+      "mode": "bridge",       
+      "ipam": {
+        "type": "dhcp"
+      }
+    }
+  ]
+}

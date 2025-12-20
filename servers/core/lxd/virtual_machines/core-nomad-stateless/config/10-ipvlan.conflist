@@ -1,0 +1,14 @@
+{
+  "cniVersion": "1.0.0",
+  "name": "ipvlan-lan",
+  "plugins": [
+    {
+      "type": "ipvlan",
+      "master": "enp5s0",
+      "mode": "l2",
+      "ipam": {
+        "type": "dhcp"
+      }
+    }
+  ]
+}

@@ -12,6 +12,8 @@ client {
     machine  = "core",
     workload = "stateless"
   }
+  cni_path = "/usr/lib/cni"
+  cni_config_dir = "/etc/cni/net.d"
 }
 
 advertise {
@@ -27,7 +29,7 @@ consul {
 plugin "nomad-driver-podman" {
   config {
     volumes {
-      enabled      = true
+      enabled      = false
     }
-  }
+  } 
 }

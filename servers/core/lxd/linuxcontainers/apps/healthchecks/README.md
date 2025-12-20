@@ -24,6 +24,7 @@ sudo -u www-data bash -lc '. .venv/bin/activate && pip install -U pip wheel && p
 - DEBUG="True"
 SECRET_KEY="xxxxxx"
 #ALLOWED_HOSTS=healthchecks.home.lan,localhost,127.0.0.1
+INTEGRATIONS_ALLOW_PRIVATE_IPS="True"
 DB=sqlite:////ssd/appdata/healthchecks/hc.sqlite
 SITE_ROOT="http://healthchecks.home.lan"
 EMAIL_USE_VERIFICATION="False"

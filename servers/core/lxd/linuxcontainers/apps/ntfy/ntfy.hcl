@@ -17,6 +17,11 @@ job "ntfy" {
   group "app" {
 
     network { 
+      mode = "bridge"
+      # mode = "cni/portmap" 
+      # mode = "bridge" 
+      # mode = "host"
+      # mode = "cni/macvlan-lan"
       port "ntfy" { to = 80 }
     }
 
@@ -43,6 +48,7 @@ job "ntfy" {
       service {
         name = "ntfy"
         port = "ntfy"
+        provider = "consul"
         check {
           type     = "http"
           path     = "/"

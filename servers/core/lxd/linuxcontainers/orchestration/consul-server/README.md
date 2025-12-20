@@ -21,10 +21,7 @@ sudo apt install -y consul
 
 config
 --- 
-
 ---
-
-
 sudo systemctl enable --now consul
 
 

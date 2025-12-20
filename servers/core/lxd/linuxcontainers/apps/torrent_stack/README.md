@@ -16,7 +16,7 @@ lib-modules:
 - lxc launch ubuntu:24.04 torrent-stack -p default -p torrent-stack
 - lxc exec torrent-stack -- bash
   - sudo apt update
-  - sudo apt install docker.io -y
+    sudo apt install docker.io -y
   - sudo apt update
     sudo apt install ca-certificates curl gnupg -y
     sudo install -m 0755 -d /etc/apt/keyrings

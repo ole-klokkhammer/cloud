@@ -6,7 +6,7 @@ config:
 devices:
   eth0:
     name: eth0
-    nictype: bridged
+    nictype: macvlan
     parent: br0
     type: nic
     hwaddr: 00:16:3e:74:7a:40

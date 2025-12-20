@@ -24,10 +24,10 @@ consul {
   checks_use_advertise = true
 }
 
-plugin "docker" {
+plugin "nomad-driver-podman" {
   config {
     volumes {
-      enabled = false
+      enabled      = true
     }
   }
 }

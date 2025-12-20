@@ -18,14 +18,11 @@ sudo nano /etc/nomad.d/nomad.hcl
 ---
 sudo systemctl enable --now nomad
 
-## cni bridge plugin
-sudo apt update
-sudo apt install -y containernetworking-plugins
-sudo mkdir -p /opt/cni
-sudo ln -s /usr/lib/cni /opt/cni/bin
-sudo systemctl restart docker
-sudo systemctl restart nomad
+## podman plugin https://developer.hashicorp.com/nomad/plugins/drivers/podman
+https://developer.hashicorp.com/nomad/plugins/drivers/podman
 
-## extra modules
-sudo modprobe bridge
-echo bridge | sudo tee -a /etc/modules
+sudo apt-get update && \
+  sudo apt-get install wget gpg coreutils
+wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+sudo apt-get update && sudo apt-get install -y nomad-driver-podman

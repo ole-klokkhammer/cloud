@@ -14,22 +14,19 @@ job "ntfy" {
     value     = "stateless"
   }
 
-  group "ntfy" {
+  group "app" {
 
-    network {
-      mode = "bridge"
-      port "http" { 
-        to = 80 
-      }
+    network { 
+      port "ntfy" { to = 80 }
     }
 
     task "ntfy" {
-      driver = "docker"
+      driver = "podman"
       
       config {
-        image = "binwiederhier/ntfy:latest"
+        image = "docker.io/binwiederhier/ntfy"
         args  = ["serve"]
-        ports = [80]
+        ports = ["ntfy"]
       }
       
       env {
@@ -45,7 +42,7 @@ job "ntfy" {
       
       service {
         name = "ntfy"
-        port = "http"
+        port = "ntfy"
         check {
           type     = "http"
           path     = "/"

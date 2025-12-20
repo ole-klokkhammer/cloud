@@ -10,22 +10,23 @@
 - lxc console core-nomad-stateless
 
 
-## install inside vm
-./nomad-client
+## install inside vm 
 
 sudo apt update
-sudo apt install -y docker.io
-sudo systemctl enable --now docker
+sudo apt install -y podman containernetworking-plugins
 
+// enable podman rootless for the user
+sudo loginctl enable-linger $USER
+
+// logout and in
+systemctl --user start podman.socket
+
+podman info | grep rootless
+
+// install nomad
+./nomad-client 
 
 ## enable bridge kernel in vm
 sudo modprobe bridge
 echo bridge | sudo tee -a /etc/modules
 sudo apt install -y containernetworking-plugins
-
-## use built in docker bridge network mode
- 
-sudo usermod -aG docker nomad
-sudo usermod -aG docker ubuntu
-sudo systemctl restart docker
-sudo systemctl restart nomad

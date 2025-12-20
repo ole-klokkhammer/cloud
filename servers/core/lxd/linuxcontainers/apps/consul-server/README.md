@@ -26,3 +26,17 @@ config
 
 
 sudo systemctl enable --now consul
+
+
+## PFSENSE
+dns resolver -> custom options:
+server:
+  include: /var/unbound/pfb_dnsbl.*conf
+
+  local-zone: "consul." static
+  forward-zone:
+    name: "consul."
+    forward-addr: 192.168.10.151#8600
+
+---
+dig @192.168.10.1 ntfy.service.consul

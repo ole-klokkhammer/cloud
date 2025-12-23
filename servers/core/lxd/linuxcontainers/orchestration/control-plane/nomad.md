@@ -2,8 +2,8 @@
 https://developer.hashicorp.com/nomad/docs/deploy
 
 ## storage
-sudo zfs create -o compression=lz4 -o atime=off ssd/appdata/nomad-server-1
-sudo zfs set logbias=latency ssd/appdata/nomad-server-1
+sudo zfs create -o compression=lz4 -o atime=off ssd/appdata/control-plane
+sudo zfs set logbias=latency ssd/appdata/control-plane
 
 ## nomad
 

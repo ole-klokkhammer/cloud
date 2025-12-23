@@ -19,9 +19,21 @@ sudo apt update
 sudo apt install -y consul
 
 
-config
---- 
----
+sudo nano /etc/consul.d/consul.hcl
+--> add config
+
+// consul keeps restarting with default config. add this
+sudo systemctl edit consul
+[Service]
+Type=simple
+TimeoutStartSec=300
+Restart=on-failure
+RestartSec=2
+sudo systemctl daemon-reload
+sudo systemctl restart consul
+sudo systemctl status consul --no-pager -l
+
+// start
 sudo systemctl enable --now consul
 
 

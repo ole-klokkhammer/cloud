@@ -1,6 +1,4 @@
-# /etc/nomad.d/server.hcl
-
-name       = "nomad-server-1" # unique per server
+name       = "nomad-server" # unique per server
 datacenter = "dc1"
 bind_addr  = "0.0.0.0"
 data_dir   = "/opt/nomad/data"
@@ -25,13 +23,13 @@ ports {
 }
 
 advertise {
- http = "nomad-server.home.lan:4646"
- rpc = "nomad-server.home.lan:4647"
- serf = "nomad-server.home.lan:4648"
+ http = "control-plane.home.lan:4646"
+ rpc = "control-plane.home.lan:4647"
+ serf = "control-plane.home.lan:4648"
 }
 
 consul {
   enabled = true
-  address = "http://consul-server.home.lan:8500"
+  address = "http://control-plane.home.lan:8500"
   checks_use_advertise = true
 }

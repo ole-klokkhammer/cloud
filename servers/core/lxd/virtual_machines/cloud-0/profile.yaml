@@ -1,8 +1,8 @@
-name: nomad-stateless-vm
-description: Nomad stateless VM profile
+name: cloud-vm
+description: Cloud VM profile
 config:
-  limits.cpu: "4"
-  limits.memory: 64GB
+  limits.cpu: "8"
+  limits.memory: 128GB
 devices:
   eth0:
     name: eth0

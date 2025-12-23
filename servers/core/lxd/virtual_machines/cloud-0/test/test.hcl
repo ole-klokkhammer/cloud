@@ -5,7 +5,7 @@ job "redis" {
     }
 
     task "redis" {
-      driver = "podman"
+      driver = "docker"
       config {
         image = "docker.io/library/redis:7"
         ports = ["redis"]

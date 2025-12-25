@@ -23,6 +23,8 @@
 - above 4g decoding: enabled
 - sr-iov: disabled
 - disable prepare link for power down command: true 
+- iommu on
+- enable virtualization: svm mode -> on
 
 ### Ubuntu Server
 

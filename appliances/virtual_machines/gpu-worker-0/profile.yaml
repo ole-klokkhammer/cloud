@@ -1,0 +1,20 @@
+name: gpu-worker-vm
+description: GPU worker VM (vLLM/Ollama, embeddings, NVIDIA GPU)
+config:
+  user.host: "core"
+  limits.cpu: "24"
+  limits.memory: 384GB
+  security.nesting: "false"
+  security.privileged: "false"
+devices:
+  eth0:
+    name: eth0
+    nictype: bridged
+    parent: br0
+    type: nic
+  root:
+    path: /
+    pool: zpool
+    type: disk
+    size: 500GB
+project: default

@@ -1,0 +1,25 @@
+name: gpu-worker-vm
+description: GPU worker VM (vLLM/Ollama, embeddings, NVIDIA GPU)
+config:
+  user.host: "core"
+  limits.cpu: "16" 
+  limits.cpu.nodes: "0,1" # assuming we have defined the cpu as two numa nodes
+  limits.memory: "196GB"
+  limits.memory.hugepages: "false"
+  security.nesting: "false"
+  security.privileged: "false"
+  # Directly instructs the underlying QEMU process to arrange those 16 vCPUs as a single physical socket with 16 cores and no hyperthreading.
+  raw.qemu: >
+    -smp 16,sockets=1,cores=16,threads=1
+devices:
+  eth0:
+    name: eth0
+    nictype: bridged
+    parent: br0
+    type: nic
+  root:
+    path: /
+    pool: zpool
+    type: disk
+    size: 500GB
+project: default

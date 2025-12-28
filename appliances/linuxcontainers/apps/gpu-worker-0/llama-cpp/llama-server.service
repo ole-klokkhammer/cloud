@@ -1,0 +1,31 @@
+[Unit]
+Description=llama.cpp Inference Server
+After=network.target
+
+[Service]
+Type=simple
+User=root
+Environment="CUDA_VISIBLE_DEVICES=0"
+ExecStart=/usr/local/bin/llama-server \
+  --host 0.0.0.0 \
+  --port 8080 \
+  -m /models/MiniMax-M2-Q4_K_M-00001-of-00003.gguf \
+  -n 1024 \
+  -t 16 \
+  --no-mmap \
+  --n-gpu-layers 7 \
+  --numa distribute \
+  --flash-attn on \
+  --cache-type-k q4_0 \
+  --cache-type-v q4_0 \
+  -b 512 \
+  -c 8096 \
+  --temp 1 \
+  --top_p 0.95 \
+  --top_k 40 
+Restart=unless-stopped
+LimitMEMLOCK=infinity
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target

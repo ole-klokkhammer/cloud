@@ -3,6 +3,7 @@ bind_addr  = "0.0.0.0"
 name       = "gpu-worker-0"
 datacenter = "dc1"
 data_dir   = "/opt/nomad/data"
+plugin_dir = "/opt/nomad/plugins"
 
 client {
   enabled = true
@@ -12,8 +13,13 @@ client {
     machine  = "core",
     workload = "gpu"
   }
-  cni_path = "/usr/lib/cni"
-  cni_config_dir = "/etc/cni/net.d"
+  # cni_path = "/usr/lib/cni"
+  # cni_config_dir = "/etc/cni/net.d"
+
+  host_volume "llama-models" {
+    path      = "/home/ubuntu/llama-api/models"
+    read_only = true
+  }
 }
 
 advertise {
@@ -26,7 +32,8 @@ consul {
   checks_use_advertise = true
 }
 
-vault {
-  enabled = true
-  address = "http://vault.home.lan:8200"
+plugin "nomad-device-nvidia" {
+  config {
+    enabled = true
+  }
 }

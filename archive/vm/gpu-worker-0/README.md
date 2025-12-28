@@ -11,6 +11,33 @@ cat  ~/.ssh/idXXXx.pub
 -> lxc console gpu-worker-0 -> ~/.ssh/authorized_keys
 - lxc console gpu-worker-0
 
+## System Improvements
+### Prevent double caching on host and in vm. On host:
+sudo zfs set primarycache=metadata ssd/lxd/virtual-machines/gpu-worker-0.block
+
+### ensure numa node location
+We only have one socket, and two CCD, so 1 or 2 numa is the only viable option
+
+limits.cpu: "16" 
+limits.cpu.mode: host
+limits.cpu.nodes: "0,1" # Pins VM to both physical NUMA nodes
+limits.memory: "196GB"
+
+# Run the container with memory interleaving
+numactl --interleave=all docker run ....
+
+test memory numa location
+
+
+### We can also use hugepages to improve vm boot speed, but only use it for testing as it can cause instability
+1. Reserve hugepages (e.g., for 196GB using 2MB pages):
+Calculate: 196 * 1024 / 2 = 100352 pages
+echo 100352 | sudo tee /proc/sys/vm/nr_hugepages
+
+2. Update the LXD profile to use them:
+lxc profile set gpu-worker-0 limits.memory.hugepages true
+
+
 ## install docker
 sudo apt update
 sudo apt install -y docker.io
@@ -24,19 +51,29 @@ curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/s
 echo "deb [signed-by=/usr/share/keyrings/hashicorp.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" \
   | sudo tee /etc/apt/sources.list.d/hashicorp.list
 sudo apt update
-sudo apt install -y nomad 
+sudo apt install -y nomad
+
+### nomad nvidia device plugin
+https://github.com/hashicorp/nomad-device-nvidia
+
+sudo apt update
+sudo apt install nomad-device-nvidia
+
+sudo mkdir -p /opt/nomad/plugins
+sudo ln -s /usr/bin/nomad-device-nvidia /opt/nomad/plugins/nomad-device-nvidia
+
+add to config:
+plugin_dir = "/opt/nomad/plugins"
+plugin "nomad-device-nvidia" {
+  config {
+    enabled = true
+  }
+}
 
 ### config
 sudo mkdir -p /etc/nomad.d
 sudo nano /etc/nomad.d/nomad.hcl
-sudo systemctl enable --now nomad
-
-## OOM memory management
-
-we may need to cap arc caching to avoid spending too much ram
-
-// cap ARC to 96 GiB
-echo $((96*1024*1024*1024)) | sudo tee /sys/module/zfs/parameters/zfs_arc_max
+sudo systemctl enable --now nomad 
 
 
 ## gpu passthrough
@@ -101,59 +138,3 @@ sudo systemctl restart docker
 
 6. verify
 docker run --rm --gpus all nvidia/cuda:12.4.1-base-ubuntu22.04 nvidia-smi
-
-7. Test ollama
-mkdir -p ~/ollama
-
-docker rm -f ollama 2>/dev/null || true
-docker run -d --name ollama \
-  --restart unless-stopped \
-  --gpus all \
-  -p 11434:11434 \
-  -v ~/ollama:/root/.ollama \
-  ollama/ollama:latest
-
-docker exec -it ollama ollama list
-docker exec -it ollama ollama run devstral-small-2:latest 
-
-
-## temp testing
-- ghcr.io/ggml-org/llama.cpp:full-cuda
-- https://github.com/ggml-org/llama.cpp/blob/master/docs/docker.md
-- https://huggingface.co/unsloth/Devstral-Small-2-24B-Instruct-2512-GGUF
- 
-### small
-docker run --name llama-api \
-  --restart unless-stopped \
-  --network host \
-  --gpus all \
-  -v ~/llama-api/models:/models \
-  ghcr.io/ggml-org/llama.cpp:full-cuda \
-  --server \
-  --host 0.0.0.0 \
-  --port 8080 \
-  -m /models/Devstral-Small-2-24B-Instruct-2512-Q4_K_M.gguf \
-  -n 1024 \
-  -t 12 \
-  --n-gpu-layers -1 \
-  -c 16384 \
-  -b 512 \
-  --temp 0.15
-
-### large
-docker run --name llama-api \
-  --restart unless-stopped \
-  --network host \
-  --gpus all \
-  -v ~/llama-api/models:/models \
-  ghcr.io/ggml-org/llama.cpp:full-cuda \
-  --server \
-  --host 0.0.0.0 \
-  --port 8080 \
-  -m /models/Devstral-2-123B-Instruct-2512-Q4_K_M-00001-of-00002.gguf \
-  -n 1024 \
-  -t 24 \
-  --n-gpu-layers 14 \
-  -c 8096 \
-  -b 512 \
-  --temp 0.15

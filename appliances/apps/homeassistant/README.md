@@ -21,8 +21,14 @@ EOF
   - tar -cvzf metadata.tar.gz metadata.yaml
   - lxc image import metadata.tar.gz disk.qcow2 --alias haos-16.3
 
-### 
+### notes
 LXD uses the colon for remote:alias, so for local images, use a simple alias like haos or haos-16.3. Rename your alias if needed, then launch with that name.
+
+## Setup database
+* CREATE DATABASE homeassistant;
+* CREATE USER homeassistant WITH PASSWORD 'xxxx';
+* GRANT ALL ON DATABASE homeassistant TO homeassistant;
+* GRANT ALL PRIVILEGES  ON SCHEMA public TO homeassistant;
 
 ## create vm
 - lxc profile create homeassistant-vm 

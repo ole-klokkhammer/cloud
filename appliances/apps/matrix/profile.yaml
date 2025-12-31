@@ -1,9 +1,9 @@
-name: healthchecks
-description: healthchecks container profile
+name: matrix
+description: matrix container profile
 config:
   user.host: "core"
-  limits.cpu: "2"
-  limits.memory: 4GB 
+  limits.cpu: "4"
+  limits.memory: 16GB 
   security.nesting: "false"
   security.privileged: "false" 
 devices:
@@ -13,9 +13,14 @@ devices:
     parent: br0
     type: nic 
   config:
-    path: /config
+    path: /etc/matrix-synapse
     shift: "true"
-    source: /ssd/appdata/healthchecks  
+    source: /ssd/appdata/matrix/config
+    type: disk
+  media:
+    path: /media
+    shift: "true"
+    source: /ssd/appdata/matrix/media
     type: disk
   root:
     path: /

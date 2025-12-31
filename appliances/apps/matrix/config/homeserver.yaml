@@ -1,0 +1,32 @@
+listeners:
+  - port: 8008
+    tls: false
+    type: http
+    x_forwarded: true
+    bind_addresses: ['::', '0.0.0.0']
+    resources:
+      - names: [client, federation]
+        compress: false
+
+database:
+  name: psycopg2
+  args:
+    user: matrix
+    password: <PASS>
+    database: matrix
+    host: postgres.home.lan
+    cp_min: 5
+    cp_max: 10
+
+log_config: "/etc/matrix-synapse/log.yaml"
+
+media_store_path: /media
+
+signing_key_path: "/etc/matrix-synapse/homeserver.signing.key"
+macaroon_secret_key_path: "/etc/matrix-synapse/homeserver.macaroon.secret"
+registration_shared_secret_path: "/etc/matrix-synapse/homeserver.registration.shared.secret"
+form_secret_path: "/etc/matrix-synapse/homeserver.form.secret"
+
+trusted_key_servers:
+  - server_name: "matrix.home.lan"
+  - server_name: "matrix.linole.org"

@@ -1,13 +1,14 @@
 [Unit]
-Description=Healthchecks (SQLite)
-After=network-online.target
-Wants=network-online.target
+Description=Uptime Kuma (Healthchecks Appliance)
+After=network.target
 
 [Service]
-WorkingDirectory=/opt/healthchecks
-EnvironmentFile=/opt/healthchecks/.env
-ExecStart=/opt/healthchecks/.venv/bin/gunicorn -b 0.0.0.0:8080 hc.wsgi:application
-Restart=always 
+Type=simple
+User=root
+WorkingDirectory=/opt/healthchecks/uptime-kuma
+Environment=PORT=80
+ExecStart=/usr/bin/node /opt/healthchecks/uptime-kuma/server/server.js
+Restart=always
 
 [Install]
 WantedBy=multi-user.target

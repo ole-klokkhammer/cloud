@@ -2,8 +2,8 @@ name: healthchecks
 description: healthchecks container profile
 config:
   user.host: "core"
-  limits.cpu: "2"
-  limits.memory: 4GB 
+  limits.cpu: "1"
+  limits.memory: 2GB
   security.nesting: "false"
   security.privileged: "false" 
 devices:

@@ -12,7 +12,7 @@ ZFS_POOL="ssd/appdata"
 SNAPSHOT_PREFIX="snapshot" 
 SNAPSHOT_KEEP=7
 ENDPOINT_URL="https://j8t7.ldn203.idrivee2-94.com"
-HEALTHCHECKS_URL="http://healthchecks.home.lan/ping/0246fd61-880e-484e-8ba1-43e5aea2c152"
+HEALTHCHECKS_URL="http://healthchecks.home.lan/api/push/fNdnPs1w3qBKdDXOaF3vrVVvObBcZtoj"
 
 echo "List all ZFS volumes (zvols) and filesystems in the pool: $ZFS_POOL"
 for volume in $(zfs list -H -o name -t filesystem,volume | grep "^$ZFS_POOL/"); do
@@ -30,7 +30,7 @@ for volume in $(zfs list -H -o name -t filesystem,volume | grep "^$ZFS_POOL/"); 
   if [ $ZFS_SNAPSHOT_STATUS -ne 0 ]; then
     echo "zfs snapshot failed"
     echo "$zfs_snapshot_output"
-    curl "$HEALTHCHECKS_URL/fail"
+    curl "$HEALTHCHECKS_URL?status=down&msg=zfs_snapshot_failed"
     exit $ZFS_SNAPSHOT_STATUS
   fi
 
@@ -42,7 +42,7 @@ for volume in $(zfs list -H -o name -t filesystem,volume | grep "^$ZFS_POOL/"); 
   if [ $ZFS_SEND_STATUS -ne 0 ]; then
     echo "zfs send failed"
     echo "$zfs_send_output"
-    curl "$HEALTHCHECKS_URL/fail"
+    curl "$HEALTHCHECKS_URL?status=down&msg=zfs_send_failed"
     exit $ZFS_SEND_STATUS
   fi
 
@@ -59,7 +59,7 @@ for volume in $(zfs list -H -o name -t filesystem,volume | grep "^$ZFS_POOL/"); 
   if [ $AWS_STATUS -ne 0 ]; then
     echo "aws s3 upload failed"
     echo "$aws_output"
-    curl "$HEALTHCHECKS_URL/fail"
+    curl "$HEALTHCHECKS_URL?status=down&msg=aws_s3_upload_failed"
     exit $AWS_STATUS
   fi
 
@@ -103,6 +103,4 @@ for volume in $(zfs list -H -o name -t filesystem,volume | grep "^$ZFS_POOL/"); 
 done
 
 echo "All ZFS volume snapshots completed and uploaded."
-curl "$HEALTHCHECKS_URL"
-
-
+curl "$HEALTHCHECKS_URL?status=up&msg=all_snapshots_completed"

@@ -1,38 +1,36 @@
 # healthchecks
 
-## zfs
+- https://github.com/louislam/uptime-kuma?tab=readme-ov-file
+
+## setup
+
+### zfs
 sudo zfs create -o quota=4G ssd/appdata/healthchecks
 sudo zfs set recordsize=16K ssd/appdata/healthchecks
 sudo zfs set atime=off ssd/appdata/healthchecks
 sudo zfs set logbias=latency ssd/appdata/healthchecks
 sudo zfs set compression=lz4 ssd/appdata/healthchecks
 
-## 
+### LXC
 - lxc profile create healthchecks
 - lxc profile edit healthchecks
 - lxc launch ubuntu:24.04 healthchecks -p default -p healthchecks
 - lxc exec healthchecks -- bash
 
-- sudo apt update
-sudo apt install -y python3-venv python3-pip git
-sudo git clone https://github.com/healthchecks/healthchecks.git /opt/healthchecks
-sudo chown -R www-data:www-data /opt/healthchecks
+
+### Installation
+sudo apt update
+sudo apt install -y nodejs npm
+npm install pm2 -g
+
 cd /opt/healthchecks
-sudo -u www-data python3 -m venv .venv
-sudo -u www-data bash -lc '. .venv/bin/activate && pip install -U pip wheel && pip install -r requirements.txt gunicorn'
+git clone https://github.com/louislam/uptime-kuma.git
+cd uptime-kuma
+npm run setup
 
-- DEBUG="True"
-SECRET_KEY="xxxxxx"
-#ALLOWED_HOSTS=healthchecks.home.lan,localhost,127.0.0.1
-INTEGRATIONS_ALLOW_PRIVATE_IPS="True"
-DB=sqlite:////ssd/appdata/healthchecks/hc.sqlite
-SITE_ROOT="http://healthchecks.home.lan"
-EMAIL_USE_VERIFICATION="False"
-TIME_ZONE="Europe/Oslo"
-- cd /opt/healthchecks
-sudo -u www-data bash -lc '. .venv/bin/activate && ./manage.py migrate && ./manage.py createsuperuser && ./manage.py collectstatic --noinput'
 
-- nano healthchecks.service
-- sudo systemctl daemon-reload
+sudo nano /etc/systemd/system/healthchecks.service
+-> add contents
+
+sudo systemctl daemon-reload
 sudo systemctl enable --now healthchecks
-sudo systemctl status healthchecks

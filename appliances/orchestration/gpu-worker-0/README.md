@@ -33,3 +33,17 @@ sudo apt install nomad-device-nvidia
 sudo mkdir -p /opt/nomad/plugins
 sudo ln -s /usr/bin/nomad-device-nvidia /opt/nomad/plugins/nomad-device-nvidia
  
+
+## NUMA testing
+
+### memory location
+sudo  numastat -p $(pidof llama-server)
+watch -n 0.5 "sudo  numastat -p $(pidof llama-server)"
+
+### CPU localization
+numactl --hardware
+then verify cpu number with htop
+
+### others
+- numactl --cpunodebind=0 --membind=0
+- numactl --interleave=all

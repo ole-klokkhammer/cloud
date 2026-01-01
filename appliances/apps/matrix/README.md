@@ -51,8 +51,47 @@ sudo systemctl restart matrix-synapse
 ### Registering users
 - https://element-hq.github.io/synapse/latest/setup/installation.html?highlight=register_new_matrix_user#registering-a-user
 
-register_new_matrix_user -c homeserver.yaml
+register_new_matrix_user -c /etc/matrix-synapse/homeserver.yaml
 
 
 ### Keycloak?
 https://element-hq.github.io/synapse/latest/openid.html?highlight=keycloa#keycloak
+
+
+## Integrations
+
+### Home Assistant
+1. Create bot: `register_new_matrix_user ... (homeassistant-bot)`
+2. In HA: Settings > Integrations > Matrix
+3. Configure homeserver, bot credentials, and Room ID
+4. Use `notify.matrix` in automations
+
+in homeassistant configuration.yaml. commands can be mapped to automations.
+https://www.home-assistant.io/integrations/matrix
+
+matrix:
+  homeserver: https://matrix.org
+  username: "@my_matrix_user:matrix.org"
+  password: supersecurepassword
+  rooms:
+    - "#hasstest:matrix.org"
+  commands:
+    - word: my_command
+      name: my_command
+
+// HA automation
+alias: Notify Matrix on Sofus door Change
+description: ""
+triggers:
+  - entity_id: binary_sensor.sofus
+    trigger: state
+actions:
+  - action: matrix.send_message
+    data:
+      message: >
+        🔔 Sofus door changed from {{ trigger.from_state.state }} to {{ trigger.to_state.state }}
+        Time: {{ now().strftime('%Y-%m-%d %H:%M:%S') }}
+      data:
+        format: text
+      target: "!xDqDOypKkhAiJmcsKP:matrix"
+mode: single

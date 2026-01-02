@@ -2,11 +2,11 @@ config: {}
 networks: [] # Keep this empty
 
 storage_pools:
-- config:
-    source: /mnt/lxd-storage
+- name: default
+  driver: btrfs
   description: ""
-  name: default
-  driver: dir
+  config:
+    source: /dev/ubuntu-vg/lxd-storage
 
 profiles:
 - config: {}

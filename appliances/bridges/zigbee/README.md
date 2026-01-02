@@ -1,7 +1,13 @@
 # zigbee
 
 ## setup 
- 
+
+### storage
+
+sudo lvcreate -L 1G -n zigbee2mqtt ubuntu-vg 
+sudo mkfs.btrfs /dev/ubuntu-vg/zigbee2mqtt 
+
+
 ### get device ids
 lsusb
 Look for a line like: Bus 001 Device 004: ID 0b05:190e ASUSTek Computer, Inc. Zenbook Flip Bluetooth
@@ -9,22 +15,13 @@ VendorID: 0b05
 ProductID: 190e
 
 add in profile:
-bluetooth:
+zigbee-usb:
   type: usb
   vendorid: "1a86"
   productid: "7523"
-
-
-### storage
-sudo lvcreate -L 1G -n zigbee2mqtt ubuntu-vg
-sudo mkfs.ext4 /dev/ubuntu-vg/zigbee2mqtt
-sudo mkdir -p /mnt/zigbee2mqtt
-sudo mount /dev/ubuntu-vg/zigbee2mqtt /mnt/zigbee2mqtt
-
-// persistent mount
-sudo blkid /dev/ubuntu-vg/zigbee2mqtt
-echo "UUID=f6f09cc1-9f67-4b13-8672-4c8711e38090 /mnt/zigbee2mqtt ext4 defaults 0 2" | sudo tee -a /etc/fstab 
-sudo mount -a
+zigbee-serial:
+  path: /dev/ttyUSB0
+  type: unix-char
 
 ### lxc 
 - lxc profile create zigbee
@@ -39,6 +36,8 @@ https://support.electrolama.com/radio-docs/zigbee2mqtt/
 ### zigbee2mqtt
 https://www.zigbee2mqtt.io/guide/installation/01_linux.html
 
+// run without data dir attached
+
 sudo apt-get install -y curl
 sudo curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
 sudo apt-get install -y nodejs git make g++ gcc libsystemd-dev
@@ -51,6 +50,7 @@ git clone --depth 1 https://github.com/Koenkk/zigbee2mqtt.git /opt/zigbee2mqtt
 cd /opt/zigbee2mqtt
 pnpm install --frozen-lockfile
 
+usermod -aG dialout ubuntu
 
 // Create a systemctl configuration file for Zigbee2MQTT
 sudo nano /etc/systemd/system/zigbee2mqtt.service

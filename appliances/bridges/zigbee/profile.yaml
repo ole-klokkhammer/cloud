@@ -18,7 +18,7 @@ devices:
     path: /dev/ttyUSB0
     type: unix-char
   data:
-    source: /mnt/zigbee2mqtt
+    source: /dev/ubuntu-vg/zigbee2mqtt
     path: /opt/zigbee2mqtt/data
     type: disk
     shift: "true"

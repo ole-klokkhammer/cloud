@@ -1,0 +1,27 @@
+config: {}
+networks: [] # Keep this empty
+
+storage_pools:
+- config:
+    source: /mnt/lxd-storage
+  description: ""
+  name: default
+  driver: dir
+
+profiles:
+- config: {}
+  description: ""
+  devices:
+    eth0:
+      name: eth0
+      nictype: bridged  # Use this for system bridges
+      parent: br0       # The name of your Netplan bridge
+      type: nic
+    root:
+      path: /
+      pool: default
+      type: disk
+  name: default
+
+projects: []
+cluster: null

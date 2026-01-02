@@ -1,0 +1,21 @@
+name: bluetooth
+description: bluetooth VM profile
+config:
+  user.host: "hub0"
+  limits.cpu: "2"
+  limits.memory: 4GB
+devices:
+  eth0:
+    name: eth0
+    nictype: bridged
+    parent: br0
+    type: nic
+  bluetooth:
+    type: usb
+    vendorid: "8087"
+    productid: "0029"
+  root:
+    path: /
+    pool: default
+    type: disk
+project: default

@@ -2,6 +2,9 @@
 
 ## setup
 
+// init lxc
+sudo lxd init --preseed < config.yaml
+
 
 ## web
 - lxc config set core.https_address :8443

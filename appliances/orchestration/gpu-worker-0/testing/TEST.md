@@ -3,6 +3,14 @@
 - https://github.com/ggml-org/llama.cpp/blob/master/docs/docker.md
 - https://huggingface.co/unsloth/Devstral-Small-2-24B-Instruct-2512-GGUF
   
+## Models
+- minimax m2
+- devstral 2 (small)
+- GLM-4.7
+- https://huggingface.co/Qwen/Qwen3-VL-235B-A22B-Instruct
+- https://huggingface.co/Qwen/Qwen3-VL-235B-A22B-Thinking
+
+
 ## Test ollama
 mkdir -p ~/ollama
 

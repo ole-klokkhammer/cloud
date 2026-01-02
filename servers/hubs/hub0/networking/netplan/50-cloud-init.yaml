@@ -1,0 +1,14 @@
+network:
+  version: 2
+  renderer: networkd
+
+  ethernets:
+    eno1: {}        # your physical NIC, no IP here
+
+  bridges:
+    br0:
+      interfaces: [eno1]
+      dhcp4: true
+      parameters:
+        stp: false
+        forward-delay: 0

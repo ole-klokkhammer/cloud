@@ -5,7 +5,7 @@ config:
   limits.cpu: "1"
   limits.memory: 2GB
   security.nesting: "false"
-  security.privileged: "false" 
+  security.privileged: "false"
 devices:
   eth0:
     name: eth0

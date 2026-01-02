@@ -1,0 +1,29 @@
+name: zigbee
+description: Zigbee profile
+config:
+  user.host: "hub0"
+  limits.cpu: "2"
+  limits.memory: 4GB
+devices:
+  eth0:
+    name: eth0
+    nictype: bridged
+    parent: br0
+    type: nic
+  zigbee-usb:
+    type: usb
+    vendorid: "1a86"
+    productid: "7523"
+  zigbee-serial:
+    path: /dev/ttyUSB0
+    type: unix-char
+  data:
+    source: /mnt/zigbee2mqtt
+    path: /opt/zigbee2mqtt/data
+    type: disk
+    shift: "true"
+  root:
+    path: /
+    pool: default
+    type: disk
+project: default

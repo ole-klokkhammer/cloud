@@ -46,11 +46,7 @@ kvm-ok
 ### lxc
 - lxc profile create bluetooth
 - lxc profile edit bluetooth
-- lxc launch ubuntu:24.04 bluetooth --vm --profile bluetooth
-- lxc exec bluetooth -- passwd ubuntu // set password
-- copy ssh key to the host
-cat  ~/.ssh/idXXXx.pub
--> lxc console bluetooth -> ~/.ssh/authorized_keys
+- lxc launch ubuntu:24.04 bluetooth --vm --profile bluetooth 
 - lxc console bluetooth
 - lxc exec bluetooth -- bash
 

@@ -12,6 +12,7 @@ devices:
     nictype: bridged
     parent: br0
     type: nic
+    hwaddr: 00:16:3e:03:e1:2b
   root:
     path: /
     pool: zpool

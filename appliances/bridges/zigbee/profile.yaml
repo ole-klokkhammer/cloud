@@ -10,6 +10,7 @@ devices:
     nictype: bridged
     parent: br0
     type: nic
+    hwaddr: 00:16:3e:01:47:75
   zigbee-usb:
     type: usb
     vendorid: "1a86"

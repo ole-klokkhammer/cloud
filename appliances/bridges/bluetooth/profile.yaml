@@ -10,6 +10,7 @@ devices:
     nictype: bridged
     parent: br0
     type: nic
+    hwaddr: 00:16:3e:e6:50:1a
   bluetooth:
     type: usb
     vendorid: "8087"

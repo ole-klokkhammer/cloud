@@ -2,7 +2,7 @@
 
 ## setup 
 
-## disable bluetooth on the host
+### disable bluetooth on the host
 Ensure the host is not using bluetooth
 
 sudo systemctl stop bluetooth

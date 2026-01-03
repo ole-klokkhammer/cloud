@@ -5,7 +5,7 @@ import logging
 import struct
 import uuid
 from typing import Any, Optional, Dict, List
-from models import (
+from bluetooth.models import (
     BLEDeviceResponse,
     Service,
     Characteristic,
@@ -19,11 +19,11 @@ from bleak.backends.device import BLEDevice
 from bleak.backends.scanner import AdvertisementData
 import env 
 
-scan_lock = asyncio.Lock()
+async_lock = asyncio.Lock()
 
 
-async def scan(timeout: int):
-    async with scan_lock:
+async def scan(timeout: float):
+    async with async_lock:
         devices: Dict[
             str, tuple[BLEDevice, AdvertisementData]
         ] = await BleakScanner.discover(
@@ -46,12 +46,12 @@ async def scan(timeout: int):
         ]
 
 
-async def connect(address: str) -> BLEDeviceResponse:
-    async with scan_lock:
+async def connect(address: str, timeout: float) -> BLEDeviceResponse:
+    async with async_lock:
         logging.info(f"Connecting to Bluetooth device {address}...")
         result = BLEDeviceResponse()
         try:
-            async with BleakClient(address, timeout=env.connect_timeout) as client:
+            async with BleakClient(address, timeout=timeout) as client:
                 for service in client.services:
                     service_info = Service(description=service.description)
                     for characteristic in service.characteristics:
@@ -104,7 +104,7 @@ async def send_command(
     command: bytearray,
     format_type: str,
 ) -> Optional[bytearray]:
-    async with scan_lock:
+    async with async_lock:
         notification = NotificationReceiver(characteristic, format_type)
         async with BleakClient(address) as client:
             await client.start_notify(characteristic, notification)

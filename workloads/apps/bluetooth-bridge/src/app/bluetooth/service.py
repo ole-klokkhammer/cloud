@@ -41,6 +41,10 @@ async def scan(timeout: float):
                     k: utils.bytes_as_str(v)
                     for k, v in ad_data.manufacturer_data.items()
                 },
+                "service_data": {
+                    k: utils.bytes_as_str(v)
+                    for k, v in ad_data.service_data.items()
+                },
             }
             for device, ad_data in devices.values()
         ]

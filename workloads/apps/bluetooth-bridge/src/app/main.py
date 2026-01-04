@@ -22,8 +22,8 @@ MQTT_BROKER = "hivemq.home.lan"
 #   │   └── {address}/read/{characteristic}
 #   ├── event/
 #   │   ├── scan/complete
-#   │   ├── {address}/connected
-#   │   └── {address}/data/{characteristic}
+#   │   ├── connect/{address}
+#   │   └── read/{address}/{characteristic}
 #   ├── state/
 #   │   ├── bridge                          # "online"/"offline" (LWT)
 #   │   ├── scan/devices                    # Last scan results
@@ -38,8 +38,8 @@ PREFIX = "bluetooth"
 
 # Commands (subscribe to these)
 CMD_SCAN = f"{PREFIX}/command/scan"
-CMD_CONNECT = f"{PREFIX}/command/+/connect"           # bluetooth/command/{address}/connect
-CMD_READ = f"{PREFIX}/command/+/read/+"               # bluetooth/command/{address}/read/{characteristic}
+CMD_CONNECT = f"{PREFIX}/command/+/connect"
+CMD_READ = f"{PREFIX}/command/+/read/+"
 
 # State (retained)
 STATE_BRIDGE = f"{PREFIX}/state/bridge"

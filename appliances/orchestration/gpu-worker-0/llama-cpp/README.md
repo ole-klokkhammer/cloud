@@ -27,7 +27,7 @@ cd llama.cpp
 
 #### cuda build
 
-cmake -B build -DGGML_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES=native
+cmake -B build -DGGML_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES=native -DLLAMA_CURL=1
 cmake --build build --config Release -j$(nproc)
 
 sudo ln -sf $(pwd)/build/bin/llama-server /usr/local/bin/llama-server

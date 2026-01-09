@@ -67,6 +67,48 @@ docker exec -it ollama ollama run devstral-small-2:latest
   --top_p 0.95 \
   --top_k 40
 
+# IQuest-Coder-V1-40B-Instruct.Q4_K_M.gguf
+
+- numactl --interleave=all llama-server \
+  --host 0.0.0.0 \
+  --port 8080 \
+  -m /models/IQuest-Coder-V1-40B-Instruct.Q4_K_M.gguf \
+  -n 1024 \
+  -t 16 \
+  --no-mmap \
+  --mlock \
+  --n-gpu-layers 50 \
+  --flash-attn on \
+  --cache-type-k q4_0 \
+  --cache-type-v q4_0 \
+  -b 2048 \
+  -ub 1024 \
+  -c 8096 \
+  --temp 0.45 \
+  --top_p 0.95 \
+  --top_k 40
+
+# NousResearch_NousCoder-14B-Q8_0.gguf
+Better than iquest coder
+
+- numactl --interleave=all llama-server \
+  --host 0.0.0.0 \
+  --port 8080 \
+  -m /models/NousResearch_NousCoder-14B-Q8_0.gguf \
+  -n 4096 \
+  -t 16 \
+  --no-mmap \
+  --mlock \
+  --n-gpu-layers -1 \
+  --flash-attn on \
+  --cache-type-k q4_0 \
+  --cache-type-v q4_0 \
+  -b 4096 \
+  -ub 8192 \
+  -c 8192 \
+  --temp 0.45 \
+  --top_p 0.95 \
+  --top_k 40
 
 ## testing minimax m2
 
@@ -106,6 +148,23 @@ limits.cpu: "16"
   --cache-type-v q4_0 \
   -b 2048 \
   -ub 1024 \
+  -c 8096 \
+  --temp 0.45 \
+  --top_p 0.95 \
+  --top_k 40
+
+- numactl --interleave=all llama-server \
+  --host 0.0.0.0 \
+  --port 8080 \
+  -m /models/MiniMax-M2.1-Q4_K_M-00001-of-00003.gguf \
+  -n 4096 \
+  -t 16 \
+  --no-mmap \
+  --mlock \
+  --n-gpu-layers 7 \
+  --flash-attn on \
+  --cache-type-k q4_0 \
+  --cache-type-v q4_0 \
   -c 8096 \
   --temp 0.45 \
   --top_p 0.95 \

@@ -13,7 +13,15 @@ setup brave
 rsync -ahHAX --info=progress2 --partial --no-links   --exclude '**/node_modules/'   --exclude '**/build/'   --exclude '**/dist/' --exclude '**/.venv/' --exclude '**/venv/'    /home/ole/workspace/ /run/media/ole/79DD-D7E3/FILES/workspace/
 
 ### Push files to remote
-rsync -ahHAX --info=progress2 --partial   /run/media/ole/79DD-D7E3/FILES   ubuntu@core.home.lan:/home/ubuntu/temp/laptop0
+rsync -ahHAX --info=progress2 --partial --no-links \
+  --exclude '**/node_modules/' \
+  --exclude '**/build/' \
+  --exclude '**/dist/' \
+  --exclude '**/.venv/' \
+  --exclude '**/venv/' \
+  --exclude '**/__pycache__/' \
+  /run/media/ole/79DD-D7E3/FILES \
+  ubuntu@core.home.lan:/home/ubuntu/temp/laptop0
 
 ### Pull files from remote
 rsync -ahHAX --info=progress2 --partial   ubuntu@core.home.lan:/home/ubuntu/temp/laptop0  XXXXX   

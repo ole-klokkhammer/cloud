@@ -40,6 +40,7 @@
       --top_p 0.95 \
       --top_k 40 \
       --repeat_penalty 1.25
+      
 2. NousResearch_NousCoder-14B-Q8_0.gguf
    - numactl --interleave=all llama-server \
       --host 0.0.0.0 \
@@ -58,4 +59,18 @@
       --top_p 0.95 \
       --top_k 40
 3. devstral 2 small
-4. GLM-4.7 ???
+4. nvidia nemotron 3 nano ->>> VERY good explanations, what about implementation?
+   - numactl --interleave=all llama-server \
+      --host 0.0.0.0 \
+      --port 8080 \
+      -m /models/Nemotron-3-Nano-30B-A3B-Q8_0.gguf \
+      -n 4096 \
+      -t 16 \
+      --no-mmap \
+      --mlock \
+      --n-gpu-layers 20 \
+      --flash-attn on \
+      -c 200000 \
+      --temp 1.0 \
+      --top_p 1.0
+5. https://huggingface.co/miromind-ai/MiroThinker-v1.5-235B

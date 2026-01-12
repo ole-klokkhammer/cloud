@@ -6,11 +6,28 @@ curl -fsSL https://opencode.ai/install | bash
 
 
 ## llama.cpp
-~/.opencode/config.json
+add in project root: 
+opencode.json -> 
 {
-  "endpoint": "http://gpu-worker-0:8080/v1",
-  "model": "Minimax-M2.1",
-  "temperature": 1
+  "$schema": "https://opencode.ai/config.json", 
+  "provider": {
+    "llama.cpp": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "llama-server (local)",
+      "options": {
+        "baseURL": "http://gpu-worker-0.home.lan:8080/v1"
+      },
+      "models": {
+        "MiniMax-M2.1-UD-IQ2_M-00001-of-00002.gguf": {
+          "name": "Minimax-M2.1 (local)",
+          "thinking": true,
+          "limit": {
+            "context": 128000,
+            "output": 4096
+          }
+        }
+      }
+    }
+  }
 }
-
-opencode
+ 

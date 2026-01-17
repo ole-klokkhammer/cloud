@@ -1,0 +1,12 @@
+[Unit]
+Description=Set enp66s0f0 autoneg to enable advertising of 2.5gbit
+After=network-pre.target
+Wants=network-pre.target
+
+[Service]
+Type=oneshot
+ExecStart=/sbin/ethtool -s enp66s0f0 autoneg on
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

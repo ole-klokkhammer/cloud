@@ -7,39 +7,12 @@ config:
   security.nesting: "true"
   security.privileged: "true"
   linux.kernel_modules: ip_tables, ip6_tables, netlink_diag, nf_nat, overlay
-  raw.lxc: |-
-    lxc.apparmor.profile=unconfined
 devices:
   eth0:
     name: eth0
     nictype: bridged
     parent: br0
     type: nic
-    hwaddr: 00:16:3e:56:f1:ab
-  proxy-qbittorrent:
-    type: proxy
-    listen: tcp:0.0.0.0:8080
-    connect: tcp:127.0.0.1:8080
-  proxy-radarr:
-    type: proxy
-    listen: tcp:0.0.0.0:7878
-    connect: tcp:127.0.0.1:7878
-  proxy-sonarr:
-    type: proxy
-    listen: tcp:0.0.0.0:8989
-    connect: tcp:127.0.0.1:8989
-  proxy-lidarr:
-    type: proxy
-    listen: tcp:0.0.0.0:8686
-    connect: tcp:127.0.0.1:8686
-  proxy-jackett:
-    type: proxy
-    listen: tcp:0.0.0.0:9117
-    connect: tcp:127.0.0.1:9117
-  proxy-jellyseerr:
-    type: proxy
-    listen: tcp:0.0.0.0:5055
-    connect: tcp:127.0.0.1:5055
   media:
     path: /hdd/media
     source: /hdd/media
@@ -63,12 +36,7 @@ devices:
     path: /config
     source: /ssd/appdata/torrent-stack/config
     type: disk
-    shift: "true"
-  secrets:
-    path: /secrets/torrent-stack.env
-    source: /ssd/secrets/torrent-stack.env
-    type: disk
-    readonly: "true"
+    shift: "true" 
   lib-modules:
     path: /mnt/lib_modules
     source: /lib/modules

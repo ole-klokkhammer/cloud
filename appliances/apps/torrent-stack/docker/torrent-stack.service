@@ -6,7 +6,8 @@ Requires=docker.service
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-WorkingDirectory=/docker
+WorkingDirectory=/docker/torrent-stack
+EnvironmentFile=/docker/torrent-stack.env
 ExecStart=docker compose up -d
 ExecStop=docker compose down
 TimeoutStartSec=0

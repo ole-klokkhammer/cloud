@@ -11,7 +11,7 @@
 #   SANOID_SNAPNAME = snapshot name (e.g., autosnap_2026-01-17_12:00:00_hourly)
 #
 # Required env (via /etc/sanoid/sanoid-s3.env):
-#   S3_BUCKET, S3_PREFIX, AWS_PROFILE, S3_ENDPOINT_URL
+#   S3_BUCKET, AWS_PROFILE, S3_ENDPOINT_URL
 ###############################################################################
 set -euo pipefail
 
@@ -37,9 +37,9 @@ aws_args=(--profile "$AWS_PROFILE" --endpoint-url "$S3_ENDPOINT_URL")
 
 # With the new incremental strategy (all incrs based on FULL, not chained),
 # snapshots can be in:
-#   prefix/dataset/full/snapname.zfs.zst         (full backup)
-#   prefix/dataset/incr/snapname_from_*.zfs.zst  (incremental backup)
-#   prefix/dataset/snapname.zfs.zst              (legacy flat path)
+#   dataset/full/snapname.zfs.zst         (full backup)
+#   dataset/incr/snapname_from_*.zfs.zst  (incremental backup)
+#   dataset/snapname.zfs.zst              (legacy flat path)
 #
 # If this is a FULL snapshot being pruned, we must also delete all incrementals
 # based on it (they become useless without their FULL base)
@@ -48,14 +48,14 @@ deleted=false
 aws_err=$(mktemp)
 
 # Try full path
-full_key="${S3_PREFIX}/${SANOID_TARGET}/full/${SANOID_SNAPNAME}.zfs.zst"
+full_key="${SANOID_TARGET}/full/${SANOID_SNAPNAME}.zfs.zst"
 log_info "Trying ${CYAN}s3://${S3_BUCKET}/${full_key}${NC}"
 if aws s3 rm "s3://${S3_BUCKET}/${full_key}" "${aws_args[@]}" 2>"$aws_err"; then
     log_ok "deleted $full_key"
     deleted=true
     
     # This was a FULL backup - delete all incrementals based on it
-    base_pattern="${S3_PREFIX}/${SANOID_TARGET}/incr/"
+    base_pattern="${SANOID_TARGET}/incr/"
     log_info "Deleting all incrementals based on pruned FULL: ${SANOID_SNAPNAME}"
     orphaned=$(aws s3 ls "s3://${S3_BUCKET}/${base_pattern}" "${aws_args[@]}" 2>/dev/null \
         | awk '{print $NF}' \
@@ -69,11 +69,11 @@ fi
 
 # Try incremental path (this snapshot might be an incremental)
 if ! $deleted; then
-    incr_prefix="${S3_PREFIX}/${SANOID_TARGET}/incr/${SANOID_SNAPNAME}_from_"
+    incr_prefix="${SANOID_TARGET}/incr/${SANOID_SNAPNAME}_from_"
     log_info "Looking for incremental matching ${CYAN}${incr_prefix}*${NC}"
     incr_files=$(aws s3 ls "s3://${S3_BUCKET}/${incr_prefix}" "${aws_args[@]}" 2>/dev/null | awk '{print $NF}' || true)
     for incr_file in $incr_files; do
-        incr_key="${S3_PREFIX}/${SANOID_TARGET}/incr/${incr_file}"
+        incr_key="${SANOID_TARGET}/incr/${incr_file}"
         if aws s3 rm "s3://${S3_BUCKET}/${incr_key}" "${aws_args[@]}" 2>"$aws_err"; then
             log_ok "deleted $incr_key"
             deleted=true
@@ -83,7 +83,7 @@ fi
 
 # Try legacy flat path (for backwards compatibility)
 if ! $deleted; then
-    legacy_key="${S3_PREFIX}/${SANOID_TARGET}/${SANOID_SNAPNAME}.zfs.zst"
+    legacy_key="${SANOID_TARGET}/${SANOID_SNAPNAME}.zfs.zst"
     log_info "Trying legacy path ${CYAN}s3://${S3_BUCKET}/${legacy_key}${NC}"
     if aws s3 rm "s3://${S3_BUCKET}/${legacy_key}" "${aws_args[@]}" 2>"$aws_err"; then
         log_ok "deleted $legacy_key (legacy)"

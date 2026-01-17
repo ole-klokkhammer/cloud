@@ -56,7 +56,6 @@ load_env() {
 # Set safe defaults for S3 variables
 init_s3_vars() {
     S3_BUCKET="${S3_BUCKET:-}"
-    S3_PREFIX="${S3_PREFIX:-}"
     AWS_PROFILE="${AWS_PROFILE:-}"
     S3_ENDPOINT_URL="${S3_ENDPOINT_URL:-}"
     WEBHOOK_URL="${WEBHOOK_URL:-}"
@@ -93,7 +92,7 @@ _aws_s3_args() {
 # Returns JSON or empty string if not found
 get_state_file() {
     local dataset="$1"
-    local s3_key="${S3_PREFIX}/${dataset}/_state.json"
+    local s3_key="${dataset}/_state.json"
     local aws_args
     read -ra aws_args <<< "$(_aws_s3_args)"
 
@@ -105,7 +104,7 @@ get_state_file() {
 set_state_file() {
     local dataset="$1"
     local state_json="$2"
-    local s3_key="${S3_PREFIX}/${dataset}/_state.json"
+    local s3_key="${dataset}/_state.json"
     local aws_args
     read -ra aws_args <<< "$(_aws_s3_args)"
 

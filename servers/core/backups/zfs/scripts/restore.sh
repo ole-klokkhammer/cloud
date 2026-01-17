@@ -78,8 +78,8 @@ aws_args=(--profile "$AWS_PROFILE" --endpoint-url "$S3_ENDPOINT_URL")
 # List all snapshots in S3 for a dataset
 list_snapshots() {
     local dataset="$1"
-    local full_prefix="${S3_PREFIX}/${dataset}/full/"
-    local incr_prefix="${S3_PREFIX}/${dataset}/incr/"
+    local full_prefix="${dataset}/full/"
+    local incr_prefix="${dataset}/incr/"
     
     echo "Full backups in S3:"
     aws s3 ls "s3://${S3_BUCKET}/${full_prefix}" "${aws_args[@]}" 2>/dev/null \
@@ -98,7 +98,7 @@ list_snapshots() {
 # Get all full backups sorted newest first
 get_full_backups() {
     local dataset="$1"
-    local full_prefix="${S3_PREFIX}/${dataset}/full/"
+    local full_prefix="${dataset}/full/"
     
     aws s3 ls "s3://${S3_BUCKET}/${full_prefix}" "${aws_args[@]}" 2>/dev/null \
         | awk '{print $NF}' \
@@ -110,7 +110,7 @@ get_full_backups() {
 # Output format: snapname:base_snapname
 get_all_incrementals() {
     local dataset="$1"
-    local incr_prefix="${S3_PREFIX}/${dataset}/incr/"
+    local incr_prefix="${dataset}/incr/"
     
     aws s3 ls "s3://${S3_BUCKET}/${incr_prefix}" "${aws_args[@]}" 2>/dev/null \
         | awk '{print $NF}' \
@@ -126,7 +126,7 @@ get_all_incrementals() {
 find_base_for_incr() {
     local dataset="$1"
     local snap_name="$2"
-    local incr_prefix="${S3_PREFIX}/${dataset}/incr/"
+    local incr_prefix="${dataset}/incr/"
     
     # Look for file: snapname_from_*.zfs.zst
     aws s3 ls "s3://${S3_BUCKET}/${incr_prefix}${snap_name}_from_" "${aws_args[@]}" 2>/dev/null \
@@ -140,7 +140,7 @@ find_base_for_incr() {
 is_full_backup() {
     local dataset="$1"
     local snap_name="$2"
-    local full_key="${S3_PREFIX}/${dataset}/full/${snap_name}.zfs.zst"
+    local full_key="${dataset}/full/${snap_name}.zfs.zst"
     
     aws s3 ls "s3://${S3_BUCKET}/${full_key}" "${aws_args[@]}" &>/dev/null
 }
@@ -237,12 +237,12 @@ if ! $DRY_RUN; then
 fi
 
 # Restore full backup
-full_key="${S3_PREFIX}/${DATASET}/full/${FULL_SNAP}.zfs.zst"
+full_key="${DATASET}/full/${FULL_SNAP}.zfs.zst"
 restore_stream "$full_key" "Full backup: $FULL_SNAP"
 
 # Restore incremental if needed
 if [[ -n "$INCR_SNAP" ]]; then
-    incr_key="${S3_PREFIX}/${DATASET}/incr/${INCR_SNAP}_from_${FULL_SNAP}.zfs.zst"
+    incr_key="${DATASET}/incr/${INCR_SNAP}_from_${FULL_SNAP}.zfs.zst"
     restore_stream "$incr_key" "Incremental: $INCR_SNAP"
 fi
 

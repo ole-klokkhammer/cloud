@@ -13,7 +13,7 @@
 #   SANOID_PRE_FAILURE= 0 or 1
 #
 # Required env (via /etc/sanoid/sanoid-s3.env):
-#   S3_BUCKET, S3_PREFIX, AWS_PROFILE, S3_ENDPOINT_URL
+#   S3_BUCKET, AWS_PROFILE, S3_ENDPOINT_URL
 #   WEBHOOK_URL (optional)
 ###############################################################################
 set -euo pipefail
@@ -91,17 +91,17 @@ for dataset in "${DATASETS[@]}"; do
         fi
 
         # Determine S3 key based on full or incremental
-        # Full:  prefix/dataset/full/snapname.zfs.zst
-        # Incr:  prefix/dataset/incr/snapname_from_base.zfs.zst
+        # Full:  dataset/full/snapname.zfs.zst
+        # Incr:  dataset/incr/snapname_from_base.zfs.zst
         if $do_full; then
-            s3_key="${S3_PREFIX}/${dataset}/full/${snapname}.zfs.zst"
+            s3_key="${dataset}/full/${snapname}.zfs.zst"
             upload_type="full"
             log_info "Uploading ${BOLD}FULL${NC} ${BLUE}$full_snap${NC} -> ${CYAN}s3://${S3_BUCKET}/${s3_key}${NC}"
             zfs_send_cmd="zfs send $full_snap"
         else
             # Always base incremental on last_full, NOT last_uploaded
             base_name="${last_full}"
-            s3_key="${S3_PREFIX}/${dataset}/incr/${snapname}_from_${base_name}.zfs.zst"
+            s3_key="${dataset}/incr/${snapname}_from_${base_name}.zfs.zst"
             upload_type="incr"
             log_info "Uploading ${BOLD}INCR${NC} ${BLUE}$full_snap${NC} (from FULL: ${base_name}) -> ${CYAN}s3://${S3_BUCKET}/${s3_key}${NC}"
             zfs_send_cmd="zfs send -i ${dataset}@${base_name} $full_snap"

@@ -13,6 +13,7 @@ devices:
     nictype: bridged
     parent: br0
     type: nic
+    hwaddr: "00:16:3e:e7:58:62"
   media:
     path: /hdd/media
     source: /hdd/media

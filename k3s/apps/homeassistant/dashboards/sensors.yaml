@@ -1,0 +1,314 @@
+title: Home
+views:
+  - title: Overview
+    path: overview
+    icon: mdi:home
+    cards:
+      - type: grid
+        title: Highlights
+        columns: 2
+        square: false
+        cards:
+          - type: gauge
+            name: Livingroom roof temp
+            entity: sensor.livingroom_roof_temperature
+            min: 0
+            max: 80
+            severity:
+              green: 0
+              yellow: 45
+              red: 60
+          - type: gauge
+            name: Entrance roof temp
+            entity: sensor.entrance_roof_temperature
+            min: 0
+            max: 80
+            severity:
+              green: 0
+              yellow: 45
+              red: 60
+
+      - type: entities
+        title: Day / Night + Sun
+        show_header_toggle: false
+        entities:
+          - entity: sensor.fe_p_day_night_state
+            name: Day/Night
+          - entity: sensor.sun_next_rising
+            name: Next rising
+          - entity: sensor.sun_next_setting
+            name: Next setting
+          - entity: sensor.sun_next_dawn
+            name: Next dawn
+          - entity: sensor.sun_next_dusk
+            name: Next dusk
+          - entity: sensor.sun_next_noon
+            name: Next noon
+          - entity: sensor.sun_next_midnight
+            name: Next midnight
+
+      - type: entities
+        title: Backups
+        show_header_toggle: false
+        entities:
+          - entity: sensor.backup_backup_manager_state
+            name: Backup manager
+          - entity: sensor.backup_last_successful_automatic_backup
+            name: Last successful auto backup
+          - entity: sensor.backup_last_attempted_automatic_backup
+            name: Last attempted auto backup
+          - entity: sensor.backup_next_scheduled_automatic_backup
+            name: Next scheduled auto backup
+
+      - type: entities
+        title: Plex
+        show_header_toggle: false
+        entities:
+          - entity: sensor.plex
+            name: Watching
+
+  - title: Environment
+    path: env
+    icon: mdi:thermometer
+    cards:
+      - type: entities
+        title: Temperature / Humidity
+        show_header_toggle: false
+        entities:
+          - entity: sensor.atc_65baf3_temperature
+            name: ATC 65BAF3 Temp
+          - entity: sensor.atc_65baf3_humidity
+            name: ATC 65BAF3 Humidity
+          - entity: sensor.aquara_temp_humidity_1_temperature
+            name: Aqara 1 Temp
+          - entity: sensor.aquara_temp_humidity_1_humidity
+            name: Aqara 1 Humidity
+          - entity: sensor.aquara_temp_humidity_1_pressure
+            name: Aqara 1 Pressure
+          - entity: sensor.aquara_temp_humidity_2_temperature
+            name: Aqara 2 Temp
+          - entity: sensor.aquara_temp_humidity_2_humidity
+            name: Aqara 2 Humidity
+          - entity: sensor.aquara_temp_humidity_2_pressure
+            name: Aqara 2 Pressure
+          - entity: sensor.aquara_temp_humidity_3_temperature
+            name: Aqara 3 Temp
+          - entity: sensor.aquara_temp_humidity_3_humidity
+            name: Aqara 3 Humidity
+          - entity: sensor.aquara_temp_humidity_3_pressure
+            name: Aqara 3 Pressure
+
+      - type: history-graph
+        title: Temps (24h)
+        hours_to_show: 24
+        refresh_interval: 60
+        entities:
+          - sensor.atc_65baf3_temperature
+          - sensor.aquara_temp_humidity_1_temperature
+          - sensor.aquara_temp_humidity_2_temperature
+          - sensor.aquara_temp_humidity_3_temperature
+          - sensor.livingroom_roof_temperature
+          - sensor.entrance_roof_temperature
+
+      - type: history-graph
+        title: Humidity (24h)
+        hours_to_show: 24
+        refresh_interval: 60
+        entities:
+          - sensor.atc_65baf3_humidity
+          - sensor.aquara_temp_humidity_1_humidity
+          - sensor.aquara_temp_humidity_2_humidity
+          - sensor.aquara_temp_humidity_3_humidity
+
+  - title: Garden
+    path: garden
+    icon: mdi:sprout
+    cards:
+      - type: entities
+        title: Soil sensors
+        show_header_toggle: false
+        entities:
+          - entity: sensor.tuya_soil_1_temperature
+            name: Soil 1 Temp
+          - entity: sensor.tuya_soil_1_soil_moisture
+            name: Soil 1 Moisture
+          - entity: sensor.tuya_soil_1_battery
+            name: Soil 1 Battery
+          - entity: sensor.tuya_soil_1_battery_state
+            name: Soil 1 Battery state
+          - entity: sensor.tuya_soil_3_temperature
+            name: Soil 3 Temp
+          - entity: sensor.tuya_soil_3_soil_moisture
+            name: Soil 3 Moisture
+          - entity: sensor.tuya_soil_3_battery
+            name: Soil 3 Battery
+          - entity: sensor.tuya_soil_3_battery_state
+            name: Soil 3 Battery state
+
+      - type: history-graph
+        title: Soil moisture (72h)
+        hours_to_show: 72
+        refresh_interval: 300
+        entities:
+          - sensor.tuya_soil_1_soil_moisture
+          - sensor.tuya_soil_3_soil_moisture
+
+  - title: Power
+    path: power
+    icon: mdi:lightning-bolt
+    cards:
+      - type: entities
+        title: Plug 0x54ef... (instant)
+        show_header_toggle: false
+        entities:
+          - entity: sensor.0x54ef4410012ef8fd_power
+            name: Power
+          - entity: sensor.0x54ef4410012ef8fd_voltage
+            name: Voltage
+          - entity: sensor.0x54ef4410012ef8fd_current
+            name: Current
+          - entity: sensor.0x54ef4410012ef8fd_device_temperature
+            name: Device temp
+
+      - type: entities
+        title: Plug 0x54ef... (energy)
+        show_header_toggle: false
+        entities:
+          - entity: sensor.0x54ef4410012ef8fd_energy
+            name: Total energy
+
+      - type: history-graph
+        title: Plug power (24h)
+        hours_to_show: 24
+        refresh_interval: 60
+        entities:
+          - sensor.0x54ef4410012ef8fd_power
+
+  - title: Roof / Network
+    path: roof
+    icon: mdi:access-point
+    cards:
+      - type: entities
+        title: Livingroom roof
+        show_header_toggle: false
+        entities:
+          - entity: sensor.livingroom_roof_ip_address
+            name: IP
+          - entity: sensor.livingroom_roof_wifi_signal
+            name: WiFi signal
+          - entity: sensor.livingroom_roof_temperature
+            name: Temperature
+          - entity: sensor.livingroom_roof_daily_energy
+            name: Daily energy
+
+      - type: entities
+        title: Entrance roof
+        show_header_toggle: false
+        entities:
+          - entity: sensor.entrance_roof_ip_address
+            name: IP
+          - entity: sensor.entrance_roof_wifi_signal
+            name: WiFi signal
+          - entity: sensor.entrance_roof_temperature
+            name: Temperature
+          - entity: sensor.entrance_roof_daily_energy
+            name: Daily energy
+
+      - type: history-graph
+        title: Roof temps (24h)
+        hours_to_show: 24
+        refresh_interval: 60
+        entities:
+          - sensor.livingroom_roof_temperature
+          - sensor.entrance_roof_temperature
+
+      - type: history-graph
+        title: WiFi signal (24h)
+        hours_to_show: 24
+        refresh_interval: 300
+        entities:
+          - sensor.livingroom_roof_wifi_signal
+          - sensor.entrance_roof_wifi_signal
+
+  - title: Batteries
+    path: batteries
+    icon: mdi:battery
+    cards:
+      - type: entities
+        title: Phones
+        show_header_toggle: false
+        entities:
+          - entity: sensor.pixel_5_battery_level
+            name: Pixel 5
+          - entity: sensor.pixel_5_battery_state
+            name: Pixel 5 state
+          - entity: sensor.pixel_5_charger_type
+            name: Pixel 5 charger
+          - entity: sensor.pixel_8_battery_level
+            name: Pixel 8
+          - entity: sensor.pixel_8_battery_state
+            name: Pixel 8 state
+          - entity: sensor.pixel_8_charger_type
+            name: Pixel 8 charger
+          - entity: sensor.sm_s931b_battery_level
+            name: SM-S931B
+          - entity: sensor.sm_s931b_battery_state
+            name: SM-S931B state
+          - entity: sensor.sm_s931b_charger_type
+            name: SM-S931B charger
+
+      - type: entities
+        title: Sensors / Trackers
+        show_header_toggle: false
+        entities:
+          - entity: sensor.atc_65baf3_battery
+            name: ATC 65BAF3 battery
+          - entity: sensor.aquara_temp_humidity_1_battery
+            name: Aqara 1 battery
+          - entity: sensor.aquara_temp_humidity_2_battery
+            name: Aqara 2 battery
+          - entity: sensor.aquara_temp_humidity_3_battery
+            name: Aqara 3 battery
+          - entity: sensor.basement_battery_level
+            name: Basement battery
+          - entity: sensor.sofus_tracker_battery
+            name: Sofus tracker battery
+          - entity: sensor.sofus_tracker_state
+            name: Sofus tracker state
+
+  - title: Zigbee / System
+    path: system
+    icon: mdi:zigbee
+    cards:
+      - type: entities
+        title: Zigbee2MQTT
+        show_header_toggle: false
+        entities:
+          - entity: sensor.zigbee2mqtt_bridge_version
+            name: Bridge version
+
+      - type: entities
+        title: ATC FAC602
+        show_header_toggle: false
+        entities:
+          - entity: sensor.atc_fac602_voltage
+            name: Voltage
+          - entity: sensor.atc_fac602_power
+            name: Power
+          - entity: sensor.atc_fac602_opening
+            name: Opening
+          - entity: sensor.atc_fac602_packet_id
+            name: Packet ID
+
+      - type: entities
+        title: Aqara (device temps / voltage)
+        show_header_toggle: false
+        entities:
+          - entity: sensor.aquara_temp_humidity_2_device_temperature
+            name: Aqara 2 device temp
+          - entity: sensor.aquara_temp_humidity_2_voltage
+            name: Aqara 2 voltage
+          - entity: sensor.aquara_temp_humidity_3_device_temperature
+            name: Aqara 3 device temp
+          - entity: sensor.aquara_temp_humidity_3_voltage
+            name: Aqara 3 voltage

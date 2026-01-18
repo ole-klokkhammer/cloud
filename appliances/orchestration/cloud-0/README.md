@@ -29,3 +29,8 @@ sudo apt install -y nomad
 sudo mkdir -p /etc/nomad.d
 sudo nano /etc/nomad.d/nomad.hcl
 sudo systemctl enable --now nomad
+
+### container registry certs
+lxc file pull core:container-registry/certs/domain.crt /tmp/domain.crt
+lxc exec core:cloud-0 -- mkdir -p /etc/docker/certs.d/container-registry.home.lan:5000
+lxc file push /tmp/domain.crt core:cloud-0/etc/docker/certs.d/container-registry.home.lan:5000/ca.crt

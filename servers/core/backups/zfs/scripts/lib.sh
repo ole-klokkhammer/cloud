@@ -18,12 +18,13 @@ NC='\033[0m' # No Color
 
 # ------------------ Logging ------------------
 # LOG_FILE must be set before sourcing this file
-log()      { echo -e "[$(date -Is)] $*" | tee -a "${LOG_FILE:-/dev/null}"; }
-log_info() { echo -e "[$(date -Is)] ${CYAN}INFO${NC}: $*" | tee -a "${LOG_FILE:-/dev/null}"; }
-log_ok()   { echo -e "[$(date -Is)] ${GREEN}OK${NC}: $*" | tee -a "${LOG_FILE:-/dev/null}"; }
-log_warn() { echo -e "[$(date -Is)] ${YELLOW}WARN${NC}: $*" | tee -a "${LOG_FILE:-/dev/null}"; }
-log_fail() { echo -e "[$(date -Is)] ${RED}FAIL${NC}: $*" | tee -a "${LOG_FILE:-/dev/null}"; }
-log_err()  { echo -e "[$(date -Is)] ${RED}${BOLD}ERROR${NC}: $*" | tee -a "${LOG_FILE:-/dev/null}"; }
+# No timestamps - systemd/journald adds them automatically
+log()      { echo -e "$*" | tee -a "${LOG_FILE:-/dev/null}"; }
+log_info() { echo -e "${CYAN}INFO${NC}: $*" | tee -a "${LOG_FILE:-/dev/null}"; }
+log_ok()   { echo -e "${GREEN}OK${NC}: $*" | tee -a "${LOG_FILE:-/dev/null}"; }
+log_warn() { echo -e "${YELLOW}WARN${NC}: $*" | tee -a "${LOG_FILE:-/dev/null}"; }
+log_fail() { echo -e "${RED}FAIL${NC}: $*" | tee -a "${LOG_FILE:-/dev/null}"; }
+log_err()  { echo -e "${RED}${BOLD}ERROR${NC}: $*" | tee -a "${LOG_FILE:-/dev/null}"; }
 
 # ------------------ Notifications ------------------
 # WEBHOOK_URL must be set (can be empty) before using notify

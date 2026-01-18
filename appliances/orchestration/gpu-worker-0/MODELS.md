@@ -64,13 +64,14 @@
       --host 0.0.0.0 \
       --port 8080 \
       -m /models/Nemotron-3-Nano-30B-A3B-Q8_0.gguf \
-      -n 4096 \
+      -n 64000 \
       -t 16 \
       --no-mmap \
       --mlock \
       --n-gpu-layers 20 \
       --flash-attn on \
       -c 200000 \
+      --jinja \
       --temp 1.0 \
       --top_p 1.0
 5. https://huggingface.co/miromind-ai/MiroThinker-v1.5-235B

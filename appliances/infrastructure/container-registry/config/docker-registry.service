@@ -1,0 +1,13 @@
+[Unit]
+Description=Docker Registry
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/registry serve /etc/docker-registry/config.yml
+Restart=always
+RestartSec=5
+User=registry
+
+[Install]
+WantedBy=multi-user.target

@@ -43,9 +43,11 @@ AVX
 AVX2
 
 ## enable service
+sudo nano llama-server.service
+---
+
 sudo systemctl daemon-reload
-sudo systemctl enable llama-server
-sudo systemctl start llama-server
+sudo systemctl enable --now ./llama-server
 
 sudo systemctl status llama-server 
 sudo journalctl -u llama-server -f

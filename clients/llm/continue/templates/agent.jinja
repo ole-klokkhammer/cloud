@@ -1,0 +1,29 @@
+# Continue Agent template (Jinja2)
+# Variables: prompt, response, actions, result, logs, code, lang
+
+## Agent Run: {{ prompt }}
+
+{% raw %}{% if actions %}{% endraw %}
+### Actions
+{% raw %}{% for a in actions %}{% endraw %}
+- {{ a }}
+{% raw %}{% endfor %}{% endraw %}
+{% raw %}{% endif %}{% endraw %}
+
+{% raw %}{% if result %}{% endraw %}
+### Result
+{{ result }}
+{% raw %}{% endif %}{% endraw %}
+
+{% raw %}{% if logs %}{% endraw %}
+### Logs
+```
+{{ logs }}
+```
+{% raw %}{% endif %}{% endraw %}
+
+{% raw %}{% if code %}{% endraw %}
+```{{ lang or "text" }}
+{{ code }}
+```
+{% raw %}{% endif %}{% endraw %}

@@ -1,0 +1,27 @@
+# Continue Ask template (Jinja2)
+# Variables: prompt, response, response_json, code, lang
+
+# Prompt
+## {{ prompt }}
+
+{% raw %}{% if response_json %}{% endraw %}
+**Parsed JSON**
+```json
+{{ response_json | tojson(indent=2) }}
+```
+{% raw %}{% endif %}{% endraw %}
+
+{% raw %}{% if response %}{% endraw %}
+**Answer**
+
+{{ response }}
+
+{% raw %}{% else %}{% endraw %}
+_No response_
+{% raw %}{% endif %}{% endraw %}
+
+{% raw %}{% if code %}{% endraw %}
+```{{ lang or "text" }}
+{{ code }}
+```
+{% raw %}{% endif %}{% endraw %}

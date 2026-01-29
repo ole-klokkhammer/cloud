@@ -1,0 +1,19 @@
+name: Local Config
+version: 1.0.0
+schema: v1
+models:
+  - name: nemotron-3-nano
+    provider: openai
+    model: nvidia/nemotron-3-nano
+    apiBase: http://gpu-worker-0:8080/v1
+    apiKey: sk-not-needed
+
+defaults:
+  planModel: nemotron-3-nano
+  agentModel: nemotron-3-nano
+  askModel: nemotron-3-nano
+ 
+templates:
+  ask: /home/ole/.continue/templates/ask.jinja
+  plan: /home/ole/.continue/templates/plan.jinja
+  agent: /home/ole/.continue/templates/agent.jinja

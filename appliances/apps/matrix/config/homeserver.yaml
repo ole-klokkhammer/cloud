@@ -30,3 +30,6 @@ form_secret_path: "/etc/matrix-synapse/homeserver.form.secret"
 trusted_key_servers:
   - server_name: "matrix.home.lan"
   - server_name: "matrix.linole.org"
+
+incoming_webhook_urls:
+  - https://backup.home.lan/matrix

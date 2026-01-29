@@ -22,6 +22,8 @@ https://nordvpn.com/download/linux/
 sh <(curl -sSf https://downloads.nordcdn.com/apps/linux/install.sh)
 nordvpn login --token <TOKEN>
 nordvpn set killswitch on
+nordvpn set autoconnect on
+nordvpn set technology nordlynx
 nordvpn connect
 
 nordvpn whitelist add subnet 192.168.10.0/24

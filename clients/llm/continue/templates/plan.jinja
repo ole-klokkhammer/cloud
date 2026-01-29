@@ -1,0 +1,18 @@
+# Continue Plan template (Jinja2)
+# Variables: prompt, response, plan_steps
+
+# Plan for: {{ prompt }}
+
+{% raw %}{% if plan_steps %}{% endraw %}
+## Steps
+{% raw %}{% for s in plan_steps %}{% endraw %}
+- {{ s }}
+{% raw %}{% endfor %}{% endraw %}
+{% raw %}{% else %}{% endraw %}
+_No structured plan available; raw response below._
+{% raw %}{% endif %}{% endraw %}
+
+{% raw %}{% if response %}{% endraw %}
+### Notes
+{{ response }}
+{% raw %}{% endif %}{% endraw %}

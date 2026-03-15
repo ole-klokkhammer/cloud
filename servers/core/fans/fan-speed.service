@@ -1,0 +1,11 @@
+# /etc/systemd/system/fan-speed.service
+[Unit]
+Description=Set fan speeds 
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/ipmitool -H 192.168.10.226 -U ADMIN -P ADMIN raw 0x30 0x70 0x66 0x01 0x00 0x1E
+ExecStart=/usr/bin/ipmitool -H 192.168.10.226 -U ADMIN -P ADMIN raw 0x30 0x70 0x66 0x01 0x01 0x1E
+
+[Install]
+WantedBy=multi-user.target

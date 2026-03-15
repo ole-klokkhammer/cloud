@@ -1,0 +1,12 @@
+# /etc/systemd/system/nvidia-power-limit.service
+[Unit]
+Description=Set NVIDIA GPU power limit
+After=nvidia-persistenced.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/nvidia-smi -pm 1
+ExecStart=/usr/bin/nvidia-smi -i 1 -pl 400
+
+[Install]
+WantedBy=multi-user.target

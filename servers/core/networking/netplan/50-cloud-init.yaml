@@ -3,18 +3,18 @@ network:
   renderer: networkd
 
   ethernets:
-    enp66s0f0: {}        # your physical NIC, no IP here
-    enp66s0f1: {}        # your physical NIC, no IP here
+    eno1: {}        # your physical NIC, no IP here
+    eno2: {}        # your physical NIC, no IP here
 
   bridges:
     br0:
-      interfaces: [enp66s0f0]
+      interfaces: [eno1]
       dhcp4: true
       parameters:
         stp: false
         forward-delay: 0
     br1:
-      interfaces: [enp66s0f1]
+      interfaces: [eno2]
       dhcp4: true
       parameters:
         stp: false

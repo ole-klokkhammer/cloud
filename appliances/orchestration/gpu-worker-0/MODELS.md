@@ -94,3 +94,23 @@
       --top_p 0.95 \
       --top_k 40 \
       --repeat_penalty 1.25
+
+7. qwen 3 coder next
+   - numactl --interleave=all llama-server \
+      --host 0.0.0.0 \
+      --port 8080 \
+      -m /models/Qwen3-Coder-Next-Q4_K_S.gguf \
+      -n 8096 \
+      -t 16 \
+      --no-mmap \
+      --mlock \
+      --n-gpu-layers 10 \
+      --flash-attn on \
+      --cache-type-k q4_0 \
+      --cache-type-v q4_0 \
+      -c 200000 \
+      --jinja \
+      --temp 1 \
+      --top_p 0.95 \
+      --top_k 40 \
+      --repeat_penalty 1.25

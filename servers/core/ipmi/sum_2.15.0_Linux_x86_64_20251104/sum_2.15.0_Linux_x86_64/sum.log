@@ -1,0 +1,2 @@
+2026-03-08_00:40:23    root    ./sum -i 192.168.10.226 -u ***** -p ***** -c ActivateProductKey --key e82813308f974a501176594e
+2026-03-08_00:40:42    root    ./sum -i 192.168.10.226 -u ***** -p ***** -c ActivateProductKey --key e828-1330-8f97-4a50-1176-594e

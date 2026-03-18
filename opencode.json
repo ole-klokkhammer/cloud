@@ -1,22 +1,22 @@
 {
     "$schema": "https://opencode.ai/config.json",
-    "model": "llama.cpp/MiniMax-M2.1-UD-IQ2_M-00001-of-00002.gguf",
+    "model": "llama.cpp/Qwen3-Coder-Next-UD-Q4_K_M.gguf",
     "provider": {
-        "llama.cpp": {
+        "llama.cpp": { 
             "npm": "@ai-sdk/openai-compatible",
             "name": "llama-server (local)",
             "options": {
                 "baseURL": "http://gpu-worker-0.home.lan:8080/v1"
             },
             "models": {
-                "MiniMax-M2.1-UD-IQ2_M-00001-of-00002.gguf": {
-                    "name": "Minimax-M2.1 (local)",
+                "Qwen3-Coder-Next-UD-Q4_K_M.gguf": {
+                    "name": "Qwen3 Coder Next (local)",
                     "limit": {
-                        "context": 128000,
-                        "output": 4096
+                        "context": 200000,
+                        "output": 65536
                     }
                 }
             }
         }
     }
-}
+} 

@@ -1,5 +1,6 @@
 {
     "dotnet.defaultSolution": "disable",
-    "python.terminal.activateEnvironment": false
-
+    "python.terminal.activateEnvironment": false,
+    "window.titleBarStyle": "custom",
+    "terminal.integrated.gpuAcceleration": "off",
 }

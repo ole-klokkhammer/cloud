@@ -1,19 +1,60 @@
 name: Local Config
 version: 1.0.0
 schema: v1
+
+telemetry:
+  enabled: true
+  provider: local
+
+context:
+  - provider: currentFile
+  - provider: terminal
+  - provider: search
+
 models:
   - name: nemotron-3-nano
     provider: openai
     model: nvidia/nemotron-3-nano
     apiBase: http://gpu-worker-0:8080/v1
     apiKey: sk-not-needed
+  - name: Qwen3.5-27B-Q8_0.gguf
+    provider: openai
+    model: unsloth/Qwen3.5-27B-GGUF
+    apiBase: http://gpu-worker-0:8080/v1
+    apiKey: sk-not-needed 
+  - name: NVIDIA-Nemotron-3-Super-120B-A12B-GGUF
+    provider: openai
+    model: unsloth/NVIDIA-Nemotron-3-Super-120B-A12B-GGUF
+    apiBase: http://gpu-worker-0:8080/v1
+    apiKey: sk-not-needed
 
 defaults:
-  planModel: nemotron-3-nano
-  agentModel: nemotron-3-nano
-  askModel: nemotron-3-nano
- 
+  planModel: NVIDIA-Nemotron-3-Super-120B-A12B-GGUF
+  agentModel: NVIDIA-Nemotron-3-Super-120B-A12B-GGUF
+  askModel: NVIDIA-Nemotron-3-Super-120B-A12B-GGUF
+
+# Attach current file context to all modes for better reasoning
+tabs:
+  - name: Agent
+    context:
+      - provider: currentFile
+      - provider: terminal
+  - name: Plan
+    context:
+      - provider: currentFile
+      - provider: terminal
+  - name: Ask
+    context:
+      - provider: currentFile
+      - provider: terminal
+
 templates:
   ask: /home/ole/.continue/templates/ask.jinja
   plan: /home/ole/.continue/templates/plan.jinja
   agent: /home/ole/.continue/templates/agent.jinja
+
+# MCP Server for RLM (Recursive Language Models)
+# Enables infinite-context queries over large documents
+mcpServers:
+  - name: rlm
+    url: http://gpu-worker-0:8766/mcp

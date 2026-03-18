@@ -75,8 +75,6 @@ for k in sorted(MODEL_MAP):
 "
 ```
 
-## Prepare model and convert to tensorrt-llm format
+## qwen3 next on tensorrt blackwell
+https://nvidia.github.io/TensorRT-LLM/deployment-guide/deployment-guide-for-qwen3-next-on-trtllm.html
 
-hf download Qwen/Qwen3-Coder-Next --local-dir qwen80b
-
- 

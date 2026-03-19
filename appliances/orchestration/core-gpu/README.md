@@ -6,10 +6,10 @@ sudo zfs set logbias=latency ssd/llm/models
 sudo zfs set recordsize=1M  ssd/llm/models 
 
 ## setup
-- lxc profile create gpu-worker
-- lxc profile edit gpu-worker
-- lxc launch ubuntu:24.04 gpu-worker-0 -p default -p gpu-worker
-- lxc exec gpu-worker-0 -- bash
+- lxc profile create core-gpu
+- lxc profile edit core-gpu
+- lxc launch ubuntu:24.04 core-gpu -p default -p core-gpu
+- lxc exec core-gpu -- bash
 
 ### install nomad client
 sudo apt update

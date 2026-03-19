@@ -1,4 +1,5 @@
-name: gpu-worker-0
+name: core-gpu
+description: A profile for running on a GPU worker with local models.
 config:
   user.host: "core"
   limits.cpu: "16"

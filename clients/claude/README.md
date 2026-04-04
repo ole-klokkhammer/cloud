@@ -27,5 +27,17 @@ vscode settings.json
     {
         "name": "ANTHROPIC_CUSTOM_MODEL_OPTION_NAME",
         "value": "Qwen3 Coder Next (local)"
+    },
+    {
+        "name": "CLAUDE_TEMPERATURE",
+        "value": "1"
+    },
+    {
+        "name": "ANTHROPIC_TOP_P",
+        "value": "0.95"
+    },
+    {
+        "name": "ANTHROPIC_TOP_K",
+        "value": "40"
     }
 ]

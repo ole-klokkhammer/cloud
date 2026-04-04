@@ -11,21 +11,19 @@ ExecStart=/usr/local/bin/llama-server \
       --port 8080 \
       -m /models/Qwen3-Coder-Next/Qwen3-Coder-Next-IQ4_NL.gguf \
       -c 128000 \
-      --cache-type-k q4_0 --cache-type-v q8_0 \
+      -n 8192 \
+      --cache-type-k q4_0 --cache-type-v q4_0 \
       --tensor-split 33,15 \
-      --n-gpu-layers 48 \
+      --n-gpu-layers 99 \
       -t 16 \
       --flash-attn on \
-      --parallel 2 \
+      --parallel 1 \
       --no-mmap \
       --mlock \
-      --jinja \
-      --temp 1.0 \
-      --top_p 0.95 \
-      --top_k 40 \
-      --min_p 0.02 \
-      --presence_penalty 0.0
-Restart=unless-stopped
+      --jinja
+TimeoutStopSec=10
+Restart=always
+RestartSec=5
 LimitMEMLOCK=infinity
 LimitNOFILE=65535
 

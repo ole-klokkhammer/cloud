@@ -1,0 +1,16 @@
+[Unit]
+Description=LiteLLM Proxy (Anthropic API -> llama.cpp)
+After=network.target llama-server.service
+
+[Service]
+Type=simple
+User=root
+ExecStart=/opt/litellm/venv/bin/litellm \
+      --model openai/qwen3-coder \
+      --api_base http://localhost:8080/v1 \
+      --host 0.0.0.0 \
+      --port 4000
+Restart=unless-stopped
+
+[Install]
+WantedBy=multi-user.target

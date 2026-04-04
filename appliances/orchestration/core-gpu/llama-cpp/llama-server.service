@@ -20,7 +20,11 @@ ExecStart=/usr/local/bin/llama-server \
       --parallel 1 \
       --no-mmap \
       --mlock \
-      --jinja
+      --jinja \
+      --temp 1 \
+      --top-p 0.95 \
+      --top-k 40 \
+      --repeat-penalty 1.25
 TimeoutStopSec=10
 Restart=always
 RestartSec=5

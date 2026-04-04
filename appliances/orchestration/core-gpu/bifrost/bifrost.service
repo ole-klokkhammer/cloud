@@ -1,0 +1,17 @@
+[Unit]
+Description=Bifrost AI Gateway (OpenAI API -> llama.cpp)
+After=network.target llama-server.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/bifrost
+ExecStart=/usr/local/bin/bifrost \
+      -host 0.0.0.0 \
+      -port 4000 \
+      -app-dir /opt/bifrost
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

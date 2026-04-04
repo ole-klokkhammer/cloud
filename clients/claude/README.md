@@ -11,6 +11,14 @@ export ANTHROPIC_BASE_URL="http://core-gpu.home.lan:4000"
 export ANTHROPIC_CUSTOM_MODEL_OPTION="qwen3-coder-next"
 
 
+## Temperature
+
+Temperature is set on the llama-server via `--temp` in `llama-server.service`.
+To change temperature, edit the service file and restart the server:
+```
+make deploy && make restart
+```
+
 ##  Add to vscode
 vscode settings.json
 

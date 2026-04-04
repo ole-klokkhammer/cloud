@@ -1,3 +1,7 @@
+# Cloud
+
+Home lab cloud infrastructure — Kubernetes (k3s), Docker, IoT bridges, and supporting services.
+
 # Tools
 * https://github.com/CorentinTh/it-tools
 * https://github.com/makeplane/plane

@@ -1,0 +1,10 @@
+# /etc/systemd/system/fan-speed.timer
+[Unit]
+Description=Re-apply fan speeds periodically
+
+[Timer]
+OnBootSec=30
+OnUnitActiveSec=5min
+
+[Install]
+WantedBy=timers.target

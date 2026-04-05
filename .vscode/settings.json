@@ -1,6 +1,7 @@
 {
-    "dotnet.defaultSolution": "disable",
     "python.terminal.activateEnvironment": false,
-    "window.titleBarStyle": "custom",
     "terminal.integrated.gpuAcceleration": "off",
+    "continue.enableDefaultContextProviders": true,
+    "continue.theme": "dark+",
+    "chat.chatTitleMode": "always"
 }

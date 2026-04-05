@@ -21,6 +21,7 @@ ExecStart=/usr/local/bin/llama-server \
       --no-mmap \
       --mlock \
       --jinja \
+      --reasoning-budget 0 \
       --temp 1 \
       --top-p 0.95 \
       --top-k 40 \

@@ -1,0 +1,4 @@
+# apc ups
+
+## status
+apcaccess

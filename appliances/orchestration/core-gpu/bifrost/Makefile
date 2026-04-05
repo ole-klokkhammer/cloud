@@ -37,10 +37,3 @@ status:
 
 logs:
 	lxc exec $(CONTAINER) -- journalctl -u $(SERVICE) -n 50 --no-pager
-
-remove-litellm:
-	lxc exec $(CONTAINER) -- systemctl stop litellm.service || true
-	lxc exec $(CONTAINER) -- systemctl disable litellm.service || true
-	lxc exec $(CONTAINER) -- rm -f /etc/systemd/system/litellm.service
-	lxc exec $(CONTAINER) -- systemctl daemon-reload
-	lxc exec $(CONTAINER) -- rm -rf /opt/litellm

@@ -1,0 +1,18 @@
+[Unit]
+Description=Bifrost LLM Gateway (Anthropic API -> llama.cpp)
+After=network.target llama-server.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/bifrost
+Environment=npm_config_cache=/opt/bifrost/.npm-cache
+ExecStart=/usr/bin/npx --yes @maximhq/bifrost \
+      -port 4000 \
+      -host 0.0.0.0 \
+      -app-dir /opt/bifrost
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

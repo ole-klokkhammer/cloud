@@ -1,7 +1,4 @@
 {
     "python.terminal.activateEnvironment": false,
-    "terminal.integrated.gpuAcceleration": "off",
-    "continue.enableDefaultContextProviders": true,
-    "continue.theme": "dark+",
-    "chat.chatTitleMode": "always"
+    "terminal.integrated.gpuAcceleration": "off"
 }

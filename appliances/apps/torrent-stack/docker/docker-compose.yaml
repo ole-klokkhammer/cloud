@@ -83,7 +83,7 @@ services:
       - apparmor:unconfined
 
   flaresolverr:
-    image: ghcr.io/flaresolverr/flaresolverr:v3.3.16 
+    image: ghcr.io/flaresolverr/flaresolverr
     network_mode: "host"
     ports:     
       - "8191:8191" # flaresolverr

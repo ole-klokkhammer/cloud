@@ -1,0 +1,30 @@
+{
+  "mcp": {
+    "client_configs": [
+      {
+        "name": "duckduckgo-search",
+        "connection_type": "stdio",
+        "stdio_config": {
+          "command": "npx",
+          "args": ["-y", "@modelcontextprotocol/server-duckduckgo"]
+        },
+        "tools_to_execute": ["*"],
+        "is_ping_available": true
+      },
+      {
+        "name": "browser",
+        "connection_type": "stdio",
+        "stdio_config": {
+          "command": "npx",
+          "args": ["-y", "@modelcontextprotocol/server-browser"]
+        },
+        "tools_to_execute": ["*"],
+        "is_ping_available": true
+      }
+    ],
+    "tool_manager_config": {
+      "tool_execution_timeout": 30,
+      "max_agent_depth": 10
+    }
+  }
+}

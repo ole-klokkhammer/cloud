@@ -6,7 +6,7 @@ config:
   limits.memory: 32GB
   security.nesting: "true"
   security.privileged: "true"
-  linux.kernel_modules: ip_tables, ip6_tables, netlink_diag, nf_nat, overlay
+  linux.kernel_modules: ip_tables, ip6_tables, netlink_diag, nf_nat, overlay, wireguard, udp_tunnel, ip6_udp_tunnel
 devices:
   eth0:
     name: eth0
@@ -43,4 +43,8 @@ devices:
     source: /lib/modules
     type: disk
     readonly: "true"
+  tun:
+    path: /dev/net/tun
+    source: /dev/net/tun
+    type: unix-char
 project: default

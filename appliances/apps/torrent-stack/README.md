@@ -11,7 +11,7 @@ make install-vpn     # install wireguard-tools + resolvconf
 # push your WireGuard config into the container:
 lxc file push wg0.conf core:torrent-stack/vpn/wg0.conf
 make vpn-up          # bring up wg0, enable on boot
-make vpn-killswitch-on  # iptables kill switch
+make vpn-killswitch-on  # enable and persist iptables kill switch
 make deploy          # push compose files + enable systemd service
 ```
 
@@ -54,9 +54,10 @@ The config lives at `/vpn/wg0.conf` inside the container and is symlinked to `/e
 make install-vpn        # install wireguard-tools, resolvconf, curl
 make vpn-up             # bring up wg0 and enable on boot
 make vpn-down           # bring down wg0 and disable boot service
-make vpn-killswitch-on  # enable iptables kill switch
-make vpn-killswitch-off # disable iptables kill switch
+make vpn-killswitch-on  # enable kill switch now and on future boots
+make vpn-killswitch-off # disable kill switch now and on future boots
 make vpn-status         # show wg interface + public IP
+make uninstall-nordvpn  # remove stale nordvpn firewall/service leftovers and boot-persistent restores
 make configure-vpn      # install + up + status in one step
 ```
 
@@ -77,7 +78,11 @@ make vpn-killswitch-on
 make vpn-killswitch-off
 ```
 
-> **Note:** The kill switch rules are not persisted across reboots. Run `make vpn-killswitch-on` after a container restart, or add it to a boot script.
+`make vpn-killswitch-on` installs and enables a systemd service inside the container so the kill switch is re-applied on boot after `wg-quick@wg0` and before `torrent-stack.service` starts. `make vpn-killswitch-off` disables that boot behavior.
+
+If this container already existed before this change, run `make vpn-killswitch-on` once to install the boot-time service.
+
+If this container previously used NordVPN, old `/etc/iptables/rules.v4` and `/etc/iptables/rules.v6` files can be restored on boot by `netfilter-persistent` and block WireGuard traffic. Run `make uninstall-nordvpn` once to remove those saved rules.
 
 ### Port Forwarding
 
@@ -104,5 +109,5 @@ sudo modprobe wireguard udp_tunnel ip6_udp_tunnel
 ## Caveats
 
 - WireGuard configs from ProtonVPN are tied to a specific server. To change servers, download a new config and push it again.
-- The kill switch iptables rules do not persist across container restarts.
+- The kill switch only persists after `make vpn-killswitch-on` has installed its systemd service in the container.
 - If the WireGuard tunnel drops, all internet traffic is blocked until it reconnects (this is the intended kill switch behavior).

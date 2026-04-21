@@ -10,10 +10,14 @@ DOCKER_COMPOSE := docker compose -f $(COMPOSE_FILE)
 WG_INTERFACE ?= wg0
 WG_CONFIG    ?= /vpn/$(WG_INTERFACE).conf
 LAN_SUBNET   ?= 192.168.10.0/24
+KILLSWITCH_SERVICE      := torrent-stack-vpn-killswitch.service
+KILLSWITCH_REMOTE_UNIT  := /etc/systemd/system/$(KILLSWITCH_SERVICE)
+KILLSWITCH_REMOTE_SCRIPT := /usr/local/bin/torrent-stack-vpn-killswitch
+KILLSWITCH_REMOTE_ENV   := /etc/default/torrent-stack-vpn-killswitch
 
 .PHONY: all create configure deploy configure-vpn install-vpn \
 	vpn-up vpn-down vpn-status vpn-killswitch-on vpn-killswitch-off \
-	vpn-killswitch-test uninstall-nordvpn install-docker push start \
+	vpn-killswitch-test install-killswitch uninstall-nordvpn install-docker push start \
 	restart stop status logs destroy shell
 
 all: create configure deploy
@@ -38,7 +42,7 @@ destroy:
 
 # --- WireGuard VPN ---
 
-configure-vpn: install-vpn vpn-up vpn-status
+configure-vpn: install-vpn vpn-up install-killswitch vpn-status
 
 install-vpn:
 	@echo "Installing WireGuard tools..."
@@ -69,33 +73,42 @@ vpn-down:
 	wg-quick down $(WG_INTERFACE) 2>/dev/null || true; \
 	systemctl disable wg-quick@$(WG_INTERFACE) 2>/dev/null || true'
 
-vpn-killswitch-on:
+install-killswitch:
+	@echo "Installing VPN kill switch service..."
+	lxc file push wireguard/torrent-stack-vpn-killswitch $(REMOTE)$(KILLSWITCH_REMOTE_SCRIPT)
+	lxc exec $(REMOTE) -- chmod 755 $(KILLSWITCH_REMOTE_SCRIPT)
+	lxc file push wireguard/$(KILLSWITCH_SERVICE) $(REMOTE)$(KILLSWITCH_REMOTE_UNIT)
+	lxc file push docker/$(SERVICE) $(REMOTE)/etc/systemd/system/$(SERVICE)
+	lxc exec $(REMOTE) -- bash -lc '\
+	install -d -m 0755 /etc/default && \
+	printf "%s\\n" \
+	  "WG_INTERFACE=$(WG_INTERFACE)" \
+	  "WG_CONFIG_PATH=/etc/wireguard/$(WG_INTERFACE).conf" \
+	  "LAN_SUBNET=$(LAN_SUBNET)" \
+	  "LAN_INTERFACE=eth0" \
+	  > $(KILLSWITCH_REMOTE_ENV) && \
+	systemctl daemon-reload'
+
+vpn-killswitch-on: install-killswitch
 	@echo "Enabling WireGuard kill switch..."
 	lxc exec $(REMOTE) -- bash -lc '\
-	endpoint=$$(grep -m1 "^Endpoint" /etc/wireguard/$(WG_INTERFACE).conf \
-	  | sed "s/.*= *//;s/:.*//"); \
-	iptables -F OUTPUT 2>/dev/null || true; \
-	iptables -P OUTPUT DROP; \
-	iptables -A OUTPUT -o lo -j ACCEPT; \
-	iptables -A OUTPUT -o $(WG_INTERFACE) -j ACCEPT; \
-	iptables -A OUTPUT -d $(LAN_SUBNET) -o eth0 -p udp --dport 53 -j DROP; \
-	iptables -A OUTPUT -d $(LAN_SUBNET) -o eth0 -p tcp --dport 53 -j DROP; \
-	iptables -A OUTPUT -d $(LAN_SUBNET) -o eth0 -j ACCEPT; \
-	iptables -A OUTPUT -d "$$endpoint" -o eth0 -p udp -j ACCEPT; \
-	ip6tables -F OUTPUT 2>/dev/null || true; \
-	ip6tables -P OUTPUT DROP; \
-	ip6tables -A OUTPUT -o lo -j ACCEPT; \
-	ip6tables -A OUTPUT -o $(WG_INTERFACE) -j ACCEPT'
-	@echo "Kill switch enabled. DNS blocked on LAN, only WireGuard traffic allowed."
+	systemctl enable $(KILLSWITCH_SERVICE) && \
+	if systemctl is-active --quiet $(KILLSWITCH_SERVICE); then \
+	  systemctl reload $(KILLSWITCH_SERVICE); \
+	else \
+	  systemctl start $(KILLSWITCH_SERVICE); \
+	fi'
+	@echo "Kill switch enabled and persisted on boot. DNS blocked on LAN, only WireGuard traffic allowed."
 
 vpn-killswitch-off:
 	@echo "Disabling WireGuard kill switch..."
 	lxc exec $(REMOTE) -- bash -lc '\
+	systemctl disable --now $(KILLSWITCH_SERVICE) 2>/dev/null || true; \
 	iptables -P OUTPUT ACCEPT; \
 	iptables -F OUTPUT 2>/dev/null || true; \
 	ip6tables -P OUTPUT ACCEPT; \
 	ip6tables -F OUTPUT 2>/dev/null || true'
-	@echo "Kill switch disabled."
+	@echo "Kill switch disabled and no longer persisted on boot."
 
 vpn-killswitch-test:
 	@echo "=== Kill Switch Test ==="
@@ -151,6 +164,30 @@ vpn-killswitch-test:
 	else \
 	  echo "=== SOME TESTS FAILED ==="; exit 1; \
 	fi'
+
+uninstall-nordvpn:
+	@echo "Removing NordVPN remnants (service, package, firewall rules, boot-persistent restores)..."
+	lxc exec $(REMOTE) -- bash -lc '\
+	set -e; \
+	systemctl stop nordvpnd 2>/dev/null || true; \
+	systemctl disable nordvpnd 2>/dev/null || true; \
+	systemctl stop netfilter-persistent 2>/dev/null || true; \
+	systemctl disable netfilter-persistent 2>/dev/null || true; \
+	apt-get purge -y nordvpn iptables-persistent netfilter-persistent 2>/dev/null || true; \
+	apt-get autoremove -y 2>/dev/null || true; \
+	rm -f /etc/iptables/rules.v4 /etc/iptables/rules.v6; \
+	rm -f /etc/apt/sources.list.d/nordvpn-app.list; \
+	iptables -t mangle -F 2>/dev/null || true; \
+	ip6tables -t mangle -F 2>/dev/null || true; \
+	while iptables -t filter -S OUTPUT | grep -qi nordvpn; do \
+	  rule=$$(iptables -t filter -S OUTPUT | grep -i nordvpn | head -n1 | sed "s/^-A /-D /"); \
+	  iptables -t filter $$rule; \
+	done; \
+	while ip6tables -t filter -S OUTPUT | grep -qi nordvpn; do \
+	  rule=$$(ip6tables -t filter -S OUTPUT | grep -i nordvpn | head -n1 | sed "s/^-A /-D /"); \
+	  ip6tables -t filter $$rule; \
+	done'
+	@echo "NordVPN cleanup complete."
 
 vpn-status:
 	@echo "=== WireGuard ==="

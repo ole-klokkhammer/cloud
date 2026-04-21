@@ -1,7 +1,8 @@
 [Unit]
 Description=Torrent Stack Docker Compose Service
-After=network.target docker.service
+After=network-online.target docker.service wg-quick@wg0.service torrent-stack-vpn-killswitch.service
 Requires=docker.service
+Wants=network-online.target wg-quick@wg0.service
 
 [Service]
 Type=oneshot

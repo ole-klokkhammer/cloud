@@ -23,7 +23,7 @@ client {
 }
 
 advertise {
-  http = "gpu-worker-0.home.lan:4646"
+  http = "core-gpu.home.lan:4646"
 }
 
 consul {

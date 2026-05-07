@@ -8,6 +8,7 @@ import asyncio
 import json
 import logging
 import os
+from aiohttp import web
 from aiomqtt import Client, Will
 from bthome import decode
 from constants import BTHOME_UUID_SHORT
@@ -16,6 +17,7 @@ from integrations import publish_discovery
 MQTT_BROKER = os.getenv("MQTT_BROKER", "hivemq.home.lan")
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 HA_DISCOVERY = os.getenv("HA_DISCOVERY", "true").lower() == "true"
+HEALTH_PORT = int(os.getenv("HEALTH_PORT", "8080"))
 
 PREFIX = "bthome"
 TOPIC_SCAN_DEVICES = "bluetooth/state/scan/devices"
@@ -26,6 +28,12 @@ logging.basicConfig(
     format="%(asctime)s %(levelname)s %(message)s"
 )
 logger = logging.getLogger(__name__)
+
+mqtt_connected = False
+
+
+async def health_handler(request: web.Request) -> web.Response: 
+    return web.json_response({"status": "ok", "mqtt": mqtt_connected}) 
 
 
 def find_service_data(device: dict, uuid_short: str) -> bytes | None:
@@ -116,22 +124,41 @@ async def handle_scan_results(client, payload: str):
         logger.debug(f"No BTHome devices found in {len(devices)} devices")
 
 
-async def main():
+async def run_processor():
+    global mqtt_connected
     will = Will(STATE_PROCESSOR, payload="offline", retain=True)
-    
+
     async with Client(MQTT_BROKER, will=will) as client:
         await client.publish(STATE_PROCESSOR, "online", retain=True)
         await client.subscribe(TOPIC_SCAN_DEVICES)
-        
+        mqtt_connected = True
+
         logger.info("BTHome Processor started...")
         logger.info(f"  Subscribed to: {TOPIC_SCAN_DEVICES}")
         logger.info(f"  HA Discovery: {HA_DISCOVERY}")
-        
-        async for message in client.messages:
-            logger.debug(f"Received message on topic: {message.topic}")
-            if message.topic.matches(TOPIC_SCAN_DEVICES):
-                payload = message.payload.decode() if message.payload else ""
-                asyncio.create_task(handle_scan_results(client, payload))
+
+        try:
+            async for message in client.messages:
+                logger.debug(f"Received message on topic: {message.topic}")
+                if message.topic.matches(TOPIC_SCAN_DEVICES):
+                    payload = message.payload.decode() if message.payload else ""
+                    asyncio.create_task(handle_scan_results(client, payload))
+        finally:
+            mqtt_connected = False
+
+
+async def main():
+    app = web.Application()
+    app.router.add_get("/health", health_handler)
+    runner = web.AppRunner(app, access_log=None)
+    await runner.setup()
+    await web.TCPSite(runner, "0.0.0.0", HEALTH_PORT).start()
+    logger.info(f"Health endpoint listening on 0.0.0.0:{HEALTH_PORT}")
+
+    try:
+        await run_processor()
+    finally:
+        await runner.cleanup()
 
 
 if __name__ == "__main__":

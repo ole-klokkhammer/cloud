@@ -1,0 +1,22 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.dist/
+.build/
+.cache/
+.venv/
+.ruff_cache/
+.pytest_cache/
+*.log
+.env
+.DS_Store
+.rlm_cache/
+
+# uv
+.uv/
+uv.lock
+
+# local caches
+cache/
+.rlm_cache/
+examples/exports/

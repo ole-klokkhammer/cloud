@@ -1,0 +1,13 @@
+# appliances/orchestration/core-gpu/vllm/docker-compose.yml
+services:
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    network_mode: host
+    volumes:
+      - open-webui:/app/backend/data
+    environment:
+      - OPENAI_API_BASE_URL=http://core-gpu.home.lan:8000/v1
+    restart: always
+
+volumes:
+  open-webui:

@@ -7,7 +7,7 @@ Wants=network-online.target wg-quick@wg0.service
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-WorkingDirectory=/docker/torrent-stack
+WorkingDirectory=/docker
 EnvironmentFile=/docker/torrent-stack.env
 ExecStart=docker compose up -d
 ExecStop=docker compose down

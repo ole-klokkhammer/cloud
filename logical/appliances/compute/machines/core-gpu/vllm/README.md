@@ -237,6 +237,7 @@ CUDA_DEVICE_ORDER=PCI_BUS_ID CUDA_VISIBLE_DEVICES=1 vllm serve LilaRest/gemma-4-
   --reasoning-parser gemma4 \
   --tool-call-parser gemma4 \
   --enable-auto-tool-choice \
+  --default-chat-template-kwargs '{"enable_thinking": true}' \
   --max-model-len 64000 \
   --max-num-seqs 128 \
   --max-num-batched-tokens 8192 \
@@ -261,3 +262,35 @@ CUDA_DEVICE_ORDER=PCI_BUS_ID CUDA_VISIBLE_DEVICES=1 vllm serve /models/gemma4/re
   --host 0.0.0.0 --port 8000
 
 # https://huggingface.co/thetom-ai/Gemma-4-31B-it-TQPlus
+
+
+## gemma4 mtp 
+
+https://forums.developer.nvidia.com/t/has-anyone-actually-succeeded-in-deploying-gemma4-dense-using-both-the-new-mtp-and-turboquant/369248/2
+
+### https://huggingface.co/ebircak/gemma-4-31B-it-4bit-NVFP4A16-GPTQ
+FLASHINFER_DISABLE_VERSION_CHECK=1 \
+PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
+CUDA_DEVICE_ORDER=PCI_BUS_ID CUDA_VISIBLE_DEVICES=1 vllm serve "/models/gemma4/ebircak-gemma-4-31B-it-4bit-NVFP4A16-GPTQ" \
+  --served-model-name Gemma4-31b-it \
+  --max-model-len 128000 \
+  --gpu-memory-utilization 0.98 \
+  --cpu-offload-gb 5 \
+  --limit-mm-per-prompt '{"image": 0, "video": 0}' \
+  --port 8000 \
+  --host 0.0.0.0 \
+  --max-num-seqs 4 \
+  --quantization compressed-tensors \
+  --kv-cache-dtype fp8 \
+  --max-num-batched-tokens 8000 \
+  --enable-prefix-caching \
+  --enable-chunked-prefill \
+  --enable-auto-tool-choice \
+  --tool-call-parser gemma4 \
+  --reasoning-parser gemma4 \
+  --load-format instanttensor \
+  --default-chat-template-kwargs '{"enable_thinking": true}' \
+  --speculative-config '{"method":"mtp","model":"/models/gemma4/google-gemma-4-31B-it-assistant","num_speculative_tokens":4}'
+
+
+

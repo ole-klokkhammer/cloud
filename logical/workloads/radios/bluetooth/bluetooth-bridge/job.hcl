@@ -57,11 +57,14 @@ job "hub0-bluetooth-bridge" {
       driver = "docker"
 
       config {
-        image      = "ghcr.io/ole-klokkhammer/bluetooth-bridge:${var.version}"
-        force_pull = true
-        ports      = ["health"]
+        image        = "ghcr.io/ole-klokkhammer/bluetooth-bridge:${var.version}"
+        force_pull   = true
+        ports        = ["health"]
+        network_mode = "host"
+        cap_add      = ["NET_ADMIN", "NET_RAW"]
+        security_opt = ["apparmor=unconfined"]
         volumes = [
-          "/run/dbus/system_bus_socket:/run/dbus/system_bus_socket"
+          "/var/run/dbus:/var/run/dbus"
         ]
       }
 
@@ -81,13 +84,23 @@ job "hub0-bluetooth-bridge" {
         }
       }
 
+      template {
+        data = <<EOH
+{{ with nomadVar "nomad/jobs" }}
+MQTT_BROKER={{ .mqtt_broker }}
+{{ end }}
+EOH
+        destination = "secrets/mqtt.env"
+        env         = true
+      }
+
       env {
-        HEALTH_PORT     = "${NOMAD_PORT_health}"
-        MQTT_BROKER     = "hivemq.home.lan"
-        LOG_LEVEL       = var.log_level
-        SCAN_TIMEOUT    = var.scan_timeout
-        CONNECT_TIMEOUT = var.connect_timeout
-        COMMAND_TIMEOUT = var.command_timeout
+        HEALTH_PORT              = "${NOMAD_PORT_health}"
+        LOG_LEVEL                = var.log_level
+        SCAN_TIMEOUT             = var.scan_timeout
+        CONNECT_TIMEOUT          = var.connect_timeout
+        COMMAND_TIMEOUT          = var.command_timeout
+        DBUS_SYSTEM_BUS_ADDRESS  = "unix:path=/run/dbus/system_bus_socket"
       }
 
       resources {

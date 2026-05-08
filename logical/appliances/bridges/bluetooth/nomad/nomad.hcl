@@ -20,5 +20,6 @@ plugin "docker" {
     volumes {
       enabled = true
     }
+    allow_caps = ["NET_ADMIN", "NET_RAW"]
   }
 }

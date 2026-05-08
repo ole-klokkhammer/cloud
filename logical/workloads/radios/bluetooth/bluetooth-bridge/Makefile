@@ -24,7 +24,7 @@ push: build
 	docker push $(IMAGE_NAME):$(VERSION)
 	docker push $(IMAGE_NAME):latest
 
-deploy-nomad:
+deploy:
 	@echo "🚀 Deploying bridge job to Nomad..."
 	nomad job run -var="version=latest" job.hcl
 

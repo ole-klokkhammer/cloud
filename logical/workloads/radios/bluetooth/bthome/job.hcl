@@ -56,9 +56,18 @@ job "bthome" {
         }
       }
 
+      template {
+        data = <<EOH
+{{ with nomadVar "nomad/jobs" }}
+MQTT_BROKER={{ .mqtt_broker }}
+{{ end }}
+EOH
+        destination = "secrets/mqtt.env"
+        env         = true
+      }
+
       env {
         HEALTH_PORT  = "${NOMAD_PORT_health}"
-        MQTT_BROKER  = "hivemq.home.lan"
         LOG_LEVEL    = var.log_level
         HA_DISCOVERY = var.ha_discovery
       }

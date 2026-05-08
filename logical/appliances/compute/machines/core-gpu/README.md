@@ -11,6 +11,12 @@ sudo zfs set recordsize=1M  ssd/llm/models
 - lxc launch ubuntu:24.04 core-gpu -p default -p core-gpu
 - lxc exec core-gpu -- bash
 
+### docker
+
+
+sudo nvidia-ctk runtime configure --runtime=docker
+sudo systemctl restart docker
+
 ### install nomad client
 sudo apt update
 sudo apt install -y gnupg lsb-release

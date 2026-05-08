@@ -31,30 +31,3 @@ zigbee-serial:
 
 ### zigbee stick setup
 https://support.electrolama.com/radio-docs/zigbee2mqtt/
-
-
-### zigbee2mqtt
-https://www.zigbee2mqtt.io/guide/installation/01_linux.html
-
-// run without data dir attached
-
-sudo apt-get install -y curl
-sudo curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
-sudo apt-get install -y nodejs git make g++ gcc libsystemd-dev
-corepack enable 
-node --version  # Should output V20.x, V22.X 
-sudo mkdir /opt/zigbee2mqtt
-sudo chown -R ${USER}: /opt/zigbee2mqtt 
-git clone --depth 1 https://github.com/Koenkk/zigbee2mqtt.git /opt/zigbee2mqtt
-
-cd /opt/zigbee2mqtt
-pnpm install --frozen-lockfile
-
-usermod -aG dialout ubuntu
-
-// Create a systemctl configuration file for Zigbee2MQTT
-sudo nano /etc/systemd/system/zigbee2mqtt.service
-....
-
-sudo systemctl enable zigbee2mqtt
-sudo systemctl start zigbee2mqtt

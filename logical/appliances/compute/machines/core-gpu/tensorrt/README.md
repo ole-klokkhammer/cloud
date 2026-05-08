@@ -18,8 +18,15 @@ cd TensorRT-LLM
 uv venv --python 3.12 --seed
 source .venv/bin/activate
 
-# Install TensorRT-LLM (includes torch, tensorrt, etc.)
-pip install tensorrt-llm
+pip install --upgrade pip setuptools wheel
+apt-get install -y libopenmpi-dev
+
+# Use the CUDA 13.0 PyTorch wheel, not the default PyPI build.
+pip install "torch==2.10.0" torchvision --index-url https://download.pytorch.org/whl/cu130
+
+# Keep TensorRT-LLM from replacing torch with an incompatible build.
+python3 -c "import torch; print(f'torch=={torch.__version__}')" > /tmp/torch-constraint.txt
+pip install tensorrt_llm -c /tmp/torch-constraint.txt
 ```
 
 ### Install (from source — if pip doesn't support sm_120/Blackwell)
@@ -79,3 +86,39 @@ for k in sorted(MODEL_MAP):
 https://nvidia.github.io/TensorRT-LLM/deployment-guide/deployment-guide-for-qwen3-next-on-trtllm.html
 
 ## gemma 4
+
+```bash
+cd ~/workspace/tensorrt
+uv venv --python 3.12 --seed
+source .venv/bin/activate
+
+pip install --upgrade pip setuptools wheel
+apt-get install -y libopenmpi-dev
+pip install "torch==2.10.0" torchvision --index-url https://download.pytorch.org/whl/cu130
+python3 -c "import torch; print(f'torch=={torch.__version__}')" > /tmp/torch-constraint.txt
+pip install tensorrt_llm==1.3.0rc14 -c /tmp/torch-constraint.txt
+```
+
+### or docker
+```bash
+docker run -it --rm \
+  --device nvidia.com/gpu=all \
+  -v /models:/models \
+  nvcr.io/nvidia/tensorrt:26.04-py3 \
+  bash
+
+pip install --upgrade pip setuptools wheel
+apt-get update && apt-get install -y libopenmpi-dev
+pip install "torch==2.10.0" torchvision --index-url https://download.pytorch.org/whl/cu130
+python3 -c "import torch; print(f'torch=={torch.__version__}')" > /tmp/torch-constraint.txt
+pip install tensorrt_llm==1.3.0rc14 -c /tmp/torch-constraint.txt
+```
+
+
+### run
+```bash
+trtllm-serve /models/gemma4/nvidia-31b-it-nvfp4 \
+  --tp_size 1 \
+  --extra_llm_api_options ./gemma4_dense.1.2.1.yaml
+```
+

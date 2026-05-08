@@ -9,9 +9,8 @@ uv pip install vllm --torch-backend=auto
 flashinfer
 https://docs.flashinfer.ai/installation.html
 
-uv pip install flashinfer-python
 uv pip install flashinfer-python flashinfer-cubin
-uv pip install flashinfer-jit-cache --index-url https://flashinfer.ai/whl/cu130
+uv pip install flashinfer-jit-cache --index-url https://flashinfer.ai/whl/cu132
 flashinfer show-config
 
 -- upgrade
@@ -32,8 +31,27 @@ docker run -d \
     --restart always \
     ghcr.io/open-webui/open-webui:main
 
+### polarengine
+https://github.com/caiovicentino/polarengine-vllm
+
+### turboquant
+uv pip install turboquant-vllm 
+https://pypi.org/project/turboquant-vllm/
+
+  Plugin path:
+  - use `--attention-backend CUSTOM`
+  - optionally set `TQ4_K_BITS` and `TQ4_V_BITS`
+  - do not combine this with `--kv-cache-dtype turboquant_*`
+
+  Built-in vLLM path:
+  - use `--attention-backend TURBOQUANT`
+  - pair it with a specific `--kv-cache-dtype` such as `turboquant_4bit_nc`
+  - do not use `TQ4_K_BITS` or `TQ4_V_BITS` with this path
+
+  If vLLM says `Selected backend AttentionBackendEnum.CUSTOM is not valid for this configuration. Reason: ['kv_cache_dtype not supported']`, remove `--kv-cache-dtype turboquant_*` from the CUSTOM/plugin command or switch the backend to `TURBOQUANT`.
+
 ### upgrade
-pip install vllm --pre --upgrade
+uv pip install -U vllm --torch-backend=auto --extra-index-url https://wheels.vllm.ai/nightly/cu132
 
 ## models
 
@@ -173,3 +191,73 @@ curl http://core-gpu.home.lan:8000/v1/chat/completions \
     "max_tokens": 256,
     "stream": true
   }'
+
+## plain
+FLASHINFER_DISABLE_VERSION_CHECK=1 \
+TQ4_K_BITS=4 TQ4_V_BITS=3 \
+PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
+CUDA_DEVICE_ORDER=PCI_BUS_ID CUDA_VISIBLE_DEVICES=1 vllm serve /models/gemma4/nvidia-31b-it-nvfp4 \
+  --tensor-parallel-size 1 \
+  --reasoning-parser gemma4 \
+  --tool-call-parser gemma4 \
+  --limit-mm-per-prompt '{"image": 0, "video": 0}' \
+  --max-model-len 16384 \
+  --attention-backend TURBOQUANT \
+  --kv-cache-dtype turboquant_4bit_nc \
+  --kv-cache-memory 9275048960 \
+  --enable-auto-tool-choice \
+  --trust-remote-code \
+  --host 0.0.0.0 --port 8000
+
+## https://huggingface.co/caiovicentino1/Gemma-4-31B-it-HLWQ-Q5-Vision
+hf download caiovicentino1/Gemma-4-31B-it-HLWQ-Q5-Vision --local-dir /models/gemma4/caiovicentino1-Gemma-4-31B-it-HLWQ-Q5-Vision
+uv pip install https://github.com/caiovicentino/polarengine-vllm.git
+
+
+FLASHINFER_DISABLE_VERSION_CHECK=1 \
+PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
+CUDA_DEVICE_ORDER=PCI_BUS_ID CUDA_VISIBLE_DEVICES=1 vllm serve /models/gemma4/caiovicentino1-Gemma-4-31B-it-HLWQ-Q5-Vision \
+  --tensor-parallel-size 1 \
+  --reasoning-parser gemma4 \
+  --tool-call-parser gemma4 \
+  --max-model-len 8192 \
+  --max-num-batched-tokens 4096 \
+  --max-num-seqs 1 \
+  --kv-cache-dtype fp8 \
+  --enforce-eager \
+  --enable-auto-tool-choice \
+  --trust-remote-code \
+  --host 0.0.0.0 --port 8000
+
+## https://huggingface.co/LilaRest/gemma-4-31B-it-NVFP4-turbo
+FLASHINFER_DISABLE_VERSION_CHECK=1 \
+PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
+CUDA_DEVICE_ORDER=PCI_BUS_ID CUDA_VISIBLE_DEVICES=1 vllm serve LilaRest/gemma-4-31B-it-NVFP4-turbo \
+  --quantization modelopt \
+  --reasoning-parser gemma4 \
+  --tool-call-parser gemma4 \
+  --enable-auto-tool-choice \
+  --max-model-len 64000 \
+  --max-num-seqs 128 \
+  --max-num-batched-tokens 8192 \
+  --gpu-memory-utilization 0.95 \
+  --kv-cache-dtype fp8 \
+  --enable-prefix-caching \
+  --trust-remote-code \
+  --host 0.0.0.0 --port 8000
+
+## https://huggingface.co/redhat
+FLASHINFER_DISABLE_VERSION_CHECK=1 \
+PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
+CUDA_DEVICE_ORDER=PCI_BUS_ID CUDA_VISIBLE_DEVICES=1 vllm serve /models/gemma4/redhat \
+  --quantization modelopt \
+  --max-model-len 32000 \
+  --max-num-seqs 128 \
+  --max-num-batched-tokens 8192 \
+  --gpu-memory-utilization 0.95 \
+  --kv-cache-dtype fp8 \
+  --enable-prefix-caching \
+  --trust-remote-code \
+  --host 0.0.0.0 --port 8000
+
+# https://huggingface.co/thetom-ai/Gemma-4-31B-it-TQPlus

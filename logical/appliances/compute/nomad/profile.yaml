@@ -18,11 +18,11 @@ devices:
     shift: "true"
     source: /ssd/appdata/control-plane/nomad
     type: disk
-  consul-data:
-    path: /opt/consul
-    shift: "true"
-    source: /ssd/appdata/control-plane/consul
-    type: disk
+  # consul-data:
+  #   path: /opt/consul
+  #   shift: "true"
+  #   source: /ssd/appdata/control-plane/consul
+  #   type: disk
   root:
     path: /
     pool: zpool

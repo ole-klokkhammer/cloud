@@ -11,7 +11,7 @@ data_dir   = "/opt/nomad/data"
 
 client {
   enabled = true
-  servers = ["control-plane.home.lan:4647"] # nomad server rpc address
+  servers = ["nomad.home.lan:4647"] # nomad server rpc address
   meta    = {
     role = "worker",
     machine  = "core",
@@ -21,17 +21,17 @@ client {
   # cni_config_dir = "/etc/cni/net.d"
 }
 
-advertise {
-  http = "core-cloud.home.lan:4646"
-}
+# advertise {
+#   http = "core-cloud.home.lan:4646"
+# }
 
-consul {
-  enabled = true
-  address = "http://control-plane.home.lan:8500"
-  checks_use_advertise = true
-}
+# consul {
+#   enabled = true
+#   address = "http://nomad.home.lan:8500"
+#   checks_use_advertise = true
+# }
 
-vault {
-  enabled = true
-  address = "http://vault.home.lan:8200"
-}
+# vault {
+#   enabled = true
+#   address = "http://vault.home.lan:8200"
+# }

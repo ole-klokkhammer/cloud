@@ -7,7 +7,7 @@ plugin_dir = "/opt/nomad/plugins"
 
 client {
   enabled = true
-  servers = ["control-plane.home.lan:4647"] # nomad server rpc address
+  servers = ["nomad.home.lan:4647"] # nomad server rpc address
   meta    = {
     role = "worker",
     machine  = "core",
@@ -22,15 +22,15 @@ client {
   }
 }
 
-advertise {
-  http = "core-gpu.home.lan:4646"
-}
+# advertise {
+#   http = "core-gpu.home.lan:4646"
+# }
 
-consul {
-  enabled = true
-  address = "http://control-plane.home.lan:8500"
-  checks_use_advertise = true
-}
+# consul {
+#   enabled = true
+#   address = "http://control-plane.home.lan:8500"
+#   checks_use_advertise = true
+# }
 
 plugin "nomad-device-nvidia" {
   config {

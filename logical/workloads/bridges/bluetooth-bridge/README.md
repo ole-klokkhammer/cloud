@@ -1,4 +1,0 @@
-# app
-
-## install
-make deploy

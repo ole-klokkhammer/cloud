@@ -268,29 +268,129 @@ CUDA_DEVICE_ORDER=PCI_BUS_ID CUDA_VISIBLE_DEVICES=1 vllm serve /models/gemma4/re
 
 https://forums.developer.nvidia.com/t/has-anyone-actually-succeeded-in-deploying-gemma4-dense-using-both-the-new-mtp-and-turboquant/369248/2
 
+https://dasroot.net/posts/2026/05/gemma-4-speed-hacks-mtp-dflash-local-inference/
+
+https://docs.vllm.ai/projects/recipes/en/latest/Google/Gemma4.html#amd-gpu-deployment-mi300x-mi325x-mi350x-mi355x-via-docker
+
 ### https://huggingface.co/ebircak/gemma-4-31B-it-4bit-NVFP4A16-GPTQ
+
 FLASHINFER_DISABLE_VERSION_CHECK=1 \
 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
-CUDA_DEVICE_ORDER=PCI_BUS_ID CUDA_VISIBLE_DEVICES=1 vllm serve "/models/gemma4/ebircak-gemma-4-31B-it-4bit-NVFP4A16-GPTQ" \
+CUDA_DEVICE_ORDER=PCI_BUS_ID CUDA_VISIBLE_DEVICES=1 vllm serve LilaRest/gemma-4-31B-it-NVFP4-turbo  \
   --served-model-name Gemma4-31b-it \
-  --max-model-len 128000 \
-  --gpu-memory-utilization 0.98 \
-  --cpu-offload-gb 5 \
-  --limit-mm-per-prompt '{"image": 0, "video": 0}' \
   --port 8000 \
   --host 0.0.0.0 \
-  --max-num-seqs 4 \
-  --quantization compressed-tensors \
+  --cpu-offload-gb 10 \
+  --gpu-memory-utilization 0.98 \
+  --max-model-len 64000 \
+  --max-num-batched-tokens 16384 \
   --kv-cache-dtype fp8 \
-  --max-num-batched-tokens 8000 \
+  --quantization compressed-tensors \
+  --load-format instanttensor \
+  --async-scheduling \
   --enable-prefix-caching \
   --enable-chunked-prefill \
   --enable-auto-tool-choice \
   --tool-call-parser gemma4 \
   --reasoning-parser gemma4 \
-  --load-format instanttensor \
+  --chat-template ./vllm/examples/tool_chat_template_gemma4.jinja \
+  --limit-mm-per-prompt '{"image": 0, "audio": 0, "video": 0}' \
   --default-chat-template-kwargs '{"enable_thinking": true}' \
-  --speculative-config '{"method":"mtp","model":"/models/gemma4/google-gemma-4-31B-it-assistant","num_speculative_tokens":4}'
+  --speculative-config '{"num_speculative_tokens": 4, "method": "mtp", "model":"/models/gemma4/google-gemma-4-31B-it-assistant"}'
+
+add when merged into vllm: heuristics: true
+also consider switching to redhat for more consistent quantization scales
+maybe we can add this then: --calculate_kv_scales \
+
+### redhatai
+FLASHINFER_DISABLE_VERSION_CHECK=1 \
+PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
+CUDA_DEVICE_ORDER=PCI_BUS_ID CUDA_VISIBLE_DEVICES=1 vllm serve LilaRest/gemma-4-31B-it-NVFP4-turbo \
+  --served-model-name Gemma4-31b-it \
+  --port 8000 \
+  --host 0.0.0.0 \
+  --max-num-seqs 1 \
+  --gpu-memory-utilization 0.98 \
+  --max-model-len 64000 \
+  --max-num-batched-tokens 8192 \
+  --kv-cache-dtype fp8 \
+  --quantization modelopt \
+  --load-format instanttensor \
+  --async-scheduling \
+  --enable-prefix-caching \
+  --enable-chunked-prefill \
+  --enable-auto-tool-choice \
+  --tool-call-parser gemma4 \
+  --reasoning-parser gemma4 \
+  --chat-template ./vllm/examples/tool_chat_template_gemma4.jinja \
+  --limit-mm-per-prompt '{"image": 0, "audio": 0, "video": 0}' \
+  --default-chat-template-kwargs '{"enable_thinking": true}' \
+  --speculative-config '{"num_speculative_tokens": 4, "method": "mtp", "model":"/models/gemma4/google-gemma-4-31B-it-assistant"}'
 
 
+FLASHINFER_DISABLE_VERSION_CHECK=1 \
+PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
+CUDA_DEVICE_ORDER=PCI_BUS_ID CUDA_VISIBLE_DEVICES=1 vllm serve LilaRest/gemma-4-31B-it-NVFP4-turbo \
+  --quantization modelopt \
+  --reasoning-parser gemma4 \
+  --tool-call-parser gemma4 \
+  --enable-auto-tool-choice \
+  --default-chat-template-kwargs '{"enable_thinking": true}' \
+  --max-model-len 64000 \
+  --max-num-seqs 128 \
+  --max-num-batched-tokens 8192 \
+  --gpu-memory-utilization 0.95 \
+  --kv-cache-dtype fp8 \
+  --enable-prefix-caching \
+  --trust-remote-code \
+  --host 0.0.0.0 --port 8000
 
+
+### redhat text only
+FLASHINFER_DISABLE_VERSION_CHECK=1 \
+PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
+CUDA_DEVICE_ORDER=PCI_BUS_ID CUDA_VISIBLE_DEVICES=1 vllm serve /models/gemma4/redhatai-31b-it-nvfp4-text-only \
+  --quantization compressed-tensors \
+  --load-format instanttensor \
+  --served-model-name Gemma4-31b-it \
+  --port 8000 \
+  --host 0.0.0.0 \
+  --gpu-memory-utilization 0.981 \
+  --max-num-seqs 1 \
+  --max-model-len 84000 \
+  --max-num-batched-tokens 8192 \
+  --kv-cache-dtype fp8 \
+  --async-scheduling \
+  --enable-prefix-caching \
+  --enable-chunked-prefill \
+  --enable-auto-tool-choice \
+  --tool-call-parser gemma4 \
+  --reasoning-parser gemma4 \
+  --chat-template ./vllm/examples/tool_chat_template_gemma4.jinja \
+  --limit-mm-per-prompt '{"image": 0, "audio": 0, "video": 0}' \
+  --default-chat-template-kwargs '{"enable_thinking": true}' \
+  --speculative-config '{"num_speculative_tokens": 4, "method": "mtp", "model":"/models/gemma4/google-gemma-4-31B-it-assistant"}'
+
+### nvidia text only
+FLASHINFER_DISABLE_VERSION_CHECK=1 \
+PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
+CUDA_DEVICE_ORDER=PCI_BUS_ID CUDA_VISIBLE_DEVICES=1 vllm serve /models/gemma4/nvidia-31b-it-nvfp4-text-only \
+  --quantization modelopt \
+  --served-model-name Gemma4-31b-it \
+  --port 8000 \
+  --host 0.0.0.0 \
+  --gpu-memory-utilization 0.981 \
+  --max-num-seqs 1 \
+  --max-model-len 3000 \
+  --max-num-batched-tokens 8192 \
+  --kv-cache-dtype fp8 \
+  --async-scheduling \
+  --enable-prefix-caching \
+  --enable-chunked-prefill \
+  --enable-auto-tool-choice \
+  --tool-call-parser gemma4 \
+  --reasoning-parser gemma4 \
+  --chat-template ./vllm/examples/tool_chat_template_gemma4.jinja \
+  --limit-mm-per-prompt '{"image": 0, "audio": 0, "video": 0}' \
+  --default-chat-template-kwargs '{"enable_thinking": true}' \
+  --speculative-config '{"num_speculative_tokens": 4, "method": "mtp", "model":"/models/gemma4/google-gemma-4-31B-it-assistant"}'

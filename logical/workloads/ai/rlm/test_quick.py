@@ -6,5 +6,5 @@ os.environ["BATCH_SIZE"] = "5"
 os.environ["SHOW_TRAJECTORY"] = "1"  # Show trajectory for debugging
 
 # Now run the main
-import logical.workloads.ai.llms.rlm.examples.hybrid_audit
-logical.workloads.ai.llms.rlm.examples.hybrid_audit.main()
+import logical.workloads.ai.rlm.examples.hybrid_audit
+logical.workloads.ai.rlm.examples.hybrid_audit.main()

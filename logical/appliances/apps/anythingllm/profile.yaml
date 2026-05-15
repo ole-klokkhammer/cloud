@@ -1,0 +1,29 @@
+name: anythingllm
+description: AnythingLLM stack profile
+config:
+  user.host: "core"
+  limits.cpu: "4"
+  limits.memory: 32GB
+  security.nesting: "true"
+  security.privileged: "false"
+devices:
+  eth0:
+    name: eth0
+    nictype: bridged
+    parent: br0
+    type: nic
+  config:
+    path: /config
+    shift: "true"
+    source: /ssd/appdata/anythingllm/config
+    type: disk
+  data:
+    path: /app/server/storage
+    shift: "true"
+    source: /ssd/appdata/anythingllm/data
+    type: disk
+  root:
+    path: /
+    pool: zpool
+    type: disk
+project: default

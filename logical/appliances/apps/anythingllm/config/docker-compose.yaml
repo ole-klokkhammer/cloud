@@ -1,0 +1,15 @@
+services:
+  anythingllm:
+    image: mintplexlabs/anythingllm:pg
+    container_name: anythingllm
+    restart: unless-stopped
+    network_mode: "host"
+    cap_add:
+      - SYS_ADMIN # to use anythingllm browser-based scraping features
+    env_file:
+      - .env
+    environment:
+      STORAGE_DIR: /app/server/storage
+      DATABASE_URL: ${DATABASE_URL}
+    volumes:
+      - /app/server/storage:/app/server/storage

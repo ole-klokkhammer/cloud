@@ -32,4 +32,4 @@ CREATE EXTENSION IF NOT EXISTS vector;
 copy in .env and docker-compose.yaml
 sudo chown -R 1000:1000 /app/server/storage
 docker compose up -d
-docker compose logs -f 
+docker compose logs -f

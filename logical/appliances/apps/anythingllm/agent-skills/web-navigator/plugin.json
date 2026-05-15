@@ -1,0 +1,5 @@
+{
+  "name": "web-navigator",
+  "description": "Use this skill when the user provides a URL and asks questions about its content. This skill fetches the webpage content and provides the text to the agent to answer questions based on the live web data.",
+  "entrypoint": "handler.js"
+}

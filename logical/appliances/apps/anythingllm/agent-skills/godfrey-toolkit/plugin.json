@@ -1,0 +1,5 @@
+{
+  "name": "targeted-doc-lookup",
+  "description": "Use this when the user asks about personalized learning, adaptive instruction, or learner-specific planning. This skill looks only at the personalized learning document section.",
+  "entrypoint": "handler.js"
+}

@@ -47,4 +47,4 @@ for backup
 ## ARC CACHE size
 
 - sudo nano /etc/modprobe.d/zfs.conf
-  - options zfs zfs_arc_max=274877906944
+  - options zfs zfs_arc_max=137438953472

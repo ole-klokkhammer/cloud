@@ -65,7 +65,7 @@ FLASHINFER_DISABLE_VERSION_CHECK=1 \
 CUDA_DEVICE_ORDER=PCI_BUS_ID CUDA_VISIBLE_DEVICES=1 vllm serve /models/gemma4/google-gemma-4-31b-it-nvfp4-text-only \
   --quantization modelopt_fp4 \
   --kv-cache-dtype fp8_e4m3 \
-  --kv-offloading-size 4 \
+  --kv-offloading-size 16 \
   --gpu-memory-utilization 0.98 \
   --max-num-seqs 1 \
   --max-model-len 64000 \

@@ -1,0 +1,24 @@
+name: ai-utils
+description: A profile for running AI utilities on a GPU worker with local models.
+config:
+  user.host: "core"
+  limits.cpu: "8"
+  limits.memory: 16GB
+  limits.kernel.memlock: unlimited
+  limits.memory.swap: "false"
+  nvidia.runtime: "true"
+  nvidia.driver.capabilities: all
+devices:
+  eth0:
+    name: eth0
+    nictype: bridged
+    parent: br0
+    type: nic
+  gpu:
+    type: gpu
+    gputype: physical
+    id: nvidia.com/gpu=0
+  root:
+    path: /
+    pool: zpool
+    type: disk

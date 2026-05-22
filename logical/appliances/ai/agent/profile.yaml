@@ -1,0 +1,31 @@
+name: core-gpu
+description: A profile for running on a GPU worker with local models.
+config:
+  user.host: "core"
+  limits.cpu: "16"
+  limits.cpu.nodes: "0,1"
+  limits.memory: 128GB
+  limits.kernel.memlock: unlimited
+  limits.memory.swap: "false"
+  security.nesting: "true"
+  security.privileged: "false"
+  nvidia.runtime: "true"
+  nvidia.driver.capabilities: all
+devices:
+  eth0:
+    name: eth0
+    nictype: bridged
+    parent: br0
+    type: nic
+    hwaddr: 00:16:3e:f8:e0:fb
+  gpu:
+    type: gpu
+  root:
+    path: /
+    pool: zpool
+    type: disk
+  models:
+    path: /models
+    shift: "true"
+    source: /ssd/llm/models
+    type: disk

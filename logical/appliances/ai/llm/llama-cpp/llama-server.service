@@ -1,0 +1,36 @@
+[Unit]
+Description=llama.cpp Inference Server
+After=network.target
+
+[Service]
+Type=simple
+User=root
+Environment="CUDA_VISIBLE_DEVICES=0,1"
+ExecStart=/usr/local/bin/llama-server \
+      --host 0.0.0.0 \
+      --port 8080 \
+      -m /models/Qwen3-Coder-Next/Qwen3-Coder-Next-IQ4_NL.gguf \
+      -c 128000 \
+      -n 8192 \
+      --cache-type-k q4_0 --cache-type-v q4_0 \
+      --tensor-split 33,15 \
+      --n-gpu-layers 99 \
+      -t 16 \
+      --flash-attn on \
+      --parallel 1 \
+      --no-mmap \
+      --mlock \
+      --jinja \
+      --reasoning-budget 0 \
+      --temp 1 \
+      --top-p 0.95 \
+      --top-k 40 \
+      --repeat-penalty 1.25
+TimeoutStopSec=10
+Restart=always
+RestartSec=5
+LimitMEMLOCK=infinity
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target

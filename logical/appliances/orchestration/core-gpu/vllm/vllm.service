@@ -27,7 +27,7 @@ ExecStart=/root/workspace/vllm/.venv/bin/vllm serve /models/gemma4/google-gemma-
   --language-model-only \
   --no-disable-cascade-attn \
   --performance-mode interactivity \
-  --default-chat-template-kwargs '{"enable_thinking": true, "thinking_budget": 0}' \
+  --default-chat-template-kwargs '{"enable_thinking": true, "thinking_budget": 8192}' \
   --chat-template /root/workspace/vllm/vllm/examples/tool_chat_template_gemma4.jinja \
   --speculative-config '{"num_speculative_tokens": 4, "method": "mtp", "model":"/models/gemma4/google-gemma-4-31B-it-assistant"}' \
   --served-model-name Gemma4-31b-it \

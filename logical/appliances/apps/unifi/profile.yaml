@@ -1,0 +1,20 @@
+name: unifi
+description: UniFi OS Server container profile
+config:
+  user.host: "core"
+  limits.cpu: "2"
+  limits.memory: 8GB
+devices:
+  eth0:
+    name: eth0
+    nictype: bridged
+    parent: br0
+    type: nic
+  root:
+    path: /
+    pool: zpool
+    type: disk
+  unifi-data:
+    path: /home
+    source: /dev/zvol/ssd/vm/unifi
+    type: disk

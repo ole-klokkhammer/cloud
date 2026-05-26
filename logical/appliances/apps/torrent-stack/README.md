@@ -51,15 +51,10 @@ sudo apt update
 sudo apt install nfs-kernel-server
 sudo systemctl enable nfs-server
 sudo systemctl start nfs-server
+ 
+sudo zfs set sharenfs="rw=@192.168.10.0/24,sync,no_subtree_check,anonuid=1000,anongid=1000" hdd/music
+sudo zfs set sharenfs="rw=@192.168.10.0/24,sync,no_subtree_check,anonuid=1000,anongid=1000" hdd/media
 
-sudo zfs set sharenfs="on" hdd/music
-sudo zfs set sharenfs="on" hdd/media
-
-sudo nano /etc/exports
----
-/hdd/media        192.168.10.0/24(rw,sync,no_subtree_check,all_squash,anonuid=1000,anongid=1000)
-/hdd/music        192.168.10.0/24(rw,sync,no_subtree_check,all_squash,anonuid=1000,anongid=1000)
----
 
 // apply
 sudo exportfs -ra

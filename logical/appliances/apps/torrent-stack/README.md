@@ -1,113 +1,97 @@
-# Torrent Stack
+# torrent
 
-LXD container running Docker Compose with qBittorrent, Radarr, Sonarr, Lidarr, Jackett, Jellyseerr, and FlareSolverr behind ProtonVPN using WireGuard.
+## setup
 
-## Quick Start
+### Disk
+sudo zfs create -V 10G \
+  -o volblocksize=16K \
+  -o compression=lz4 \
+  ssd/vm/torrent-zvol
+sudo zfs set sync=disabled ssd/vm/torrent-zvol
 
-```bash
-make create          # create LXD container with profile
-make install-docker  # install Docker + Compose plugin
-make install-vpn     # install wireguard-tools + resolvconf
-# push your WireGuard config into the container:
-lxc file push wg0.conf core:torrent-stack/vpn/wg0.conf
-make vpn-up          # bring up wg0, enable on boot
-make vpn-killswitch-on  # enable and persist iptables kill switch
-make deploy          # push compose files + enable systemd service
-```
+### lxc 
+lxc profile create torrent-vm
+lxc profile edit torrent-vm
+lxc launch ubuntu:24.04 torrent-stack --vm -p default -p torrent-vm
 
-Or: `make all` (create + configure + deploy).
+lxc exec torrent-stack -- sudo --login --user ubuntu
+lsblk
+sudo mkfs.ext4 /dev/sdb
+sudo mkdir -p /torrent
+sudo mount /dev/sdb /torrent
 
-## Operations
+sudo blkid /dev/sdb
+sudo nano /etc/fstab
+UUID=<uuid-from-blkid> /torrent ext4 defaults 0 2
 
-```bash
-make status          # service + containers + WireGuard status
-make logs            # tail docker compose logs
-make restart         # restart the stack
-make stop            # stop the stack
-make shell           # shell into the container
-make destroy         # destroy container (with confirmation)
-```
+sudo umount /torrent
+sudo mount -a
+df -h /torrent
 
-## VPN
+### installation
+lxc exec unifi -- sudo --login --user ubuntu
 
-Uses WireGuard (`wg-quick`) inside the container with an iptables-based kill switch.
+#### wireguard
+https://github.com/qdm12/gluetun-wiki/blob/main/setup/providers/protonvpn.md
 
-### WireGuard Config
+https://github.com/qdm12/gluetun-wiki/blob/main/setup/advanced/wireguard.md
 
-Download a WireGuard config from ProtonVPN:
+- VPN_PORT_FORWARDING_UP_COMMAND=/bin/sh -c 'wget -O- --post-data "json={\"listen_port\":{{PORT}},\"upnp\":false}" http://127.0.0.1:8080/api/v2/app/setPreferences'
 
-https://account.protonvpn.com/downloads
+#### apparmor
+sudo apt update
+sudo apt install apparmor apparmor-utils
+sudo systemctl enable --now apparmor
+sudo systemctl restart docker
 
-Pick **WireGuard**, choose a **P2P-capable server**, and save as `wg0.conf`.
+#### nfs on media files
 
-Push it into the container:
+// on the host
+sudo apt update
+sudo apt install nfs-kernel-server
+sudo systemctl enable nfs-server
+sudo systemctl start nfs-server
 
-```bash
-lxc file push wg0.conf core:torrent-stack/vpn/wg0.conf
-```
+sudo zfs set sharenfs="on" hdd/music
+sudo zfs set sharenfs="on" hdd/media
 
-The config lives at `/vpn/wg0.conf` inside the container and is symlinked to `/etc/wireguard/wg0.conf` when `make vpn-up` runs.
+sudo nano /etc/exports
+---
+/hdd/media        192.168.10.0/24(rw,sync,no_subtree_check,all_squash,anonuid=1000,anongid=1000)
+/hdd/music        192.168.10.0/24(rw,sync,no_subtree_check,all_squash,anonuid=1000,anongid=1000)
+---
 
-### VPN Commands
+// apply
+sudo exportfs -ra
+sudo systemctl restart nfs-kernel-server
 
-```bash
-make install-vpn        # install wireguard-tools, resolvconf, curl
-make vpn-up             # bring up wg0 and enable on boot
-make vpn-down           # bring down wg0 and disable boot service
-make vpn-killswitch-on  # enable kill switch now and on future boots
-make vpn-killswitch-off # disable kill switch now and on future boots
-make vpn-status         # show wg interface + public IP
-make uninstall-nordvpn  # remove stale nordvpn firewall/service leftovers and boot-persistent restores
-make configure-vpn      # install + up + status in one step
-```
+// in the vm
+sudo apt update
+sudo apt install nfs-common
 
-### Kill Switch
+sudo mkdir -p /hdd/music
+sudo mkdir -p /hdd/media
 
-The kill switch uses iptables to set the OUTPUT policy to DROP, then only allows:
+sudo nano /etc/fstab
+---
+core.home.lan:/hdd/media      /hdd/media      nfs  vers=4,hard,timeo=30,_netdev  0  0
+core.home.lan:/hdd/music  /hdd/music  nfs  vers=4,hard,timeo=30,_netdev  0  0
+---
 
-- loopback traffic
-- traffic out the `wg0` interface
-- LAN traffic to `192.168.10.0/24` via `eth0`
-- the WireGuard endpoint IP via `eth0` (UDP, parsed from the config)
-- IPv6 is fully blocked (OUTPUT DROP) except loopback and `wg0`
+#### qbittorrent
+In qBittorrent WebUI, check these settings:
 
-To enable or disable:
+Tools -> Options -> Advanced -> Network Interface
+Set it to Any interface.
 
-```bash
-make vpn-killswitch-on
-make vpn-killswitch-off
-```
+Tools -> Options -> Advanced -> Optional IP address to bind to
+Set it to All addresses.
 
-`make vpn-killswitch-on` installs and enables a systemd service inside the container so the kill switch is re-applied on boot after `wg-quick@wg0` and before `torrent-stack.service` starts. `make vpn-killswitch-off` disables that boot behavior.
+Tools -> Options -> Connection -> Proxy Server
+Set it to None.
 
-If this container already existed before this change, run `make vpn-killswitch-on` once to install the boot-time service.
+Tools -> Options -> BitTorrent
+For public torrents, make sure DHT, PeX, and Local Peer Discovery are enabled.
 
-If this container previously used NordVPN, old `/etc/iptables/rules.v4` and `/etc/iptables/rules.v6` files can be restored on boot by `netfilter-persistent` and block WireGuard traffic. Run `make uninstall-nordvpn` once to remove those saved rules.
-
-### Port Forwarding
-
-ProtonVPN supports port forwarding via NAT-PMP on P2P servers. This allows inbound peer connections for better torrent performance.
-
-For qBittorrent, enable **UPnP / NAT-PMP** in Settings → Connection.
-
-### LXD Profile Requirements
-
-The container profile needs these settings for WireGuard to work:
-
-- `security.privileged: "true"`
-- `security.nesting: "true"`
-- `linux.kernel_modules:` must include `wireguard, udp_tunnel, ip6_udp_tunnel`
-- `/dev/net/tun` exposed as a unix-char device
-- `/lib/modules` mounted read-only for kernel module access
-
-The host must have the WireGuard kernel modules loaded:
-
-```bash
-sudo modprobe wireguard udp_tunnel ip6_udp_tunnel
-```
-
-## Caveats
-
-- WireGuard configs from ProtonVPN are tied to a specific server. To change servers, download a new config and push it again.
-- The kill switch only persists after `make vpn-killswitch-on` has installed its systemd service in the container.
-- If the WireGuard tunnel drops, all internet traffic is blocked until it reconnects (this is the intended kill switch behavior).
+Tools -> Options -> Connection -> Listening Port
+You can keep this equal to the forwarded port, but this is secondary to the bind/proxy settings.

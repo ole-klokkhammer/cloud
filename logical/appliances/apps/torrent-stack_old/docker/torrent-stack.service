@@ -1,14 +1,14 @@
 [Unit]
 Description=Torrent Stack Docker Compose Service
-After=network-online.target docker.service
+After=network-online.target docker.service wg-quick@wg0.service torrent-stack-vpn-killswitch.service
 Requires=docker.service
-Wants=network-online.target
+Wants=network-online.target wg-quick@wg0.service
 
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-WorkingDirectory=/torrent/docker/
-EnvironmentFile=/torrent/docker/torrent-stack.env
+WorkingDirectory=/docker
+EnvironmentFile=/docker/torrent-stack.env
 ExecStart=docker compose up -d
 ExecStop=docker compose down
 TimeoutStartSec=0

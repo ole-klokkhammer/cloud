@@ -122,7 +122,7 @@ CUDA_DEVICE_ORDER=PCI_BUS_ID CUDA_VISIBLE_DEVICES=1 vllm serve /models/gemma4/go
   --enable-auto-tool-choice \
   --tool-call-parser gemma4 \
   --reasoning-parser gemma4 \
-  --default-chat-template-kwargs '{"enable_thinking": true}' \
+  --default-chat-template-kwargs '{"enable_thinking": false}' \
   --chat-template ./vllm/examples/tool_chat_template_gemma4.jinja \
   --limit-mm-per-prompt '{"image": 0, "audio": 0, "video": 0}' \
   --speculative-config '{"num_speculative_tokens": 4, "method": "mtp", "model":"/models/gemma4/google-gemma-4-31B-it-assistant"}'

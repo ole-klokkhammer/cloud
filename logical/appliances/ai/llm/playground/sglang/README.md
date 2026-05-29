@@ -19,7 +19,7 @@ uv pip install 'compressed-tensors==0.15.0.1' --no-deps
 
 
 ### possible patch?
-mv /lib/x86_64-linux-gnu/libcudart.so.12 /tmp/libcudart.so.12.bak
+mv /root/workspace/sglang/.venv/lib/python3.12/site-packages/nvidia/cuda_runtime/lib/libcudart.so.12 /root/workspace/sglang/.venv/lib/python3.12/site-packages/nvidia/cuda_runtime/lib/libcudart.so.12.bak
 
 sed -n '295,302p' /root/workspace/sglang/.venv/lib/python3.12/site-packages/sglang/srt/model_loader/weight_utils.py
 sed -i 's/return quant_cls()$/return quant_cls.from_config({})/' /root/workspace/sglang/.venv/lib/python3.12/site-packages/sglang/srt/model_loader/weight_utils.py
@@ -77,3 +77,42 @@ CUDA_DEVICE_ORDER=PCI_BUS_ID CUDA_VISIBLE_DEVICES=1 vllm serve /models/gemma4/re
   --limit-mm-per-prompt '{"image": 0, "audio": 0, "video": 0}' \
   --default-chat-template-kwargs '{"enable_thinking": true}' \
   --speculative-config '{"num_speculative_tokens": 4, "method": "mtp", "model":"/models/gemma4/google-gemma-4-31B-it-assistant"}'
+
+
+### 
+uv pip uninstall kernels
+uv pip install accellerate
+uv pip install --upgrade transformers --pre
+uv pip install 'nvidia-modelopt[torch]' --extra-index-url https://pypi.nvidia.com
+
+LD_PRELOAD=/usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.13 \
+FLASHINFER_DISABLE_VERSION_CHECK=1 \
+PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
+CUDA_DEVICE_ORDER=PCI_BUS_ID \
+CUDA_VISIBLE_DEVICES=1 \
+SGLANG_ENABLE_SPEC_V2=True \
+sglang serve \
+  --model-path /models/gemma4/google-gemma-4-31b-it-nvfp4-kv-fp4 \
+  --quantization compressed-tensors \
+  --kv-cache-dtype fp8_e4m3 \
+  --context-length 64000 \
+  --speculative-algorithm NEXTN \
+  --speculative-draft-model-path /models/gemma4/google-gemma-4-31B-it-assistant \
+  --speculative-num-steps 5 \
+  --speculative-num-draft-tokens 4 \
+  --speculative-eagle-topk 1 \
+  --cpu-offload-gb 8 \
+  --mem-fraction-static 0.95 \
+  --fp4-gemm-backend flashinfer_trtllm \
+  --max-running-requests 2 \
+  --chunked-prefill-size 8192 \
+  --schedule-policy lpm \
+  --reasoning-parser gemma4 \
+  --tool-call-parser gemma4 \
+  --chat-template /root/workspace/vllm/vllm/examples/tool_chat_template_gemma4.jinja \
+  --host 0.0.0.0 \
+  --port 8000
+
+The key finding: SGLang auto-selects flashinfer_cudnn on Blackwell (SM120/RTX 5090) because flashinfer_cutlass has a NaN bug with heterogeneous batches (mixed prefill+decode from different sequences). This is why you're slower than vLLM.
+
+Add --fp4-gemm-backend flashinfer_cutlass to your serve command. Since you're single-user, heterogeneous batches don't occur and the NaN bug won't hit you. If you do hit NaN outputs, fall back to flashinfer_trtllm as the next option.

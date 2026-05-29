@@ -17,6 +17,22 @@ uv pip install -r requirements.txt --no-build-isolation
 
 ## export 
 
+### nvfp4 + fp8 kv cache - dataset optimized for reasoning
+python hf_ptq.py \
+  --pyt_ckpt_path /models/gemma4/google-gemma-4-31B-it \
+  --qformat nvfp4 \
+  --kv_cache_qformat fp8_cast \
+  --dataset open_platypus \
+  --calib_size 512 \
+  --calib_seq 1024 \
+  --smoothquant 0.5 \
+  --batch_size 1 \
+  --export_path /models/gemma4/google-gemma-4-31b-it-nvfp4 \
+  --trust_remote_code \
+  --use_seq_device_map \
+  --skip_generate
+
+
 ### nvfp4 + fp8 kv cache
 python hf_ptq.py \
   --pyt_ckpt_path /models/gemma4/google-gemma-4-31B-it \

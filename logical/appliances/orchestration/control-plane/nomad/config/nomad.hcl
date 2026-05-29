@@ -27,15 +27,3 @@ advertise {
  rpc = "nomad.home.lan:4647"
  serf = "nomad.home.lan:4648"
 }
-
-# consul {
-#   enabled = true
-#   address = "http://nomad.home.lan:8500"
-#   checks_use_advertise = true
-# }
-
-# vault {
-#   enabled = true
-#   address = "http://vault.home.lan:8200"
-#   # token = "..."   # usually NOT hardcoded; use Nomad-Vault integration + policies
-# }

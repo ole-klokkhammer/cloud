@@ -5,6 +5,8 @@ disable wifi, issues with certain kernels
 
 ## enable registration of dhcp entries in local dns
 
+For the Nomad wildcard ingress pattern, keep pfSense responsible for the wildcard record and let Traefik handle per-service routing. The operator guide lives in [logical/appliances/orchestration/control-plane/nomad/README.md](/home/ole/workspace/oleklokkhammer/projects/cloud/logical/appliances/orchestration/control-plane/nomad/README.md).
+
 ## ip ranges
 
 |       Range | Typical Use                                   |

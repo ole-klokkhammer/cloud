@@ -2,8 +2,9 @@ name: ai-utils
 description: A profile for running AI utilities on a GPU worker with local models.
 config:
   user.host: "core"
-  limits.cpu: "8"
-  limits.memory: 16GB
+  limits.cpu: "16"
+  limits.cpu.nodes: "0,1"
+  limits.memory: 32GB
   limits.kernel.memlock: unlimited
   limits.memory.swap: "false"
   nvidia.runtime: "true"
@@ -21,4 +22,9 @@ devices:
   root:
     path: /
     pool: zpool
+    type: disk
+  models:
+    path: /models
+    shift: "true"
+    source: /ssd/llm/models
     type: disk

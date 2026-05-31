@@ -29,10 +29,12 @@ python hf_ptq.py \
  --kv_cache_qformat fp8 \
  --dataset allenai/tulu-3-sft-mixture \
  --calib_size 512 \
- --calib_seq 1024 \
+ --calib_seq 512 \
  --batch_size 1 \
  --export_path /models/gemma4/google-gemma-4-31b-it-nvfp4mse-tulu3sftmixture \
  --trust_remote_code \
+ --use_seq_device_map \
+ --gpu_max_mem_percentage 0.70 \
  --skip_generate
 
 ### make text-only

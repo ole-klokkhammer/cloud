@@ -1,0 +1,16 @@
+name: ai-agent
+description: A profile for running AI agents on a GPU worker with local models.
+config:
+  user.host: "core"
+  limits.cpu: "4"
+  limits.memory: 32GB
+devices:
+  eth0:
+    name: eth0
+    nictype: bridged
+    parent: br0
+    type: nic
+  root:
+    path: /
+    pool: zpool
+    type: disk

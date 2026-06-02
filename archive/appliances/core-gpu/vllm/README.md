@@ -1,10 +1,14 @@
 https://docs.vllm.ai/en/latest/getting_started/installation/gpu/
 
 ## setup
+https://vllm.ai/
+
 uv venv --python 3.12 --seed
 source .venv/bin/activate
 
 uv pip install vllm --torch-backend=auto
+uv pip install instanttensor ninja
+apt update && apt install ninja-build
 
 flashinfer
 https://docs.flashinfer.ai/installation.html
@@ -30,6 +34,9 @@ docker run -d \
     -e OPENAI_API_BASE_URL=http://0.0.0.0:8000/v1 \
     --restart always \
     ghcr.io/open-webui/open-webui:main
+
+#### nightly
+uv pip install -U vllm --pre --extra-index-url https://wheels.vllm.ai/nightly/cu130 --extra-index-url https://download.pytorch.org/whl/cu130 --index-strategy unsafe-best-match
 
 ### polarengine
 https://github.com/caiovicentino/polarengine-vllm

@@ -1,5 +1,5 @@
-name: ai-agent
-description: A profile for running AI agents on a GPU worker with local models.
+name: hermes
+description: A profile for running hermes
 config:
   user.host: "core"
   limits.cpu: "4"
@@ -13,4 +13,9 @@ devices:
   root:
     path: /
     pool: zpool
+    type: disk
+  hermes-data:
+    path: /root/.hermes
+    shift: "true"
+    source: /ssd/appdata/hermes/data
     type: disk

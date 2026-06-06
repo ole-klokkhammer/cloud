@@ -1,11 +1,10 @@
 # /etc/systemd/system/fan-speed.service
 [Unit]
-Description=Set fan speeds 
+Description=Set fan speeds based on CPU temperature
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/ipmitool -U ADMIN -P ADMIN raw 0x30 0x70 0x66 0x01 0x00 0x29
-ExecStart=/usr/bin/ipmitool -U ADMIN -P ADMIN raw 0x30 0x70 0x66 0x01 0x01 0x3A
+ExecStart=/usr/local/bin/fan-control.sh
 
 [Install]
 WantedBy=multi-user.target

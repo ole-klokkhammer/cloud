@@ -70,7 +70,9 @@ def filter_shards(input_dir: Path, output_dir: Path) -> None:
                 if should_drop_tensor(key):
                     removed_count += 1
                     continue
-                kept_tensors[key] = handle.get_tensor(key)
+                # Remap model.language_model.* → model.* for Gemma4ForCausalLM
+                out_key = key.replace("model.language_model.", "model.", 1)
+                kept_tensors[out_key] = handle.get_tensor(key)
 
         if not kept_tensors:
             continue
@@ -92,6 +94,13 @@ def patch_index(output_dir: Path) -> None:
     for name in removed:
         del weight_map[name]
 
+    # Remap model.language_model.* → model.* keys in the index
+    remapped = {}
+    for name, shard in list(weight_map.items()):
+        new_name = name.replace("model.language_model.", "model.", 1)
+        remapped[new_name] = shard
+    index["weight_map"] = remapped
+
     with index_path.open("w") as fh:
         json.dump(index, fh, indent=2)
         fh.write("\n")
@@ -110,8 +119,16 @@ def patch_config(output_dir: Path) -> None:
     with config_path.open() as fh:
         config = json.load(fh)
 
+    # Flatten text_config into the root so Gemma4TextModel can find all attributes
+    # (e.g. pad_token_id) without going through the multimodal Gemma4Config wrapper.
+    text_config = config.pop("text_config", None)
+    if text_config:
+        for k, v in text_config.items():
+            if k not in config:
+                config[k] = v
+
     config["architectures"] = ["Gemma4ForCausalLM"]
-    config["model_type"] = "gemma4"
+    config["model_type"] = "gemma4_text"
 
     removed_keys = []
     for key in list(config.keys()):

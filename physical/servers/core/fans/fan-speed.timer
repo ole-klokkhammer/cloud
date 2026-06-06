@@ -4,7 +4,7 @@ Description=Re-apply fan speeds periodically
 
 [Timer]
 OnBootSec=30
-OnUnitActiveSec=5min
+OnUnitActiveSec=1min
 
 [Install]
 WantedBy=timers.target

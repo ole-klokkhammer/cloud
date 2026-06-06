@@ -3,8 +3,10 @@ HOST := ubuntu@core
 .PHONY: deploy restart status logs
 
 deploy:
-	scp fan-speed.service fan-speed.timer $(HOST):/tmp/
+	scp fan-control.sh fan-speed.service fan-speed.timer $(HOST):/tmp/
 	ssh -t $(HOST) "\
+		sudo mv /tmp/fan-control.sh /usr/local/bin/fan-control.sh && \
+		sudo chmod +x /usr/local/bin/fan-control.sh && \
 		sudo mv /tmp/fan-speed.service /etc/systemd/system/fan-speed.service && \
 		sudo mv /tmp/fan-speed.timer /etc/systemd/system/fan-speed.timer && \
 		sudo systemctl daemon-reload && \

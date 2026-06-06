@@ -10,32 +10,69 @@ cd Model-Optimizer/examples/llm_ptq
 
 uv venv .venv
 source .venv/bin/activate
-
-uv pip install -U pip setuptools wheel ninja packaging
-uv pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
-uv pip install flash-attn==2.8.3 --no-build-isolation
-uv pip install -U nvidia-modelopt[hf]
-uv pip install -r requirements.txt --no-build-isolation
+uv pip install -U nvidia-modelopt[all]  --pre
+uv pip install torch --index-url https://download.pytorch.org/whl/cu132
 
 ## export
 
 ### nvfp4 + fp8 kv cache - dataset optimized for reasoning
+python3 make-gemma4-text-only.py \
+  /models/gemma4/google-gemma-4-31B-it \
+  /models/gemma4/google-gemma-4-31B-it-text-only
+-------------------
 CUDA_DEVICE_ORDER=PCI_BUS_ID \
-CUDA_VISIBLE_DEVICES=1,0 \
+CUDA_VISIBLE_DEVICES=1 \
 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
-python hf_ptq.py \
- --pyt_ckpt_path /models/gemma4/google-gemma-4-31B-it \
+python ./examples/llm_ptq/hf_ptq.py \
+ --pyt_ckpt_path /models/gemma4/google-gemma-4-31B-it-text-only \
  --qformat nvfp4_mse \
  --kv_cache_qformat fp8 \
- --dataset allenai/tulu-3-sft-mixture \
  --calib_size 512 \
- --calib_seq 512 \
+ --calib_seq 2048 \
  --batch_size 1 \
- --export_path /models/gemma4/google-gemma-4-31b-it-nvfp4mse-tulu3sftmixture \
+ --dataset allenai/tulu-3-sft-mixture \
+ --export_path /models/gemma4/google-gemma-4-31b-it-nvfp4mse \
  --trust_remote_code \
- --use_seq_device_map \
  --gpu_max_mem_percentage 0.50 \
  --skip_generate
+
+du -sh /models/gemma4/google-gemma-4-31b-it-nvfp4mse
+
+CUDA_DEVICE_ORDER=PCI_BUS_ID \
+CUDA_VISIBLE_DEVICES=1 \
+PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
+python ./examples/llm_ptq/hf_ptq.py \
+ --pyt_ckpt_path /models/gemma4/google-gemma-4-31B-it-text-only \
+ --qformat nvfp4_svdquant \
+ --kv_cache_qformat fp8 \
+ --calib_size 512 \
+ --calib_seq 2048 \
+ --batch_size 1 \
+ --dataset allenai/tulu-3-sft-mixture \
+ --export_path /models/gemma4/google-gemma-4-31b-it-nvfp4_svdquant \
+ --trust_remote_code \
+ --gpu_max_mem_percentage 0.75 \
+ --skip_generate
+
+du -sh /models/gemma4/google-gemma-4-31b-it-nvfp4_svdquant
+
+#### mtp model too
+CUDA_DEVICE_ORDER=PCI_BUS_ID \
+CUDA_VISIBLE_DEVICES=1 \
+PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
+python ./examples/llm_ptq/hf_ptq.py \
+ --pyt_ckpt_path /models/gemma4/google-gemma-4-31B-it-assistant \
+ --qformat nvfp4_mse \
+ --kv_cache_qformat fp8 \
+ --calib_size 512 \
+ --calib_seq 2048 \
+ --batch_size 1 \
+ --dataset allenai/tulu-3-sft-mixture \
+ --export_path /models/gemma4/google-gemma-4-31b-it-assistant-nvfp4mse \
+ --trust_remote_code \
+ --gpu_max_mem_percentage 0.85 \
+ --skip_generate
+
 
 ### make text-only
 

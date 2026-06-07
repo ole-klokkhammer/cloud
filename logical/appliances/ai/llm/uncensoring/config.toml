@@ -1,0 +1,10 @@
+model = "/models/gemma4/google-gemma-4-31B-it-text-only"
+
+device_map = "auto"
+max_memory = { "0" = "29GB", "1" = "12GB", "cpu" = "128GB" }
+
+offload_outputs_to_cpu = true
+row_normalization = "pre"
+batch_size = 16
+dtypes = ["bfloat16", "float16"]
+quantization = "none"

@@ -67,7 +67,7 @@ services:
       - TZ=Europe/Oslo
     volumes:
       - /torrent/config/lidarr:/config
-      - /hdd/music:/music
+      - /hdd/music/data:/music
       - /hdd/media/downloads:/downloads
 
   jackett:

@@ -1,0 +1,27 @@
+name: lms
+description: LMS container profile
+config:
+  user.host: "core"
+  limits.cpu: "2"
+  limits.memory: 8GB 
+devices:
+  eth0:
+    name: eth0
+    nictype: bridged
+    parent: br0
+    type: nic
+  music:
+    path: /music
+    shift: "true"
+    source: /hdd/music
+    type: disk
+  lms:
+    path: /var/lib/squeezeboxserver
+    shift: "true"
+    source: /ssd/appdata/lms
+    type: disk
+  root:
+    path: /
+    pool: zpool
+    type: disk
+project: default

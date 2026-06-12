@@ -21,6 +21,17 @@ https://docs.astral.sh/uv/
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
 #### install 
+sudo apt update && apt install -y gcc build-essential python3.12-dev wget ninja-build
+wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-keyring_1.1-1_all.deb
+sudo dpkg -i cuda-keyring_1.1-1_all.deb
+sudo apt update && apt install -y cuda-toolkit
+
+cd ~/workspace/vllm
 uv venv --python 3.12 --seed
 source .venv/bin/activate
+
 uv pip install vllm --torch-backend=auto
+uv pip install instanttensor
+uv pip install flashinfer-python flashinfer-cubin
+uv pip install flashinfer-jit-cache --index-url https://flashinfer.ai/whl/cu132
+flashinfer show-config

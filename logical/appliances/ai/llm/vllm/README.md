@@ -1,6 +1,9 @@
 https://docs.vllm.ai/en/latest/getting_started/installation/gpu/
 
 ## setup
+sudo apt update
+snap install astral-uv
+
 uv venv --python 3.12 --seed
 source .venv/bin/activate
 

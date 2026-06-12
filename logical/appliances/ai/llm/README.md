@@ -11,16 +11,16 @@ sudo zfs set recordsize=1M  ssd/llm/models
 - lxc launch ubuntu:24.04 llm -p default -p llm
 - lxc exec llm -- bash
 
-## NUMA testing
+### vllm setup
+https://docs.vllm.ai/en/latest/getting_started/quickstart/
 
-### memory location
-sudo  numastat -p $(pidof llama-server)
-watch -n 0.5 "sudo  numastat -p $(pidof llama-server)"
 
-### CPU localization
-numactl --hardware
-then verify cpu number with htop
+#### install uv
+https://docs.astral.sh/uv/
 
-### others
-- numactl --cpunodebind=0 --membind=0
-- numactl --interleave=all
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+#### install 
+uv venv --python 3.12 --seed
+source .venv/bin/activate
+uv pip install vllm --torch-backend=auto

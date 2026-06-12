@@ -7,8 +7,6 @@ Type=simple
 User=root
 WorkingDirectory=/root/workspace/vllm
 Environment="FLASHINFER_DISABLE_VERSION_CHECK=1"
-Environment="CUDA_DEVICE_ORDER=PCI_BUS_ID"
-Environment="CUDA_VISIBLE_DEVICES=1"
 ExecStart=/root/workspace/vllm/.venv/bin/vllm serve /models/gemma4/google-gemma-4-31b-it-nvfp4mse \
   --quantization modelopt_fp4 \
   --kv-cache-dtype fp8_e4m3 \
@@ -28,7 +26,7 @@ ExecStart=/root/workspace/vllm/.venv/bin/vllm serve /models/gemma4/google-gemma-
   --no-disable-cascade-attn \
   --performance-mode interactivity \
   --default-chat-template-kwargs '{"enable_thinking": false, "thinking_budget": 8192}' \
-  --chat-template /root/workspace/vllm/tool_chat_template_gemma4.jinja \
+  --chat-template /models/TEMPLATES/tool_chat_template_gemma4.jinja \
   --speculative-config '{"num_speculative_tokens": 4, "method": "mtp", "model":"/models/gemma4/google-gemma-4-31B-it-assistant"}' \
   --served-model-name Gemma4-31b-it \
   --port 8000 \

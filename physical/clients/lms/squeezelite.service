@@ -1,0 +1,12 @@
+[Unit]
+Description=Squeezelite
+After=network-online.target sound.target
+Wants=network-online.target
+
+[Service]
+ExecStart=/usr/bin/squeezelite -o hw:CARD=Audio,DEV=0
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

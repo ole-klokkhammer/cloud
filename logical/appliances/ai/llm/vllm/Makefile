@@ -1,4 +1,4 @@
-CONTAINER := core:core-gpu
+CONTAINER := core:llm
 SERVICE   := vllm.service
 
 .PHONY: deploy restart kill status logs

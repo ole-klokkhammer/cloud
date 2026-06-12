@@ -1,5 +1,5 @@
-name: control-plane
-description: Control Plane Server container profile
+name: nomad
+description: Nomad Server container profile
 config:
   user.host: "core"
   limits.cpu: "2"
@@ -17,12 +17,7 @@ devices:
     path: /opt/nomad/data
     shift: "true"
     source: /ssd/appdata/control-plane/nomad
-    type: disk
-  # consul-data:
-  #   path: /opt/consul
-  #   shift: "true"
-  #   source: /ssd/appdata/control-plane/consul
-  #   type: disk
+    type: disk 
   root:
     path: /
     pool: zpool

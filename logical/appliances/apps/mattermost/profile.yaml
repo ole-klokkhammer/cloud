@@ -1,0 +1,29 @@
+name: mattermost
+description: mattermost container profile
+config:
+  user.host: "core"
+  limits.cpu: "4"
+  limits.memory: 16GB 
+  security.nesting: "false"
+  security.privileged: "false" 
+devices:
+  eth0:
+    name: eth0
+    nictype: bridged
+    parent: br0
+    type: nic
+  data:
+    path: /opt/mattermost/data
+    shift: "true"
+    source: /ssd/appdata/mattermost/data
+    type: disk
+  config:
+    path: /opt/mattermost/config
+    shift: "true"
+    source: /ssd/appdata/mattermost/config
+    type: disk
+  root:
+    path: /
+    pool: zpool
+    type: disk
+project: default

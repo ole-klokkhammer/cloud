@@ -42,3 +42,11 @@ sudo apt install mattermost -y
 
 ### mattermost config
 use env vars. edit systemd service and add env file.
+
+
+### BOTS
+https://developers.mattermost.com/integrate/reference/bot-accounts/
+
+Go to System Console > Integrations > Bot Accounts.
+Set Enable Bot Account Creation to true.
+

@@ -1,10 +1,8 @@
 # AI Utilities Appliance
 
-Consolidated utility appliance for secondary AI services.
+## setup
+lxc profile create ai-utils
+lxc profile edit ai-utils
+lxc launch ubuntu:24.04 ai-utils -p default -p ai-utils
+lxc exec ai-utils -- bash
 
-- **Hardware:** RTX 5060 Ti (16GB)
-- **Services:**
-  - Embedding Model
-  - Reranker Model
-  - OCR & Image Recognition
-  - Text-to-Audio / Music Generation

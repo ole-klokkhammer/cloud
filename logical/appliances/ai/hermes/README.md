@@ -28,3 +28,6 @@ sudo zfs create \
 https://hermes-agent.nousresearch.com/docs/getting-started/installation
 
 curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash
+
+#### env vars
+nano ~/.hermes/.env

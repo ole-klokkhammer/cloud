@@ -4,11 +4,9 @@ config:
   user.host: "core"
   limits.cpu: "16"
   limits.cpu.nodes: "0,1"
-  limits.memory: 32GB
+  limits.memory: 64GB
   limits.kernel.memlock: unlimited
   limits.memory.swap: "false"
-  nvidia.runtime: "true"
-  nvidia.driver.capabilities: all
 devices:
   eth0:
     name: eth0

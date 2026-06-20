@@ -1,0 +1,64 @@
+{
+  "distSpecVersion": "1.0.1",
+  "storage": {
+    "dedupe": true,
+    "gc": true,
+    "gcDelay": "1h",
+    "gcInterval": "6h",
+    "rootDirectory": "/data/zot/"
+  },
+  "http": {
+    "address": "0.0.0.0",
+    "port": "8080",
+    "ratelimit": {
+      "rate": 20,
+      "methods": [
+        {
+          "method": "GET",
+          "rate": 5
+        }
+      ]
+    },
+    "auth": {
+      "htpasswd": {
+        "path": "/etc/zot/htpasswd"
+      },
+      "failDelay": 5
+    }
+  },
+  "log": {
+    "level": "debug",
+    "output": "/var/log/zot/zot.log",
+    "audit": "/var/log/zot/zot-audit.log"
+  },
+  "extensions": {
+    "ui": {
+      "enable": true
+    },
+    "search": {
+      "enable": true,
+      "cve": {
+        "updateInterval": "24h"
+      }
+    },
+    "sync": {
+      "enable": false,
+      "registries": [
+        {
+          "urls": ["https://mirror.gcr.io/library"],
+          "onDemand": true,
+          "maxRetries": 3,
+          "retryDelay": "5m",
+          "pollInterval": "6h"
+        },
+        {
+          "urls": ["https://index.docker.io"],
+          "onDemand": true
+        }
+      ]
+    },
+    "scrub": {
+      "interval": "24h"
+    }
+  }
+}

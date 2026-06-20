@@ -12,6 +12,7 @@ devices:
     nictype: bridged
     parent: br0
     type: nic
+    hwaddr: 00:16:3e:fa:8a:28
   data:
     path: /opt/mattermost/data
     shift: "true"

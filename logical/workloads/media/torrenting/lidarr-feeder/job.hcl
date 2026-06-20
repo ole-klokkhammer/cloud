@@ -20,7 +20,7 @@ job "lidarr-feeder" {
       driver = "docker"
 
       config {
-        image       = "ghcr.io/ole-klokkhammer/lidarrfeeder:1.0.36"
+        image       = "registry.linole.org/lidarrfeeder:1.0.36"
         force_pull  = true
       }
 

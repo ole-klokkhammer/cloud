@@ -26,8 +26,7 @@ job "matrix-ai-bot" {
       driver = "docker"
 
       config {
-        image = "container-registry.home.lan:5000/matrix-ai-bot:latest"
-        insecure_registry = "container-registry.home.lan:5000"
+        image = "container-registry.linole.org/matrix-ai-bot:latest"
       }
 
       env {
@@ -36,7 +35,7 @@ job "matrix-ai-bot" {
         MATRIX_PASSWORD  = "your-password-here"
         MATRIX_TOKEN    = ""
         MATRIX_ROOM     = "!your-room-id:matrix.org"
-        VLLM_API_URL    = "http://core-gpu.home.lan:8000/v1"
+        VLLM_API_URL    = "http://llm.home.lan:8000/v1"
         VLLM_MODEL      = "gemma-4-31b-nvfp4"
         LOG_LEVEL       = "INFO"
       }

@@ -1,9 +1,9 @@
-name: container-registry
-description: container registry profile
+name: zot
+description: zot - container registry profile
 config:
   user.host: "core"
-  limits.cpu: "1"
-  limits.memory: 2GB 
+  limits.cpu: "2"
+  limits.memory: 4GB 
   security.nesting: "false"
   security.privileged: "false" 
 devices:

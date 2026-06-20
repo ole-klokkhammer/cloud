@@ -13,7 +13,7 @@ MATRIX_USER = os.environ["MATRIX_USER"]
 MATRIX_PASSWORD = os.environ.get("MATRIX_PASSWORD", "")
 MATRIX_TOKEN = os.environ.get("MATRIX_TOKEN", "")
 MATRIX_ROOM = os.environ["MATRIX_ROOM"]
-VLLM_API_URL = os.environ.get("VLLM_API_URL", "http://core-gpu.home.lan:8000/v1")
+VLLM_API_URL = os.environ.get("VLLM_API_URL", "http://llm.home.lan:8000/v1")
 VLLM_MODEL = os.environ.get("VLLM_MODEL", "gemma-4-31b-nvfp4")
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 

@@ -1,4 +1,4 @@
-REGISTRY := container-registry.home.lan:5000
+REGISTRY := registry.linole.org
 IMAGE := matrix-ai-bot
 TAG := latest
 

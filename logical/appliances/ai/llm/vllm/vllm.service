@@ -30,7 +30,7 @@ ExecStart=/root/workspace/vllm/.venv/bin/vllm serve /models/gemma4/google-gemma-
   --speculative-config '{"num_speculative_tokens": 4, "method": "mtp", "model":"/models/gemma4/google-gemma-4-31B-it-assistant"}' \
   --served-model-name Gemma4-31b-it \
   --port 8000 \
-  --host 0.0.0.0
+  --host 0.0.0.
 TimeoutStopSec=10
 Restart=always
 RestartSec=5

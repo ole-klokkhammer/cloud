@@ -35,3 +35,9 @@ uv pip install instanttensor
 uv pip install flashinfer-python flashinfer-cubin
 uv pip install flashinfer-jit-cache --index-url https://flashinfer.ai/whl/cu132
 flashinfer show-config
+
+
+## notes on quantized assistant model
+https://huggingface.co/melcheikh/gemma-4-31B-it-qat-assistant-NVFP4-Blackwell
+
+enable quant_config

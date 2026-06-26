@@ -16,6 +16,8 @@ uv pip install flashinfer-python flashinfer-cubin
 uv pip install flashinfer-jit-cache --index-url https://flashinfer.ai/whl/cu132
 flashinfer show-config
 
+uv pip install instanttensor
+
 -- upgrade
 uv pip install -U vllm --torch-backend=auto
 

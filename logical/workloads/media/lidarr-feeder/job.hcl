@@ -41,6 +41,7 @@ job "lidarr-feeder" {
         data = <<EOH
 {{ with nomadVar "nomad/jobs" }}
 LIDARR_API_KEY={{ .lidarr_api_key }}
+LIDARR_URL={{ .lidarrr_url }}
 {{ end }}
 EOH
       }

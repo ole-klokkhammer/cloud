@@ -54,10 +54,10 @@ job "hub0-bluetooth-bridge" {
     }
 
     task "bridge" {
-      driver = "docker"
+      driver = "podman" 
 
       config {
-        image        = "ghcr.io/ole-klokkhammer/bluetooth-bridge:${var.version}"
+        image        = "registry.linole.org/bluetooth-bridge:${var.version}"
         force_pull   = true
         ports        = ["health"]
         network_mode = "host"

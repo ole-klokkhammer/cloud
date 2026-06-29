@@ -6,7 +6,7 @@
 #   make status          - Check Nomad job status
 #   make logs            - Follow Nomad allocation logs
 
-IMAGE_NAME := ghcr.io/ole-klokkhammer/bluetooth-bridge
+IMAGE_NAME := registry.linole.org/bluetooth-bridge
 VERSION := $(shell date +%Y%m%d%H%M%S)
 JOB_NAME := bluetooth-bridge
 

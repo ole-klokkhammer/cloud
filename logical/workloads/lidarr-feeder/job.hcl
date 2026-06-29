@@ -29,6 +29,12 @@ job "lidarr-feeder" {
       config {
         image       = "registry.linole.org/lidarr-feeder:1.0.36"
         force_pull  = true
+        
+        registry {
+          address  = "registry.linole.org"
+          username = "${env.REGISTRY_USER}"
+          password = "${env.REGISTRY_PASSWORD}"
+        }
       }
 
       env {
@@ -42,6 +48,8 @@ job "lidarr-feeder" {
 {{ with nomadVar "nomad/jobs" }}
 LIDARR_API_KEY={{ .lidarr_api_key }}
 LIDARR_URL={{ .lidarrr_url }}
+REGISTRY_USERNAME={{ .registry_username }}
+REGISTRY_PASSWORD={{ .registry_password }}
 {{ end }}
 EOH
       }

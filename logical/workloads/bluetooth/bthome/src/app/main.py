@@ -10,9 +10,9 @@ import logging
 import os
 from aiohttp import web
 from aiomqtt import Client, Will
-from logical.workloads.radios.bluetooth.bthome.src.app.bthome import decode
-from logical.workloads.radios.bluetooth.bthome.src.app.constants import BTHOME_UUID_SHORT
-from logical.workloads.radios.bluetooth.bthome.src.app.integrations import publish_discovery
+from logical.workloads.bluetooth.bthome.src.app.bthome import decode
+from logical.workloads.bluetooth.bthome.src.app.constants import BTHOME_UUID_SHORT
+from logical.workloads.bluetooth.bthome.src.app.integrations import publish_discovery
 
 MQTT_BROKER = os.getenv("MQTT_BROKER", "hivemq.home.lan")
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()

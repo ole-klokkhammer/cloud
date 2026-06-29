@@ -1,5 +1,6 @@
+
 bind_addr  = "0.0.0.0"
-name       = "hub0-cloud"
+name       = "hub0-bluetooth"
 datacenter = "dc1"
 data_dir   = "/opt/nomad/data"
 plugin_dir = "/opt/nomad/plugins"
@@ -11,7 +12,6 @@ client {
     role = "worker",
     machine  = "hub0",
     bluetooth  = "true"
-    zigbee     = "true"
   }
 }
 
@@ -21,14 +21,5 @@ plugin "docker" {
       enabled = true
     }
     allow_caps = ["NET_ADMIN", "NET_RAW"]
-  }
-}
-
-plugin "nomad-driver-podman" {
-  config {
-    volumes {
-      enabled      = true
-      selinuxlabel = "z"
-    }
   }
 }

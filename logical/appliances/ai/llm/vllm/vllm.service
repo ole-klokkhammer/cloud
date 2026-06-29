@@ -15,7 +15,7 @@ ExecStart=/root/workspace/vllm/.venv/bin/vllm serve /models/gemma4/google-gemma-
   --max-num-seqs 2 \
   --max-model-len 65536 \
   --max-num-batched-tokens 8192 \
-  --async-scheduling \
+#  --enable-async-scheduling \
   --load-format instanttensor \
   --enable-prefix-caching \
 #  --enable-chunked-prefill \
@@ -27,7 +27,10 @@ ExecStart=/root/workspace/vllm/.venv/bin/vllm serve /models/gemma4/google-gemma-
   --performance-mode interactivity \
   --default-chat-template-kwargs '{"enable_thinking": false, "thinking_budget": 8192}' \
   --chat-template /models/TEMPLATES/tool_chat_template_gemma4.jinja \
-  --speculative-config '{"num_speculative_tokens": 3, "method": "mtp", "model":"/models/gemma4/google-gemma-4-31B-it-assistant-nvfp4"}' \
+#  --speculative-config '{"num_speculative_tokens": 3, "method": "mtp", "model":"/models/gemma4/google-gemma-4-31B-it-assistant", "max_model_len": 8192}' \
+#  --speculative-config '{ "num_speculative_tokens": 3, "method": "mtp", "model": "/models/gemma4/google-gemma-4-31B-it-assistant-nvfp4", "max_model_len": 8192}' \
+#  --speculative-config '{"method": "dflash", "model": "z-lab/gemma-4-31B-it-DFlash", "num_speculative_tokens": 15, "attention_backend": "flash_attn"}' \
+#  --attention-backend triton_attn \
   --served-model-name Gemma4-31b-it \
   --port 8000 \
   --host 0.0.0.0

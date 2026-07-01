@@ -4,7 +4,7 @@ https://documentation.ubuntu.com/server/how-to/graphics/install-nvidia-drivers/
 sudo apt update  
 
 // This package includes the kernel modules, the driver, and the nvidia-smi utilities in one go. 
-sudo apt install -y nvidia-driver-580-server-open 
+sudo apt install -y nvidia-driver-595-server-open
 sudo reboot
 nvidia-smi
 

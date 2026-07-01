@@ -6,7 +6,8 @@ After=network.target
 Type=simple
 User=root
 WorkingDirectory=/root/workspace/vllm
-Environment="FLASHINFER_DISABLE_VERSION_CHECK=1"
+Environment="PATH=/usr/local/cuda-13/bin:$PATH"
+Environment="LD_LIBRARY_PATH=/usr/local/cuda-13/lib64:$LD_LIBRARY_PATH"
 ExecStart=/root/workspace/vllm/.venv/bin/vllm serve /models/gemma4/google-gemma-4-31b-it-abliterated-nvfp4mse \
   --quantization modelopt_fp4 \
   --kv-cache-dtype fp8_e4m3 \

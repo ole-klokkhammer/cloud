@@ -1,12 +1,7 @@
-# Install NVIDIA drivers
-https://documentation.ubuntu.com/server/how-to/graphics/install-nvidia-drivers/
+# Install NVIDIA drivers 
+https://docs.nvidia.com/datacenter/tesla/driver-installation-guide/latest/ubuntu.html
 
-sudo apt update  
-
-// This package includes the kernel modules, the driver, and the nvidia-smi utilities in one go. 
-sudo apt install -y nvidia-driver-595-server-open
-sudo reboot
-nvidia-smi
+follow the path
 
 # Install NVIDIA Container Toolkit
 You need the NVIDIA Container Toolkit on the host because it acts as the "bridge" between the physical hardware driver and the container ecosystem (LXD and Docker).
@@ -21,7 +16,7 @@ curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dear
     sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
     sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
 sudo apt-get update
-export NVIDIA_CONTAINER_TOOLKIT_VERSION=1.18.1-1
+export NVIDIA_CONTAINER_TOOLKIT_VERSION=1.19.1-1
 sudo apt-get install -y \
     nvidia-container-toolkit=${NVIDIA_CONTAINER_TOOLKIT_VERSION} \
     nvidia-container-toolkit-base=${NVIDIA_CONTAINER_TOOLKIT_VERSION} \

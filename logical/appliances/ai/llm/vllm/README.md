@@ -1,60 +1,6 @@
+# 
 https://docs.vllm.ai/en/latest/getting_started/installation/gpu/
 
-## prereq (on host?)
-
-sudo apt update
-sudo apt install -y build-essential cmake git libcurl4-openssl-dev
-
-wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-keyring_1.1-1_all.deb
-sudo dpkg -i cuda-keyring_1.1-1_all.deb
-sudo apt-get update
-sudo apt-get -y install cuda-toolkit-13-3
-
-export PATH=/usr/local/cuda-13/bin:$PATH
-export LD_LIBRARY_PATH=/usr/local/cuda-13/lib64:$LD_LIBRARY_PATH
-
-## setup
-
-sudo apt update
-snap install astral-uv
-
-uv venv --python 3.12 --seed --managed-python
-source .venv/bin/activate
-
-uv pip install vllm --torch-backend=auto
-
-uv pip install -U vllm \
- --torch-backend=cu130 \
- --extra-index-url https://wheels.vllm.ai/nightly/cu130
-
-# --torch-backend=auto --index-url https://flashinfer.ai/whl/cu132
-
-flashinfer
-https://docs.flashinfer.ai/installation.html
-
-uv pip install flashinfer-python flashinfer-cubin
-uv pip install flashinfer-jit-cache --index-url https://flashinfer.ai/whl/cu132
-flashinfer show-config
-
-uv pip install instanttensor
-uv pip install "git+https://github.com/deepseek-ai/DeepGEMM" --no-build-isolation
-
--- upgrade
-uv pip install -U vllm --torch-backend=auto --index-url https://download.pytorch.org/whl/cu133
-
--- example
-hf download llmat/Qwen3-4B-Instruct-2507-NVFP4 --local-dir /models/Qwen3-4B-Instruct-2507-NVFP4
-
--- ui
-https://docs.vllm.ai/en/latest/deployment/frameworks/open-webui/
-
-docker run -d \
- --network=host \
- --name open-webui \
- -v open-webui:/app/backend/data \
- -e OPENAI_API_BASE_URL=http://0.0.0.0:8000/v1 \
- --restart always \
- ghcr.io/open-webui/open-webui:main
 
 ## build from source
 sudo apt-get install -y gcc-11 g++-11

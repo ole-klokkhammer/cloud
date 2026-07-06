@@ -16,6 +16,5 @@ devices:
     pool: zpool
     type: disk
   torrent-data:
-    path: /torrent
     source: /dev/zvol/ssd/vm/torrent-zvol
     type: disk

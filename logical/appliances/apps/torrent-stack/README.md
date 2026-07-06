@@ -3,7 +3,7 @@
 ## setup
 
 ### Disk
-sudo zfs create -V 10G \
+sudo zfs create -V 20G \
   -o volblocksize=16K \
   -o compression=lz4 \
   ssd/vm/torrent-zvol

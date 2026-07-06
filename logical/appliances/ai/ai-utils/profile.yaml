@@ -3,7 +3,7 @@ description: A profile for running AI utilities on a GPU worker with local model
 config:
   user.host: "core"
   limits.cpu: "16"
-  limits.cpu.nodes: "0,1"
+  limits.cpu.nodes: "0,1,2,3"
   limits.memory: 64GB
   limits.kernel.memlock: unlimited
   limits.memory.swap: "false"

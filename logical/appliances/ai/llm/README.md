@@ -36,6 +36,8 @@ uv pip install flashinfer-python flashinfer-cubin
 uv pip install flashinfer-jit-cache --index-url https://flashinfer.ai/whl/cu132
 flashinfer show-config
 
+## 0.24 error
+https://github.com/vllm-project/vllm/pull/45544/commits
 
 ## notes on quantized assistant model
 https://huggingface.co/melcheikh/gemma-4-31B-it-qat-assistant-NVFP4-Blackwell

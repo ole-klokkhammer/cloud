@@ -2,8 +2,9 @@ name: llm
 description: A profile for running LLMs on a GPU worker with local models.
 config:
   user.host: "core"
-  limits.cpu: "16"
-  limits.cpu.nodes: "0,1"
+  limits.cpu:
+    nodes: "0,1,2,3"
+    shares: "1024"
   limits.memory: 128GB
   limits.kernel.memlock: unlimited
   limits.memory.swap: "false"

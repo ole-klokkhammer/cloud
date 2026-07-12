@@ -9,7 +9,7 @@ WorkingDirectory=/root/workspace/vllm
 ExecStart=/usr/bin/numactl --interleave=all /root/workspace/vllm/.venv/bin/vllm serve /models/gemma4/google-gemma-4-31b-it-abliterated-nvfp4mse \
   --quantization modelopt_fp4 \
   --kv-cache-dtype fp8_e4m3 \
-  --kv-offloading-size 8 \
+  --kv-offloading-size 32 \
   --gpu-memory-utilization 0.95 \
   --max-num-seqs 32 \
   --max-model-len 65536 \

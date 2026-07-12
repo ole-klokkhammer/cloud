@@ -11,7 +11,7 @@ ExecStart=/usr/bin/numactl --interleave=all /root/workspace/vllm/.venv/bin/vllm 
   --kv-cache-dtype fp8_e4m3 \
   --kv-offloading-size 8 \
   --gpu-memory-utilization 0.95 \
-  --max-num-seqs 2 \
+  --max-num-seqs 16 \
   --max-model-len 65536 \
   --max-num-batched-tokens 8192 \
   --load-format instanttensor \
@@ -25,9 +25,6 @@ ExecStart=/usr/bin/numactl --interleave=all /root/workspace/vllm/.venv/bin/vllm 
   --default-chat-template-kwargs '{"enable_thinking": false, "thinking_budget": 8192}' \
   --chat-template /models/TEMPLATES/tool_chat_template_gemma4.jinja \
   --speculative-config '{"num_speculative_tokens": 4, "method": "mtp", "model":"/models/gemma4/google-gemma-4-31B-it-assistant"}' \
-#  --speculative-config '{ "num_speculative_tokens": 4, "method": "mtp", "model":"/models/gemma4/google-gemma-4-31B-it-assistant-nvfp4"}' \
-#  --speculative-config '{"method": "dflash", "model": "z-lab/gemma-4-31B-it-DFlash", "num_speculative_tokens": 15, "attention_backend": "flash_attn"}' \
-#  --attention-backend triton_attn \
   --served-model-name Gemma4-31b-it \
   --port 8000 \
   --host 0.0.0.0

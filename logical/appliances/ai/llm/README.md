@@ -43,3 +43,7 @@ https://github.com/vllm-project/vllm/pull/45544/commits
 https://huggingface.co/melcheikh/gemma-4-31B-it-qat-assistant-NVFP4-Blackwell
 
 enable quant_config
+
+## 0.25
+sudo apt-get update
+sudo apt-get install -y ffmpeg libavcodec-dev libavformat-dev libavutil-dev

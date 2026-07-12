@@ -11,7 +11,7 @@ ExecStart=/usr/bin/numactl --interleave=all /root/workspace/vllm/.venv/bin/vllm 
   --kv-cache-dtype fp8_e4m3 \
   --kv-offloading-size 8 \
   --gpu-memory-utilization 0.95 \
-  --max-num-seqs 16 \
+  --max-num-seqs 32 \
   --max-model-len 65536 \
   --max-num-batched-tokens 8192 \
   --load-format instanttensor \

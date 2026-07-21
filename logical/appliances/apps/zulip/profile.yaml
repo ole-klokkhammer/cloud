@@ -1,0 +1,30 @@
+name: zulip
+description: zulip container profile
+config:
+  user.host: "core"
+  limits.cpu: "4"
+  limits.memory: 16GB 
+  security.nesting: "false"
+  security.privileged: "false" 
+devices:
+  eth0:
+    name: eth0
+    nictype: bridged
+    parent: br0
+    type: nic
+    hwaddr: 00:16:3e:8b:77:f1
+  root:
+    path: /
+    pool: zpool
+    type: disk
+  config:
+    path: /etc/zulip
+    shift: "true"
+    source: /ssd/appdata/zulip/config
+    type: disk
+  uploads:
+    path: /home/zulip/uploads
+    shift: "true"
+    source: /ssd/appdata/zulip/uploads
+    type: disk
+project: default

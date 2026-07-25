@@ -1,0 +1,1 @@
+uvx --with "openai[pydantic]" --with "Pillow" python test.py --image ./image.png --prompt "Describe this image"

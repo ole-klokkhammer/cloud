@@ -10,7 +10,7 @@ ExecStart=/usr/bin/numactl --interleave=all /root/workspace/vllm/.venv/bin/vllm 
   --quantization modelopt_fp4 \
   --kv-cache-dtype fp8_e4m3 \
   --kv-offloading-size 32 \
-  --gpu-memory-utilization 0.95 \
+  --gpu-memory-utilization 0.90 \
   --max-num-seqs 32 \
   --max-model-len 65536 \
   --max-num-batched-tokens 8192 \

@@ -1,0 +1,31 @@
+[Unit]
+Description=vllm Inference Server
+After=network.target
+
+[Service]
+Type=simple
+User=root
+Environment="PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True"
+WorkingDirectory=/root/workspace/vllm
+ExecStart=/usr/bin/numactl --interleave=all /root/workspace/vllm/.venv/bin/vllm serve /models/qwen3-vl/JEILDLWLRMA_Qwen3-VL-8B-Instruct-NVFP4/ \
+  --quantization compressed-tensors \
+  --kv-cache-dtype fp8 \
+  --gpu-memory-utilization 0.85 \
+  --max-num-seqs 32 \
+  --max-model-len 16384 \
+  --max-num-batched-tokens 8192 \
+  --limit-mm-per-prompt '{"image":1}' \
+  --load-format instanttensor \
+  --no-disable-cascade-attn \
+  --performance-mode interactivity \
+  --served-model-name Qwen3VL-8B-Instruct-NVFP4 \
+  --port 8000 \
+  --host 0.0.0.0
+TimeoutStopSec=10
+Restart=always
+RestartSec=5
+LimitMEMLOCK=infinity
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target

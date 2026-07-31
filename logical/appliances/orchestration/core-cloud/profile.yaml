@@ -1,8 +1,8 @@
 name: core-cloud
-description: Cloud VM profile
+description: Cloud profile
 config:
   limits.cpu: "8"
-  limits.memory: 128GB
+  limits.memory: 32GB
 devices:
   eth0:
     name: eth0
@@ -13,6 +13,4 @@ devices:
     path: /
     pool: zpool
     type: disk
-used_by:
-- /1.0/instances/core-cloud
 project: default

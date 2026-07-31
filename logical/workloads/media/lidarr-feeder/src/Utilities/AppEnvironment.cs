@@ -9,4 +9,4 @@ public static class AppEnvironment
     public static string RssUrl =>
         Environment.GetEnvironmentVariable("RSS_URL") ?? throw new InvalidOperationException("RSS_URL is not set.");
  
-}
+} 

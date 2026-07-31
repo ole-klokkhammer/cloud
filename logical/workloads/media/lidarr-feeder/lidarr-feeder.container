@@ -1,0 +1,15 @@
+[Unit]
+Description=Lidarr Feeder Service
+After=network-online.target
+
+[Container]
+ContainerName=lidarr-feeder
+Image=registry.linole.org/lidarr-feeder:1.0.37
+EnvironmentFile=/etc/containers/env/zot.env
+EnvironmentFile=/etc/containers/env/lidarr-feeder.env
+
+[Service]
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

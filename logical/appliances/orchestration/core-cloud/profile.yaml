@@ -3,6 +3,9 @@ description: Cloud profile
 config:
   limits.cpu: "8"
   limits.memory: 32GB
+  linux.kernel_modules: overlay,nf_nat,ip_tables,ip6_tables,br_netfilter
+  raw.lxc: |
+    lxc.apparmor.profile = unconfined
 devices:
   eth0:
     name: eth0
@@ -12,5 +15,10 @@ devices:
   root:
     path: /
     pool: zpool
+    type: disk
+  env:
+    path: /etc/containers/env
+    shift: "true"
+    source: /ssd/appdata/env
     type: disk
 project: default

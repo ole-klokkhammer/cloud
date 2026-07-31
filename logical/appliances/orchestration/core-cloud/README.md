@@ -12,3 +12,9 @@ lxc exec core-cloud -- bash
 https://podman.io/docs/installation
 
 sudo apt update && sudo apt install -y podman
+
+## common network for quadlets 
+make deploy
+
+## env management
+sudo zfs create -o compression=lz4 -o atime=off ssd/appdata/env

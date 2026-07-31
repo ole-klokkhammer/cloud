@@ -1,5 +1,5 @@
-CONTAINER := core:core-gpu
-SERVICE   := llama-server.service
+CONTAINER := core:core-cloud
+SERVICE   := podman-registry-login.service
 
 .PHONY: deploy restart kill status logs
 
@@ -14,7 +14,7 @@ restart:
 
 kill:
 	lxc exec $(CONTAINER) -- systemctl kill -s SIGKILL $(SERVICE)
-	lxc exec $(CONTAINER) -- systemctl start $(SERVICE) 
+	lxc exec $(CONTAINER) -- systemctl start $(SERVICE)
 
 status:
 	lxc exec $(CONTAINER) -- systemctl status $(SERVICE) --no-pager

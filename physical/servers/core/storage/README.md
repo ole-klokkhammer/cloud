@@ -107,9 +107,7 @@ is hdd fast enough for k3s volumes?
 * sudo zpool status
 
 ### SSD mirror 1TB for databases and k3s volumes that needs speed
-* sudo zpool create ssd /dev/sdX
-* sudo zfs create ssd/postgres
-* sudo zfs create ssd/k3s
+* sudo zpool create -o ashift=12  ssd /dev/disk/by-id/nvme....
 * sudo zpool attach ssd /dev/sdX /dev/sdY
 * sudo zpool status
 
@@ -127,3 +125,20 @@ mount disks with UUID for reliability
 
 ## NFS provisioning
 https://github.com/kubernetes-sigs/nfs-subdir-external-provisioner?tab=readme-ov-file
+
+## migrating data
+sudo zfs create ssd/appdata
+sudo zfs create ssd/llm
+sudo zfs create ssd/lxd
+sudo zfs create ssd/swap
+sudo zfs create ssd/vm
+
+
+zfs list -r ssd
+
+sudo zfs send -Rpv db/ssd/appdata@migration_backup | sudo  zfs recv -F ssd/appdata
+sudo zfs send -Rpv db/ssd/llm@migration_backup | sudo  zfs recv -F ssd/llm
+sudo zfs send -Rpv db/ssd/vm@migration_backup | sudo  zfs recv -F ssd/vm
+sudo zfs send -Rpv db/ssd/swap@migration_backup | sudo  zfs recv -F ssd/swap
+
+sudo zfs send -Rpv db/ssd/lxd@migration_backup | sudo  zfs recv -F ssd/lxd

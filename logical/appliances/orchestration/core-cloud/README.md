@@ -11,10 +11,16 @@ lxc exec core-cloud -- bash
 
 https://podman.io/docs/installation
 
-sudo apt update && sudo apt install -y podman
+sudo apt update && sudo apt install -y podman systemd-container 
+
+enable auto update
+systemctl enable --now podman-auto-update.timer
+systemctl list-timers | grep podman-auto-update
 
 ## common network for quadlets 
 make deploy
 
 ## env management
 sudo zfs create -o compression=lz4 -o atime=off ssd/appdata/env
+
+## reverse proxy

@@ -1,15 +1,21 @@
 [Unit]
-Description=Lidarr Feeder Service
-After=network-online.target
+Description=Lidarr Feeder Service 
+After=network-online.target 
 
 [Container]
+Network=host
 ContainerName=lidarr-feeder
 Image=registry.linole.org/lidarr-feeder:1.0.37
 EnvironmentFile=/etc/containers/env/zot.env
 EnvironmentFile=/etc/containers/env/lidarr-feeder.env
 
+# Add these labels for Traefik
+Label=traefik.enable=true
+Label=traefik.http.routers.lidarr-feeder.rule=Host(`lidarr.core-cloud.homelan`)
+Label=traefik.http.services.lidarr-feeder.loadbalancer.server.port=999999
+
 [Service]
 Restart=on-failure
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=multi-user.target default.target

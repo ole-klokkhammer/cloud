@@ -1,0 +1,37 @@
+[Unit]
+Description=Traefik Edge Router
+After=network-online.target
+
+[Container]
+Network=host
+ContainerName=traefik 
+Image=docker.io/library/traefik:v3.7
+Exec=--api.insecure=true \
+    --api.dashboard=true \
+    --providers.docker=true \
+    --providers.docker.endpoint=unix:///var/run/docker.sock \
+    --providers.docker.exposedByDefault=false \
+    --providers.docker.allowEmptyServices=true \
+    --log.level=INFO
+
+Label=traefik.enable=true
+Label=traefik.http.routers.dashboard.rule=Host(`dashboard.core-cloud.homelan`)
+Label=traefik.http.services.dashboard.loadbalancer.server.port=8080
+
+# Map ports for HTTP (80) and HTTPS (443)
+PublishPort=80:80
+# PublishPort=443:443
+
+# Traefik dashboard port
+PublishPort=8080:8080
+
+# Mount the Podman socket so Traefik can discover other containers
+# For Rootful: /run/podman/podman.sock
+# For Rootless: /run/user/<UID>/podman/podman.sock
+Volume=/run/podman/podman.sock:/var/run/docker.sock:ro
+
+[Service]
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

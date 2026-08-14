@@ -6,6 +6,8 @@ After=network.target
 Type=simple
 User=root
 WorkingDirectory=/root/workspace/sglang
+Environment=SGLANG_DEFAULT_THINKING=false
+Environment=SGLANG_MAX_THINK_TOKENS=0
 ExecStart=/usr/bin/numactl --interleave=all /root/workspace/sglang/.venv/bin/sglang serve \
   --trust-remote-code \
   --model-path /models/qwen3.8/RadixArk_Qwen3.8-27B-NVFP4 \

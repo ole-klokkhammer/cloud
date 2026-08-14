@@ -22,3 +22,6 @@ status:
 
 logs:
 	lxc exec $(LXC) -- journalctl -u $(QUADLET_NAME) -f
+
+
+	

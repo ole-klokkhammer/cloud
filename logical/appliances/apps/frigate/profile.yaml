@@ -1,0 +1,32 @@
+name: frigate
+description: Frigate container profile
+config:
+  user.host: "core"
+  limits.cpu: "4"
+  limits.memory: 16GB
+  security.nesting: "true"
+  security.privileged: "false"
+  raw.lxc: |
+    lxc.apparmor.profile = unconfined
+    lxc.uts.name = frigate.core
+devices:
+  eth0:
+    name: eth0
+    nictype: bridged
+    parent: br0
+    type: nic
+  media:
+    path: /media/frigate
+    shift: "true"
+    source: /ssd/appdata/frigate/media
+    type: disk
+  config:
+    path: /config
+    shift: "true"
+    source: /ssd/appdata/frigate/config
+    type: disk
+  root:
+    path: /
+    pool: zpool
+    type: disk
+project: default

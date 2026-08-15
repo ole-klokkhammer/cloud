@@ -43,7 +43,7 @@
     {{- raise_exception('No messages provided.') }}
 {%- endif %}
 {%- set reasoning_instructions = '' %}
-{%- if enable_thinking is true %}
+{%- if enable_thinking is defined and enable_thinking is true %}
     {%- set resolved_reasoning_effort = reasoning_effort|default('xhigh') %}
     {%- if resolved_reasoning_effort not in ('xhigh', 'medium', 'low') %}
         {{- raise_exception('Unexpected reasoning effort ' ~ reasoning_effort ~ '. Supported types are xhigh (default), medium, and low.') }}
@@ -113,7 +113,7 @@
             {%- set reasoning_content = message.reasoning_content %}
         {%- endif %}
         {%- set reasoning_content = reasoning_content|trim %}
-        {%- if preserve_thinking is undefined or preserve_thinking is true or loop.index0 > ns.last_query_index %}
+        {%- if preserve_thinking is defined and preserve_thinking is true or loop.index0 > ns.last_query_index %}
             {{- '<|im_start|>' + message.role + '\n<think>\n' + reasoning_content + '\n</think>\n\n' + content }}
         {%- else %}
             {{- '<|im_start|>' + message.role + '\n' + content }}
@@ -162,9 +162,9 @@
 {%- endfor %}
 {%- if add_generation_prompt %}
     {{- '<|im_start|>assistant\n' }}
-    {%- if enable_thinking is defined and enable_thinking is false %}
-        {{- '<think>\n\n</think>\n\n' }}
-    {%- else %}
+    {%- if enable_thinking is defined and enable_thinking is true %}
         {{- '<think>\n' }}
+    {%- else %}
+        {{- '<think>\n\n</think>\n\n' }}
     {%- endif %}
 {%- endif %}

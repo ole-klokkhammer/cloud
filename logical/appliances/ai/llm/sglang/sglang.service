@@ -29,7 +29,7 @@ ExecStart=/usr/bin/numactl --interleave=all /root/workspace/sglang/.venv/bin/sgl
   --mamba-radix-cache-strategy extra_buffer_lazy \
   --mamba-full-memory-ratio 0.4 \
   --enable-hierarchical-cache \
-  --hicache-size 16 \
+  --hicache-size 32 \
   --hicache-io-backend kernel \
   --host 0.0.0.0 \
   --port 8000

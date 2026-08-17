@@ -14,5 +14,7 @@ services:
       DATABASE_URL: ${DATABASE_URL}
       PGVECTOR_CONNECTION_STRING: ${DATABASE_URL}
       VECTOR_DB: pgvector
+      EMBEDDING_MODEL_PREF: multilingual-e5-small
+
     volumes:
       - /app/server/storage:/app/server/storage

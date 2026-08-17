@@ -13,27 +13,32 @@ ExecStart=/usr/bin/numactl --interleave=all /root/workspace/sglang/.venv/bin/sgl
   --model-path /models/qwen3.8/RadixArk_Qwen3.8-27B-NVFP4 \
   --kv-cache-dtype fp8_e4m3 \
   --quantization modelopt_fp4 \
-  --mem-fraction-static 0.995 \
-  --max-running-requests 2 \
-  --chunked-prefill-size 2048 \
   --attention-backend flashinfer \
-  --chat-template /models/qwen3.8/RadixArk_Qwen3.8-27B-NVFP4/chat_template.default.jinja \
-  --reasoning-parser qwen3 \
-  --tool-call-parser qwen3_coder \
+  --mem-fraction-static 0.99 \
+  --max-running-requests 2 \
+  --cuda-graph-max-bs 2 \
+  --chunked-prefill-size 2048 \
   --speculative-algorithm EAGLE \
   --speculative-num-steps 3 \
   --speculative-eagle-topk 1 \
   --speculative-num-draft-tokens 4 \
   --mamba-backend flashinfer \
-  --mamba-ssm-dtype bfloat16 \
+  --mamba-full-memory-ratio 0.6 \
+  --enable-linear-replayssm-spec \
   --mamba-radix-cache-strategy extra_buffer_lazy \
-  --mamba-full-memory-ratio 0.4 \
+  --mamba-ssm-dtype bfloat16 \
   --enable-hierarchical-cache \
   --hicache-size 32 \
   --hicache-io-backend kernel \
+  --chat-template /models/qwen3.8/RadixArk_Qwen3.8-27B-NVFP4/chat_template.default.jinja \
+  --reasoning-parser qwen3 \
+  --tool-call-parser qwen3_coder \
   --host 0.0.0.0 \
   --port 8000
 TimeoutStopSec=10
 Restart=always
 RestartSec=5
 LimitMEMLOCK=infinity
+
+[Install]
+WantedBy=multi-user.target

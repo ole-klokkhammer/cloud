@@ -1,6 +1,3 @@
-[Install]
-WantedBy=multi-user.target
-
 [Unit]
 Description=sglang Inference Server
 After=network.target
@@ -13,22 +10,27 @@ Environment=SGLANG_DEFAULT_THINKING=false
 Environment=SGLANG_MAX_THINK_TOKENS=0
 ExecStart=/usr/bin/numactl --interleave=all /root/workspace/sglang/.venv/bin/sglang serve \
   --trust-remote-code \
-  --model-path /models/qwen3.8/gittensor-model-hub_Qwen3.8-27B-NVFP4-RTX5090 \
+  --model-path /models/qwen3.8/RadixArk_Qwen3.8-27B-NVFP4 \
   --kv-cache-dtype fp8_e4m3 \
-  --retry-prefill-on-kv-oom True \
   --quantization modelopt_fp4 \
   --attention-backend flashinfer \
-  --mem-fraction-static 0.90 \
+  --mem-fraction-static 0.99 \
   --max-running-requests 2 \
   --cuda-graph-max-bs 2 \
   --chunked-prefill-size 2048 \
+  --speculative-algorithm EAGLE \
+  --speculative-num-steps 3 \
+  --speculative-eagle-topk 1 \
+  --speculative-num-draft-tokens 4 \
   --mamba-backend flashinfer \
   --mamba-full-memory-ratio 0.6 \
+  --enable-linear-replayssm-spec \
   --mamba-radix-cache-strategy extra_buffer_lazy \
   --mamba-ssm-dtype bfloat16 \
   --enable-hierarchical-cache \
   --hicache-size 32 \
   --hicache-io-backend kernel \
+  --chat-template /models/qwen3.8/RadixArk_Qwen3.8-27B-NVFP4/chat_template.default.jinja \
   --reasoning-parser qwen3 \
   --tool-call-parser qwen3_coder \
   --host 0.0.0.0 \
@@ -37,6 +39,3 @@ TimeoutStopSec=10
 Restart=always
 RestartSec=5
 LimitMEMLOCK=infinity
-
-[Install]
-WantedBy=multi-user.target

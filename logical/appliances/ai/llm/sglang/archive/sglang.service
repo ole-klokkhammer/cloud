@@ -1,0 +1,43 @@
+[Unit]
+Description=sglang Inference Server
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/workspace/sglang
+ExecStart=/usr/bin/numactl --interleave=all /root/workspace/sglang/.venv/bin/sglang serve \
+#  --disable-flashinfer-autotune \
+#  --disable-cuda-graph \
+  --tensor-parallel-size 1 \
+  --trust-remote-code \
+  --model-path /models/qwen3.8/gittensor-model-hub_Qwen3.8-27B-NVFP4-RTX5090 \
+  --kv-cache-dtype fp8_e4m3 \
+  --quantization modelopt_fp4 \
+  --attention-backend flashinfer \
+  --mem-fraction-static 0.86 \
+  --cuda-graph-max-bs-decode 1 \
+  --max-running-requests 1 \
+  --chunked-prefill-size 1024 \
+  --context-length 122880 \
+  --mm-feature-transport cpu \
+  --speculative-algorithm DSPARK \
+  --speculative-draft-model-path /models/qwen3.8/gittensor-model-hub_Qwen3.8-27B-DSpark-NVFP4 \
+  --speculative-draft-model-quantization modelopt_fp4 \
+  --speculative-draft-attention-backend flashinfer \
+  --speculative-dspark-block-size 7 \
+  --mamba-backend triton \
+  --max-mamba-cache-size 8 \
+  --mamba-radix-cache-strategy extra_buffer_lazy \
+  --mamba-ssm-dtype bfloat16 \
+  --reasoning-parser qwen3 \
+  --tool-call-parser qwen3_coder \
+  --host 0.0.0.0 \
+  --port 8000
+TimeoutStopSec=10
+Restart=always
+RestartSec=5
+LimitMEMLOCK=infinity
+
+[Install]
+WantedBy=multi-user.target

@@ -1,23 +1,22 @@
-CONTAINER := core:llm
-SERVICE   := sglang.service
+LXC := core:llm
+QUADLET_NAME := sglang
+QUADLET_DIR := etc/containers/systemd
 
-.PHONY: deploy restart kill status logs
+.PHONY: deploy restart status logs
 
 deploy:
-	lxc file push $(SERVICE) $(CONTAINER)/etc/systemd/system/$(SERVICE)
-	lxc exec $(CONTAINER) -- systemctl daemon-reload
-	lxc exec $(CONTAINER) -- systemctl enable --now $(SERVICE)
-	lxc exec $(CONTAINER) -- systemctl status $(SERVICE) --no-pager
-
-restart:
-	lxc exec $(CONTAINER) -- systemctl restart $(SERVICE)
-
-kill:
-	lxc exec $(CONTAINER) -- systemctl kill -s SIGKILL $(SERVICE)
-	lxc exec $(CONTAINER) -- systemctl start $(SERVICE)
+	lxc file push $(QUADLET_NAME).container $(LXC)/$(QUADLET_DIR)/$(QUADLET_NAME).container
+	lxc exec $(LXC) -- systemctl daemon-reload
+	lxc exec $(LXC) -- systemctl restart $(QUADLET_NAME)
 
 status:
-	lxc exec $(CONTAINER) -- systemctl status $(SERVICE) --no-pager
+	lxc exec $(LXC) -- systemctl status $(QUADLET_NAME)
+
+restart:
+	lxc exec $(LXC) -- systemctl restart $(QUADLET_NAME)
 
 logs:
-	lxc exec $(CONTAINER) -- journalctl -u $(SERVICE) -n 50 --no-pager
+	lxc exec $(LXC) -- journalctl -u $(QUADLET_NAME) -f
+
+
+	

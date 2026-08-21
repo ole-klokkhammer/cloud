@@ -1,0 +1,53 @@
+[Unit]
+Description=SGLang Service 
+After=network-online.target 
+
+[Container]
+Network=host
+ContainerName=sglang
+AddDevice=nvidia.com/gpu=all
+Volume=/root/.cache/huggingface:/root/.cache/huggingface
+Volume=/models:/models
+Image=docker.io/lmsysorg/sglang:qwen38-27b 
+Exec=sh -c 'numactl --interleave=all sglang serve \
+    --tp-size 1 \
+    --trust-remote-code \
+    --model-path /models/qwen3.8/gittensor-model-hub_Qwen3.8-27B-NVFP4-RTX5090 \
+    --speculative-algorithm DSPARK \
+    --speculative-draft-model-path /models/qwen3.8/gittensor-model-hub_Qwen3.8-27B-DSpark-NVFP4 \
+    --speculative-draft-model-quantization modelopt_fp4 \
+    --speculative-dspark-block-size 7 \
+    --kv-cache-dtype fp8_e4m3 \
+    --quantization modelopt_fp4 \
+    --attention-backend flashinfer \
+    --mem-fraction-static 0.90 \
+    --chunked-prefill-size 8192 \
+    --cuda-graph-max-bs-decode 2 \
+    --max-running-requests 2 \
+    --mamba-backend flashinfer \
+    --max-mamba-cache-size 5 \
+    --mamba-radix-cache-strategy extra_buffer_lazy \
+    --mamba-ssm-dtype bfloat16 \
+    --mm-feature-transport cpu \
+    --enable-hierarchical-cache \
+    --hicache-size 32 \
+    --hicache-io-backend kernel \
+    --reasoning-parser qwen3 \
+    --tool-call-parser qwen3_coder \
+    --host 0.0.0.0 \
+    --port 8000 \
+    2>&1'
+
+# Add these labels for Traefik
+Label=traefik.enable=true
+Label=traefik.http.routers.sglang.rule=Host(`sglang.cloud0.homelan`)
+Label=traefik.http.services.sglang.loadbalancer.server.port=8000
+
+[Service]
+Restart=always
+TimeoutStopSec=30
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

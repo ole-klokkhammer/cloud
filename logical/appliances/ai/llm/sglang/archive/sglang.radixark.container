@@ -8,22 +8,21 @@ ContainerName=sglang
 AddDevice=nvidia.com/gpu=all
 Volume=/root/.cache/huggingface:/root/.cache/huggingface
 Volume=/models:/models
-Image=docker.io/lmsysorg/sglang:qwen38-27b
-ShmSize=32G
+Image=docker.io/lmsysorg/sglang:qwen38-27b 
 Exec=sh -c 'numactl --interleave=all sglang serve \
     --tp-size 1 \
     --trust-remote-code \
-    --model-path /models/qwen3.8/gittensor-model-hub_Qwen3.8-27B-NVFP4-RTX5090 \
-    --speculative-algorithm DSPARK \
-    --speculative-draft-model-path /models/qwen3.8/gittensor-model-hub_Qwen3.8-27B-DSpark-NVFP4 \
-    --speculative-draft-model-quantization modelopt_fp4 \
-    --speculative-dspark-block-size 7 \
+    --model-path /models/qwen3.8/RadixArk_Qwen3.8-27B-NVFP4 \
+    --speculative-algorithm EAGLE \
+    --speculative-num-steps 3 \
+    --speculative-eagle-topk 1 \
+    --speculative-num-draft-tokens 4 \
     --kv-cache-dtype fp8_e4m3 \
     --quantization modelopt_fp4 \
     --attention-backend flashinfer \
     --chunked-prefill-size 2048 \
     --cuda-graph-backend-prefill disabled \
-    --mem-fraction-static 0.92 \
+    --mem-fraction-static 0.90 \
     --max-running-requests 2 \
     --mamba-backend flashinfer \
     --max-mamba-cache-size 8 \
@@ -35,6 +34,7 @@ Exec=sh -c 'numactl --interleave=all sglang serve \
     --hicache-io-backend kernel \
     --reasoning-parser qwen3 \
     --tool-call-parser qwen3_coder \
+    --chat-template /models/TEMPLATES/qwen3.8/chat_template.froggeric.jinja \
     --host 0.0.0.0 \
     --port 8000 \
     2>&1'

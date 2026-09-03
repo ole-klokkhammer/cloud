@@ -1,15 +1,23 @@
 name: frigate
 description: Frigate container profile
 config:
-  user.host: "core"
+  user.host: core
   limits.cpu: "4"
   limits.memory: 16GB
-  security.nesting: "true"
-  security.privileged: "false"
   raw.lxc: |
     lxc.apparmor.profile = unconfined
-    lxc.uts.name = frigate.core
+    lxc.cap.drop =
+  security.nesting: "true"
 devices:
+  gpu:
+    type: gpu
+    gputype: physical
+    id: nvidia.com/gpu=0
+  config:
+    path: /config
+    shift: "true"
+    source: /ssd/appdata/frigate
+    type: disk
   eth0:
     name: eth0
     nictype: bridged
@@ -18,15 +26,11 @@ devices:
   media:
     path: /media/frigate
     shift: "true"
-    source: /ssd/appdata/frigate/media
-    type: disk
-  config:
-    path: /config
-    shift: "true"
-    source: /ssd/appdata/frigate/config
+    source: /hdd/surveillance/frigate
     type: disk
   root:
     path: /
     pool: zpool
     type: disk
+used_by: []
 project: default

@@ -1,35 +1,25 @@
 [Unit]
 Description=Frigate NVR
-Wants=network-online.target
-After=network-online.target
+After=network-online.target 
 
 [Container]
-Image=ghcr.io/blakeblackshear/frigate:stable
+Network=host
 ContainerName=frigate
-
-ShmSize=512m
+Image=ghcr.io/blakeblackshear/frigate:stable-tensorrt
+ShmSize=4g
+AddDevice=nvidia.com/gpu=all
 Volume=/config:/config:rw
 Volume=/media/frigate:/media/frigate:rw
 Volume=/etc/localtime:/etc/localtime:ro
-
-# Performance: tmpfs for the cache
-# This implements the "tmpfs" recommendation from the docs
 Mount=type=tmpfs,target=/tmp/cache,tmpfs-size=1000000000
-
-# Ports
-PublishPort=8971:8971
-PublishPort=5000:5000
-PublishPort=8554:8554
-PublishPort=8555:8555/tcp
-PublishPort=8555:8555/udp
-
-# Environment
 Environment=TZ=Europe/Oslo
-Environment=FRIGATE_RTSP_PASSWORD=yourpassword
+Environment=OMP_NUM_THREADS=4
 
 [Service]
 Restart=always
 TimeoutStopSec=30
+StandardOutput=journal
+StandardError=journal
 
 [Install]
 WantedBy=multi-user.target

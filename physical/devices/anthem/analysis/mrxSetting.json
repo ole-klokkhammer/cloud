@@ -1,0 +1,14 @@
+{
+ "value": {
+  "string_": "some string",
+  "type": "string_"
+ },
+ "type": "value",
+ "path": "settings:/paradigm/mrxSetting",
+ "modifiable": true,
+ "title": "mrxSetting",
+ "defaultValue": {
+  "string_": "some string",
+  "type": "string_"
+ }
+}

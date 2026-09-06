@@ -1,4 +1,4 @@
-name: homeassistant-vm
+name: homeassistant
 description: homeassistant VM profile
 config:
   user.host: "core"

@@ -15,6 +15,7 @@ internal sealed class YoloModel : IDisposable
 {
     private readonly InferenceSession _session;
     public string InputName { get; }
+    public string OutputName { get; }
     public int InputSize { get; }
 
     public YoloModel(string modelPath, string device, int inputSize)
@@ -48,7 +49,8 @@ internal sealed class YoloModel : IDisposable
 
         _session = new InferenceSession(modelPath, options);
         InputName = _session.InputMetadata.Keys.First();
-        Log.Info($"model ready: {modelPath} (input '{InputName}', {inputSize}x{inputSize})");
+        OutputName = _session.OutputMetadata.Keys.First();
+        Log.Info($"model ready: {modelPath} (input '{InputName}', output '{OutputName}', {inputSize}x{inputSize})");
     }
 
     /// <summary>
@@ -102,8 +104,10 @@ internal sealed class YoloModel : IDisposable
     public List<Detection> Infer(float[] input, HashSet<int> classes, double minConf)
     {
         var inputVal = OrtValue.CreateTensorValueFromMemory(input, new long[] { 1, 3, InputSize, InputSize });
-        using var results = _session.Run(new RunOptions(), new[] { InputName }, new[] { inputVal }, Array.Empty<string>());
-        var t = results.First();
+        // null would mean "all outputs" in the native API, but the .NET binding rejects an
+        // empty string array; pass the explicit output name instead.
+        using var results = _session.Run(new RunOptions(), new[] { InputName }, new[] { inputVal }, new[] { OutputName });
+        var t = results[0];
         var shape = t.GetTensorTypeAndShape().Shape;
         if (shape.Length != 3 || shape[2] != 6)
             throw new InvalidOperationException(

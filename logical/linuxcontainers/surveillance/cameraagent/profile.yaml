@@ -23,10 +23,10 @@ devices:
     nictype: bridged
     parent: br0
     type: nic
-  media:
-    path: /media
+  detections:
+    path: /detections
     shift: "true"
-    source: /hdd/surveillance/detector
+    source: /hdd/surveillance/detections
     type: disk
   models:
     path: /models

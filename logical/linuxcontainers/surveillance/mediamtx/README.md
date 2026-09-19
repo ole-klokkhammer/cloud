@@ -4,33 +4,7 @@ CPU-only, unprivileged LXC running mediamtx as a podman quadlet: camera
 ingest + recording + playback API. No GPU - the 5060 Ti stays with the camagent LXC. No nesting/apparmor overrides: an unprivileged LXC is enough
 for podman.
 
-## services
-
-| folder      | what                                                                              |
-| ----------- | --------------------------------------------------------------------------------- |
-| `mediamtx/` | RTSP/SRT/WebRTC ingest, recording, playback (:9996), API (:9997), metrics (:9998) |
-
-## ports
-
-| proto    | port | what                       |
-| -------- | ---- | -------------------------- |
-| rtsp     | 8554 | camera ingest / stream out |
-| hls      | 8888 | hls re-serve               |
-| rtmp     | 1935 | rtmp                       |
-| srt      | 8890 | srt                        |
-| webrtc   | 8889 | live viewing               |
-| api      | 9997 | REST                       |
-| metrics  | 9998 | prometheus                 |
-| playback | 9996 | recorded segments (http)   |
-
 ## setup
-
-### disk (on core)
-
-    # config data (SSD) -> LXC /config (new dataset for this LXC)
-    sudo zfs create -o compression=lz4 -o atime=off -o xattr=sa -o acltype=posixacl -o recordsize=1M ssd/appdata/mediamtx
-    # recordings share the HDD pool with the camagent LXC (already created)
-    # hdd/surveillance -> both LXCs' /media, per-service subdirs
 
 ### lxc
 
@@ -89,6 +63,25 @@ add a camera: new CAMERA\_\* vars in mediamtx.env + a new key under
   under `pathDefaults`, `recordPath` is a template needing %path +
   strftime fields. Pin the image (e.g. bluenviron/mediamtx:1.21.0) if
   the auto-update timer may bump major schema changes
-- the camagent LXC's movement detector consumes our re-served streams
+- the cameraagent LXC's detector consumes our re-served streams
   (`rtsp://mediamtx.homelan:8554/...`), NOT the cameras - Reolink allows
   only a handful of concurrent RTSP sessions
+
+## services
+
+| folder      | what                                                                              |
+| ----------- | --------------------------------------------------------------------------------- |
+| `mediamtx/` | RTSP/SRT/WebRTC ingest, recording, playback (:9996), API (:9997), metrics (:9998) |
+
+## ports
+
+| proto    | port | what                       |
+| -------- | ---- | -------------------------- |
+| rtsp     | 8554 | camera ingest / stream out |
+| hls      | 8888 | hls re-serve               |
+| rtmp     | 1935 | rtmp                       |
+| srt      | 8890 | srt                        |
+| webrtc   | 8889 | live viewing               |
+| api      | 9997 | REST                       |
+| metrics  | 9998 | prometheus                 |
+| playback | 9996 | recorded segments (http)   |

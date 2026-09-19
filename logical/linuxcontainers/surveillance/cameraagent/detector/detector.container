@@ -1,0 +1,24 @@
+[Unit]
+Description=Camera object detector (.NET, ONNX/CUDA) - GPU YOLO via mediamtx
+After=network-online.target
+
+[Container]
+Network=host
+ContainerName=detector
+Image=registry.linole.org/detector:latest
+AddDevice=nvidia.com/gpu=all
+Volume=/media:/media:rw
+Volume=/models:/models:ro
+EnvironmentFile=/env/surveillance/detector.env
+Environment=TZ=Europe/Oslo
+Exec=/app/detector
+
+[Service]
+Restart=always
+RestartSec=5
+TimeoutStopSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

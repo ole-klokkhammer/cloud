@@ -3,7 +3,7 @@
 
 CONTAINER := core:zot
 SERVICE := zot.service
-ZOT_VERSION := 2.1.17
+ZOT_VERSION := 2.1.21
 ZOT_BINARY := /usr/bin/zot
 ZOT_CONFIG_SRC := $(CURDIR)/config/config.json
 ZOT_CONFIG_DEST := /etc/zot/config.json
@@ -17,7 +17,6 @@ all: deploy
 ## Install Zot binary
 install:
 	@echo "Installing Zot v$(ZOT_VERSION)..."
-	lxc exec $(CONTAINER) -- sudo apt update && sudo apt upgrade -y
 	lxc exec $(CONTAINER) -- wget -O $(ZOT_BINARY) https://github.com/project-zot/zot/releases/download/v$(ZOT_VERSION)/zot-linux-amd64
 	lxc exec $(CONTAINER) -- chmod +x $(ZOT_BINARY)
 	lxc exec $(CONTAINER) -- chown root:root $(ZOT_BINARY)

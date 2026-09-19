@@ -1,19 +1,23 @@
 [Unit]
-Description=Camera object detector (.NET, ONNX/CUDA) - GPU YOLO via mediamtx
+Description=Camera object detector (python/torch, CUDA YOLO11) - mediamtx RTSP
 After=network-online.target
 
 [Container]
 Network=host
-ContainerName=detector
+ContainerName=detector 
+
+Pull=newer
 Image=registry.linole.org/detector:latest
+Exec=/app/detector.py
+
+# driver-only GPU: the torch wheel carries its CUDA runtime, nothing else to mount
 AddDevice=nvidia.com/gpu=all
-Volume=/media:/media:rw
+
+Volume=/detections:/detections:rw
 Volume=/models:/models:ro
+
 EnvironmentFile=/env/surveillance/detector.env
 Environment=TZ=Europe/Oslo
-Volume=/opt/cuda-runtime/lib64:/usr/local/cuda/lib64:ro
-Environment=LD_LIBRARY_PATH=/usr/local/cuda/lib64
-Exec=/app/detector
 
 [Service]
 Restart=always

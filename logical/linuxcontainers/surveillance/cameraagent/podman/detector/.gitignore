@@ -1,4 +1,5 @@
-*.onnx
+__pycache__/
 *.pt
+*.onnx
 bin/
 obj/

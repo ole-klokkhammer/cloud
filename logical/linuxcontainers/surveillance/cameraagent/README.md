@@ -8,18 +8,18 @@ mediamtx moved out to the mediamtx LXC, everything else stays here.
 
 | folder              | what                                                       | unit       |
 |---------------------|------------------------------------------------------------|------------|
-| `detector/`         | YOLO cat detection, .NET + ONNX Runtime GPU: substream -> best-frame stills + NATS events | detector |
-| `detector-python/`  | (legacy fallback) the original python/ultralytics detector, unit `detectorpy` | detectorpy |
-| `embedder/`         | CLIP stills -> pgvector + NATS (the "ai-utils" role; LXC = camagent)       | embedder   |
-| `nats/`             | NATS server, the surveillance event bus                     | nats       |
-| `query/`            | camera query agent: POST /query, tools + LLM (on the 5090) | query      |
+| `podman/detector/`  | YOLO11 cat detection, python/torch (CUDA): substream -> best-frame stills + NATS events | detector |
+| `podman/embedder/`  | CLIP stills -> pgvector + NATS (the "ai-utils" role; LXC = camagent)       | embedder   |
+| `podman/query/`     | camera query agent: POST /query, tools + LLM (on the 5090) | query      |
 | `podman-registry/`  | in-LXC registry + login helper                              | -          |
+
+NATS runs in its own LXC (`nats.homelan:4222`), not here.
 
 ## data flow
 
     camera -> mediamtx LXC (ingest + record + re-serve)
-              -> detector: .NET/ONNX YOLO on the substream (CUDA) ->
-                 per-burst best-frame stills (/detector/events) + one NATS event
+              -> detector: python/torch YOLO11 on the substream (CUDA) ->
+                 per-burst best-frame stills (/detections/events) + one NATS event
                  (subject surveillance.detector, any consumer)
 
                  -> embedder: stills -> CLIP vectors -> postgres (pgvector) + NATS pub
@@ -33,9 +33,11 @@ this card).
 
 ## storage (on core, shared with the mediamtx LXC)
 
-    ssd/appdata/cameraagent   -> /config   (config/<svc> per service)
-    hdd/surveillance/detector -> /detector (detector writes stills to /detector/events; query mounts it :ro)
-    ssd/appdata/env           -> /env      (surveillance/<svc>.env secrets, never in git)
+    ssd/appdata/cameraagent      -> /config      (config/<svc> per service)
+    hdd/surveillance/detections -> /detections  (detector writes stills to /detections/events;
+                                                 embedder + query mount it :ro)
+    ssd/llm/models/detector    -> /models (ro)   (the detector's .pt, shipped by 'make push-model')
+    ssd/appdata/env            -> /env         (surveillance/<svc>.env secrets, never in git)
 
 ## setup (new build - the LXC likely already has these)
 
@@ -86,18 +88,18 @@ sudo nvidia-ctk cdi generate --output=/var/run/cdi/nvidia.yaml
 ## deploy order
 
     sql:        psql -d postgres -f sql/schema.sql         (postgres LXC)
-    detector:   cd detector/podman && make image && make deploy
-    nats:       cd nats/podman && make deploy
-    embedder:   cd embedder/podman && make image && make deploy
-    query:      cd query/podman && make image && make deploy
+    nats:       (separate LXC - nats.homelan:4222; up before the detector starts)
+    detector:   cd podman/detector && make push-model (core) && make image (LXC) && make deploy (core)
+    embedder:   cd podman/embedder && make image (LXC) && make deploy (core)
+    query:      cd podman/query && make image (LXC) && make deploy (core)
 
-then: `lxc exec core:camagent -- systemctl enable detector nats embedder query`
+then: `lxc exec core:camagent -- systemctl enable detector embedder query`
 
 ## notes
 
 - quadlets: /etc/containers/systemd/<svc>.container, deployed by each
   service's Makefile; images build inside the LXC and push to
   registry.linole.org
-- detector details: detector/README.md; per-service notes in each folder's README
+- detector details: podman/detector/README.md; per-service notes in each folder's README
 - image names are fully qualified: the LXC's registries.conf has no
   unqualified-search registries

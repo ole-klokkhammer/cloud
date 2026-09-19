@@ -28,7 +28,7 @@
   },
   "log": {
     "level": "debug",
-    "output": "/var/log/zot/zot.log",
+    "output": "stdout",
     "audit": "/var/log/zot/zot-audit.log"
   },
   "extensions": {

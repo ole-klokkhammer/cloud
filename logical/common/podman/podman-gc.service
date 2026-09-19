@@ -1,0 +1,8 @@
+[Unit]
+Description=Podman image GC
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/podman image prune -af
+ExecStart=/usr/bin/podman system prune -af

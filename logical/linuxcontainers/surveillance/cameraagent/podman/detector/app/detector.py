@@ -18,10 +18,12 @@ callback on the capture thread:
     (main.py wires them to NatsPub.publish + MqttPub.publish - the
     domain owns no transport).
 
-DetectionHeartbeat: the detector-side 60s beat - its own daemon thread,
-its own timer (the capture beat in capture.py reports stream health,
-this one reports detector activity: last_dets, dets_60s, idle_s; no
-stream-health field - that is the capture beat's job).
+DetectionHeartbeat: the detector-side 60s beat - its own daemon thread
+(started by Detector.start(), so the trimmer's lifecycle belongs to
+the state it trims), its own timer (the capture beat in capture.py
+reports stream health, this one reports detector activity: last_dets,
+dets_60s, idle_s; no stream-health field - that is the capture
+beat's job).
 
 Threading: all Detector state is touched only on the capture thread
 (on_frame + the on_session hook); the heartbeat thread reads single
@@ -70,10 +72,11 @@ class Candidate:
 class Detector:
     """Per-camera detection pipeline.
 
-    Constructed on the main thread (cheap: state only); main() calls
-    load() for model load + warm-up (a hard failure there exits 1).
-    on_detect() registers the event callbacks (one per transport);
-    from then on `on_frame`
+    Lifecycle: constructed on the main thread (cheap: state only);
+    main() calls load() for model load + warm-up (a hard failure
+    there exits 1), then start() to bring up this object's own
+    daemon thread (the 60s DetectionHeartbeat). on_detect() registers
+    the event callbacks (one per transport); from then on `on_frame`
     and `new_session` run only on the capture thread, and the
     heartbeat thread only reads single attributes - so no locking
     anywhere.
@@ -124,6 +127,18 @@ class Detector:
             f"model ready: {self.model_path} (device={self.device}, "
             f"input {environment.input_size}x{environment.input_size})"
         )
+
+    def start(self) -> "Detector":
+        """Bring up this object's own daemon thread: the 60s
+        DetectionHeartbeat (detector-activity beat + the trimmer for
+        det_events). Pure daemon like the other workers - no
+        stop()/join(), killed at process exit. The heartbeat state it
+        trims belongs to this object, so its lifecycle belongs here
+        rather than to the process coordinator. Safe to call only
+        once, after load()."""
+        self._beat = DetectionHeartbeat(self)
+        self._beat.start()
+        return self
 
     # ---- event callback (call before the capture loop starts) ---------
 

@@ -4,7 +4,7 @@
 Owns everything process-level; each domain module owns its own:
   * capture.py   - CaptureStream daemon (VideoCapture, reconnect policy,
                    stream clock, capture heartbeat beat)
-  * detector.py  - Detector pipeline + DetectionHeartbeat (detector beat)
+  * detector.py  - Detector pipeline + its own heartbeat (detector beat)
   * nats_pub.py  - NatsPub daemon (auto-reconnecting publisher)
   * mqtt_pub.py  - MqttPub daemon (auto-reconnecting MQTT publisher,
                    only when MQTT_HOST is set)
@@ -26,7 +26,7 @@ from pathlib import Path
 
 from capture import CaptureStream
 from config import environment
-from detector import DetectionHeartbeat, Detector
+from detector import Detector
 from mqtt_pub import MqttPub
 
 
@@ -82,7 +82,7 @@ def main():
 
     # model load + warm-up happens in detector.load() (the constructor
     # is cheap: it only sets state); a hard failure = bad model path /
-    # driver - fail the process before the NATS thread ever starts.
+    # driver - fail the process
     try:
         logger.info(
             f"Loading detector: model={environment.model} device={environment.device}"
@@ -107,10 +107,9 @@ def main():
         capture.start()
 
         logger.info(
-            f"Starting detector heartbeat: model={environment.model} device={environment.device}"
+            f"Starting detector: model={environment.model} device={environment.device}"
         )
-        det_beat = DetectionHeartbeat(detector)
-        det_beat.start()
+        detector.start()
     except Exception:
         logger.exception("detector init failed")
         sys.exit(1)

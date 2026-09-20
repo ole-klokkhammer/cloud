@@ -14,8 +14,9 @@ callback on the capture thread:
   * per-frame detection JSON; best-frame ring of 16 Candidates keyed
     on confidence x target-area fraction
   * burst close -> best-frame still (JPEG, <= frame_width wide) + one
-    detection_burst event via the registered on_detect callback
-    (main.py wires it to NatsPub.publish - the domain owns no transport).
+    detection_burst event via the registered on_detect callbacks
+    (main.py wires them to NatsPub.publish + MqttPub.publish - the
+    domain owns no transport).
 
 DetectionHeartbeat: the detector-side 60s beat - its own daemon thread,
 its own timer (the capture beat in capture.py reports stream health,
@@ -71,7 +72,8 @@ class Detector:
 
     Constructed on the main thread (cheap: state only); main() calls
     load() for model load + warm-up (a hard failure there exits 1).
-    on_detect() registers the event callback; from then on `on_frame`
+    on_detect() registers the event callbacks (one per transport);
+    from then on `on_frame`
     and `new_session` run only on the capture thread, and the
     heartbeat thread only reads single attributes - so no locking
     anywhere.
@@ -79,7 +81,7 @@ class Detector:
 
     def __init__(self, model_path: str, device: str):
         self.min_interval = 1.0 / environment.max_fps
-        self._detect_cb = None  # registered via on_detect(); main wires it
+        self._detect_cbs = []  # registered via on_detect(); main wires them
         self._cb_errors = 0
 
         # ---- model init (main thread)
@@ -125,30 +127,33 @@ class Detector:
 
     # ---- event callback (call before the capture loop starts) ---------
 
-    def on_detect(self, cb) -> "Detector":
-        """Detection-event callback: receives the detection_burst payload
-        (dict, same shape NatsPub.publish would get). It runs on the
-        capture thread inside on_frame - keep it to a fast, thread-safe
-        enqueue. main.py wires it to NatsPub.publish."""
-        self._detect_cb = cb
+    def on_detect(self, *cbs) -> "Detector":
+        """Detection-event callbacks: each receives the detection_burst
+        payload (dict, same shape NatsPub.publish / MqttPub.publish get).
+        They run on the capture thread inside on_frame - keep each to a
+        fast, thread-safe enqueue. main.py wires them: NatsPub.publish
+        and MqttPub.publish (one callback per transport)."""
+        self._detect_cbs.extend(cbs)
         return self
 
     def _emit(self, payload):
-        """Guarded dispatch: an uncaught callback exception must never kill
-        the capture thread (same contract as capture.py's frame-callback
-        guard): log #1 + every 50th, keep the loop alive."""
-        cb = self._detect_cb
-        if cb is None:
-            return  # nobody registered - events are dropped by design
-        try:
-            cb(payload)
-        except Exception:
-            self._cb_errors += 1
-            if self._cb_errors == 1 or self._cb_errors % 50 == 0:
-                logger.error(
-                    f"detect callback error (#{self._cb_errors}) - continuing",
-                    exc_info=True,
-                )
+        """Guarded dispatch to the registered callbacks (one per
+        transport): an uncaught exception must never kill the capture
+        thread (same contract as capture.py's frame-callback guard): log
+        #1 + every 50th, keep the loop alive. Each callback is guarded
+        separately - a failure in one transport must not stop the
+        others. No callbacks registered = events dropped by design."""
+        for cb in self._detect_cbs:
+            try:
+                cb(payload)
+            except Exception:
+                self._cb_errors += 1
+                if self._cb_errors == 1 or self._cb_errors % 50 == 0:
+                    logger.error(
+                        f"detect callback error (#{self._cb_errors}) from "
+                        f"{getattr(cb, '__name__', 'callback')!r} - continuing",
+                        exc_info=True,
+                    )
 
     def store_still(self, cand):
         """best frame -> JPEG at <= frame_width wide; returns (path, box-in-still)."""

@@ -1,5 +1,5 @@
 [Unit]
-Description=NATS server - surveillance event bus
+Description=NATS server - event bus
 After=network-online.target
 
 [Container]

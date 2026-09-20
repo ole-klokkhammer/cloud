@@ -6,6 +6,8 @@ Owns everything process-level; each domain module owns its own:
                    stream clock, capture heartbeat beat)
   * detector.py  - Detector pipeline + DetectionHeartbeat (detector beat)
   * nats_pub.py  - NatsPub daemon (auto-reconnecting publisher)
+  * mqtt_pub.py  - MqttPub daemon (auto-reconnecting MQTT publisher,
+                   only when MQTT_HOST is set)
   * config.py    - env -> typed Environment (attribute access)
 
 main() wires the pieces together and coordinates shutdown: the main
@@ -25,7 +27,7 @@ from pathlib import Path
 from capture import CaptureStream
 from config import environment
 from detector import DetectionHeartbeat, Detector
-from nats_pub import NatsPub
+from mqtt_pub import MqttPub
 
 
 def setup_logging():
@@ -48,7 +50,13 @@ def main():
 
     stop = threading.Event()
     logger = logging.getLogger("detector")
-    nats_pub = NatsPub(environment.nats_url, environment.nats_subject)
+    mqtt_pub = MqttPub(
+        environment.mqtt_host,
+        environment.mqtt_port,
+        environment.mqtt_topic,
+        user=environment.mqtt_user,
+        password=environment.mqtt_pass,
+    )
     capture = CaptureStream(environment.rtsp_url)
     detector = Detector(environment.model, environment.device)
 
@@ -59,10 +67,17 @@ def main():
     signal.signal(signal.SIGTERM, on_signal)
     signal.signal(signal.SIGINT, on_signal)
 
+    mqtt_str = (
+        "off"
+        if not environment.mqtt_host
+        else f"{environment.mqtt_host}:{environment.mqtt_port} "
+        f"topic={environment.mqtt_topic}/<camera>"
+    )
     logger.info(
         f"starting: model={environment.model} device={environment.device} "
         f"classes={environment.classes_str} rtsp={environment.rtsp_url} "
-        f"input={environment.input_size} conf={environment.min_conf} max_fps={environment.max_fps}"
+        f"input={environment.input_size} conf={environment.min_conf} "
+        f"max_fps={environment.max_fps} mqtt={mqtt_str}"
     )
 
     # model load + warm-up happens in detector.load() (the constructor
@@ -75,14 +90,15 @@ def main():
         detector.load()
 
         logger.info(
-            f"Starting NATS: url={environment.nats_url} subject={environment.nats_subject}"
+            f"Starting MQTT: host={environment.mqtt_host}:{environment.mqtt_port} "
+            f"topic={environment.mqtt_topic}/<camera>"
         )
-        nats_pub.start()
+        mqtt_pub.start()
 
         logger.info("Registering callbacks")
         capture.set_frame_callback(detector.on_frame)
         capture.on_session(detector.new_session)
-        detector.on_detect(nats_pub.publish)
+        detector.on_detect(*[mqtt_pub.publish])
 
         logger.info(
             f"Starting capture: rtsp={environment.rtsp_url} input={environment.input_size} "
@@ -100,9 +116,9 @@ def main():
         sys.exit(1)
 
     # main thread's only job: wait for the stop signal, then exit.
-    # The capture, detect-hb, and NATS threads are all daemons: they
-    # die at process exit (the kernel reclaims ffmpeg fds + the CUDA
-    # context; mediaMTX and the NATS server just see a TCP close).
+    # The capture, detect-hb, NATS, and MQTT threads are all daemons:
+    # they die at process exit (the kernel reclaims ffmpeg fds + the
+    # CUDA context; mediaMTX, NATS, and HiveMQ just see a TCP close).
     stop.wait()
     logger.info("stopped")
 

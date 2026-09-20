@@ -1,0 +1,27 @@
+[Unit]
+Description=HeyNATS - NATS web UI
+After=network-online.target
+StartLimitIntervalSec=120
+StartLimitBurst=10
+
+[Container]
+Network=host
+ContainerName=heynats
+
+Pull=newer
+Image=docker.io/mukezhz/heynats 
+
+# No GPU, no volumes: stateless - the NATS connection is created in the UI
+# (nats://nats.homelan:4222, no auth). UI on http://<this-host>:5000
+Environment=TZ=Europe/Oslo
+Environment=NATS_URL=nats://nats.homelan:4222
+
+[Service]
+Restart=always
+RestartSec=5
+TimeoutStopSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

@@ -86,6 +86,11 @@ class Environment:
     device: str
     nats_url: str
     nats_subject: str
+    mqtt_host: str
+    mqtt_port: int
+    mqtt_topic: str
+    mqtt_user: str
+    mqtt_pass: str
 
     @property
     def classes_str(self) -> str:
@@ -97,7 +102,9 @@ class Environment:
     def from_env(cls) -> "Environment":
         classes = _env_classes("DETECTOR_CLASS", "all")
         env = cls(
-            rtsp_url=_env("DETECTOR_RTSP_URL", "rtsp://mediamtx.homelan:8554/entrance_roof_sub"),
+            rtsp_url=_env(
+                "DETECTOR_RTSP_URL", "rtsp://mediamtx.homelan:8554/entrance_roof_sub"
+            ),
             model=_env("DETECTOR_MODEL", "/models/yolo26m.pt"),
             classes=tuple(classes) if classes is not None else None,
             frame_width=_env_int("DETECTOR_FRAME_WIDTH", 1280),
@@ -110,6 +117,13 @@ class Environment:
             device=_env("DETECTOR_DEVICE", "cuda"),
             nats_url=_env("NATS_URL", "nats://nats.homelan:4222"),
             nats_subject=_env("NATS_SUBJECT", "surveillance.detector"),
+            # MQTT is off unless MQTT_HOST is set (empty = no MQTT publisher);
+            # empty user/pass = anonymous (HiveMQ currently has no auth).
+            mqtt_host=_env("MQTT_HOST", "hivemq.homelan"),
+            mqtt_port=_env_int("MQTT_PORT", 1883),
+            mqtt_topic=_env("MQTT_TOPIC", "surveillance/detector"),
+            mqtt_user=_env("MQTT_USER", ""),
+            mqtt_pass=_env("MQTT_PASS", ""),
         )
         # cheap enum validation: a typo here used to be caught only after
         # the model had loaded (cost: a ~15s startup for the privilege)

@@ -9,4 +9,5 @@ RUN pip install --no-cache-dir --break-system-packages -r /app/requirements.txt
 
 WORKDIR /app
 
-CMD ["python", "-c", "/app/main.py"]
+ENTRYPOINT ["python"]
+CMD ["/app/main.py"]

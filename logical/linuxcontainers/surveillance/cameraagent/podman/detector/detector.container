@@ -6,7 +6,7 @@ StartLimitBurst=10
 
 [Container]
 Network=host
-ContainerName=detector 
+ContainerName=detector
 
 Pull=newer
 Image=registry.linole.org/detector:latest
@@ -19,7 +19,7 @@ Volume=/media/detector:/detector:rw
 Volume=/models:/models:ro
 
 Environment=YOLO_CONFIG_DIR=/config
-EnvironmentFile=/env/detector.env
+EnvironmentFile=/env/cameraagent/detector.env
 Environment=TZ=Europe/Oslo
 
 

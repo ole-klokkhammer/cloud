@@ -1,5 +1,5 @@
 LXC := core:camagent
-# where the PVE 'lxc' CLI lives: override when make runs off-host, e.g.
+# where the host 'lxc' (LXD) CLI lives: override when make runs off-host, e.g.
 #   make LXC_BIN='ssh core lxc' deploy          (root ssh user)
 #   make LXC_BIN='ssh core sudo lxc' deploy
 LXC_BIN ?= lxc

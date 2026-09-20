@@ -1,6 +1,8 @@
 [Unit]
 Description=Camera object detector
 After=network-online.target
+StartLimitIntervalSec=120
+StartLimitBurst=10
 
 [Container]
 Network=host
@@ -8,18 +10,17 @@ ContainerName=detector
 
 Pull=newer
 Image=registry.linole.org/detector:latest
-Exec=/app/detector.py
 
 # driver-only GPU: the torch wheel carries its CUDA runtime, nothing else to mount
 AddDevice=nvidia.com/gpu=all
 
-Environment=YOLO_CONFIG_DIR=/config
-EnvironmentFile=/env/surveillance/detector.env
-Environment=TZ=Europe/Oslo
-
 Volume=/config/detector:/config:rw
-Volume=/detections:/detections:rw
+Volume=/media/detector:/detector:rw
 Volume=/models:/models:ro
+
+Environment=YOLO_CONFIG_DIR=/config
+EnvironmentFile=/env/detector.env
+Environment=TZ=Europe/Oslo
 
 
 [Service]

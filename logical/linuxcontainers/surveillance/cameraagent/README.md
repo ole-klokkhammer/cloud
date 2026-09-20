@@ -1,14 +1,14 @@
 # camagent LXC (core:camagent)
 
 GPU LXC (RTX 5060 Ti, CDI passthrough) running the detection + query
-stack as podman quadlets. Existing LXC: rename `core:surveillance` -> `core:camagent` (`pct set <id> hostname camagent` on PVE + DNS) so the name matches this folder.
+stack as podman quadlets. Existing LXC: rename `core:surveillance` -> `core:camagent` (rename the LXD instance to `camagent` on the host + DNS) so the name matches this folder.
 mediamtx moved out to the mediamtx LXC, everything else stays here.
 
 ## services
 
 | folder              | what                                                       | unit       |
 |---------------------|------------------------------------------------------------|------------|
-| `podman/detector/`  | YOLO11 cat detection, python/torch (CUDA): substream -> best-frame stills + NATS events | detector |
+| `podman/detector/`  | YOLO26 cat detection, python/torch (CUDA): substream -> best-frame stills + NATS events | detector |
 | `podman/embedder/`  | CLIP stills -> pgvector + NATS (the "ai-utils" role; LXC = camagent)       | embedder   |
 | `podman/query/`     | camera query agent: POST /query, tools + LLM (on the 5090) | query      |
 | `podman-registry/`  | in-LXC registry + login helper                              | -          |
@@ -18,7 +18,7 @@ NATS runs in its own LXC (`nats.homelan:4222`), not here.
 ## data flow
 
     camera -> mediamtx LXC (ingest + record + re-serve)
-              -> detector: python/torch YOLO11 on the substream (CUDA) ->
+              -> detector: python/torch YOLO26 on the substream (CUDA) ->
                  per-burst best-frame stills (/detections/events) + one NATS event
                  (subject surveillance.detector, any consumer)
 

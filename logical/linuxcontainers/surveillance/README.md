@@ -22,7 +22,7 @@ camera NVR stack, split across two LXCs + external services:
 
 quadlets at /etc/containers/systemd/<name>.container, config in /config/<name>
 (SSD pool), secrets in /env/surveillance/<name>.env (never in git).
-still data: /detector (camagent, HDD pool = PVE /hdd/surveillance/detector);
-recordings: /media/recordings (mediamtx LXC, HDD pool = PVE /hdd/surveillance).
+still data: /detector (camagent, host HDD via LXD mount: /hdd/surveillance/detector);
+recordings: /media/recordings (mediamtx LXC, host HDD via LXD mount: /hdd/surveillance).
 
 see `mediamtx/README.md` and `cameraagent/README.md` for LXC setup.

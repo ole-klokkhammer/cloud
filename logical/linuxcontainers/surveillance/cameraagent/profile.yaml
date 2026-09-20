@@ -23,20 +23,20 @@ devices:
     nictype: bridged
     parent: br0
     type: nic
-  detections:
-    path: /detections
+  media:
+    path: /media
     shift: "true"
-    source: /hdd/surveillance/detections
+    source: /hdd/surveillance/cameraagent
     type: disk
   models:
     path: /models
     shift: "true"
-    source: /ssd/llm/models/detector
+    source: /ssd/llm/models/cameraagent
     type: disk
   env:
     path: /env
     shift: "true"
-    source: /ssd/appdata/env
+    source: /ssd/appdata/env/cameraagent
     type: disk
   root:
     path: /

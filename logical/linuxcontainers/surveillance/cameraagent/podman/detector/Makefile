@@ -4,13 +4,14 @@ IMAGE := registry.linole.org/detector:latest
 QUADLET_NAME := detector
 QUADLET_DIR := etc/containers/systemd
 
-.PHONY: push-model image deploy restart status logs
+.PHONY: push-model build_and_push deploy restart stop status logs
 
-push-model:
-	$(LXC_BIN) file push ./yolo11m.pt $(LXC):/models/yolo11m.pt
+build_and_deploy: build push deploy
 
-build_and_push:
+build:
 	podman build -t $(IMAGE) -f Dockerfile .
+
+push:
 	podman push $(IMAGE)
 
 deploy:

@@ -11,7 +11,7 @@ reference - it needed host-side CUDA runtime plumbing this LXC lacks.)
 ## what it does
 
     camera -> mediamtx (:8554, substream) -> OpenCV RTSP capture
-      -> python: YOLO11 (torch, CUDA) at 640x640 letterbox
+      -> python: YOLO26 (torch, CUDA) at 640x640 letterbox
       -> per-burst BEST-FRAME selection (confidence x area score, ring of 16)
       -> stills: /detections/events/cat_YYYYMMDD_HHMMSS.jpg   (embedder picks these up)
       -> one NATS event per burst: subject surveillance.detector
@@ -29,7 +29,7 @@ two features carried over from the .NET version (ported 1:1):
 ## model
 
 https://docs.ultralytics.com/models/yolo26
-
+https://docs.ultralytics.com/quickstart
 
 ### download
 cd /ssd/llm/models/detector

@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS events (
     camera      text NOT NULL,
     class       text NOT NULL,
     conf        real,                 -- detector confidence (NULL when written by the embedder from a still)
-    still_path  text,                 -- container-visible path (/detector/events/...; same PVE disk the detector writes)
+    still_path  text,                 -- container-visible path (/detector/events/...; same host disk the detector writes)
     embedding   vector(512),         -- CLIP ViT-B/32 image+text space
     created_at  timestamptz NOT NULL DEFAULT now(),
     PRIMARY KEY (id, ts)

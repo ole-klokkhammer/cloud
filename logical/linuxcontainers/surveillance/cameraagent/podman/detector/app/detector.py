@@ -1,255 +1,369 @@
 #!/usr/bin/env python3
-"""detector - RTSP YOLO11 object detector (python/torch, CUDA).
+"""Detection pipeline for the detector service.
 
-    camera -> mediamtx substream -> per-frame YOLO11 (torch CUDA; the torch
-    wheel bundles its own CUDA runtime, so only the driver is needed from
-    the host) -> per-burst BEST-FRAME selection (conf x target-area score)
-    -> one JPEG still per burst + one NATS event per burst
+Everything in this module is detector domain, no process lifecycle - the
+capture stream lives in capture.py, the process coordinator (signals,
+thread wiring, teardown) in main.py.
 
-stills are the source of truth (the embedder polls the dir); the NATS event
-is deduped signal for consumers. config: env vars, see detector.env.example.
+Detector: the per-frame pipeline, driven by CaptureStream's on_frame
+callback on the capture thread:
+  * every frame: burst-close check (stream-clock window)
+  * throttled predict: MAX_FPS on the stream clock; post-failure
+    backoff on the wall clock (a cooldown on our side, not a stream
+    property)
+  * per-frame detection JSON; best-frame ring of 16 Candidates keyed
+    on confidence x target-area fraction
+  * burst close -> best-frame still (JPEG, <= frame_width wide) + one
+    detection_burst event via the registered on_detect callback
+    (main.py wires it to NatsPub.publish - the domain owns no transport).
+
+DetectionHeartbeat: the detector-side 60s beat - its own daemon thread,
+its own timer (the capture beat in capture.py reports stream health,
+this one reports detector activity: last_dets, dets_60s, idle_s; no
+stream-health field - that is the capture beat's job).
+
+Threading: all Detector state is touched only on the capture thread
+(on_frame + the on_session hook); the heartbeat thread reads single
+attributes (GIL-safe) and sums dets_60s from the append-only event log
+- no read-then-reset counter, no locks anywhere.
+
+Stills are the source of truth; NATS events are the dedupe signal for
+consumers. Config: env vars, see detector.env.example.
 """
-import asyncio
+
 import json
-import os
-import signal
+import logging
+import sys
 import threading
 import time
 from collections import deque
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import cv2
-import nats
 import torch
 from ultralytics import YOLO
 
+from config import environment
 
-# ---------------------------------------------------------------- config
-
-def _env(name, default):
-    return os.environ.get(name, default)
-
-def _env_int(name, default):
-    return int(_env(name, default))
-
-def _env_float(name, default):
-    return float(_env(name, default))
-
-def _env_ints(name, default):
-    raw = _env(name, default)
-    return [int(x) for x in raw.split(",") if x.strip()] or [int(x) for x in default.split(",")]
-
-CFG = dict(
-    rtsp_url=_env("DETECTOR_RTSP_URL", "rtsp://mediamtx.homelan:8554/entrance_roof_sub"),
-    model=_env("DETECTOR_MODEL", "/models/yolo11m.pt"),
-    classes=_env_ints("DETECTOR_CLASS", "15"),
-    frame_width=_env_int("DETECTOR_FRAME_WIDTH", 1280),
-    input_size=_env_int("DETECTOR_INPUT_SIZE", 640),
-    min_conf=_env_float("DETECTOR_MIN_CONF", 0.5),
-    max_fps=_env_float("DETECTOR_MAX_FPS", 10),
-    burst_window=_env_float("DETECTOR_BURST_WINDOW_SECS", 2.0),
-    event_dir=_env("DETECTOR_EVENT_DIR", "/detections/events"),
-    camera=_env("DETECTOR_CAMERA", "entrance_roof"),
-    device=_env("DETECTOR_DEVICE", "cuda"),
-    nats_url=_env("NATS_URL", "nats://nats.homelan:4222"),
-    nats_subject=_env("NATS_SUBJECT", "surveillance.detector"),
-)
+logger = logging.getLogger("detector")
 
 
-def log(msg):
-    print(f"[detector] {msg}", flush=True)
+# ---------------------------------------------------------------- candidates
 
-def log_event(obj):
-    print(f"[detector] {json.dumps(obj, separators=(',', ':'))}", flush=True)
-
-
-# ---------------------------------------------------------------- nats publisher
-
-class NatsPub(threading.Thread):
-    """background publisher: auto-reconnect; drops nothing, stills never wait on NATS."""
-
-    def __init__(self, url, subject):
-        super().__init__(daemon=True, name="nats")
-        self.url, self.subject = url, subject
-        self._q = asyncio.Queue()
-        self._stop = False
-
-    def stop(self):
-        self._stop = True
-
-    def publish(self, payload):
-        self._q.put_nowait(json.dumps(payload, separators=(",", ":")).encode())
-
-    def run(self):
-        asyncio.run(self._run())
-
-    async def _run(self):
-        while not self._stop:
-            try:
-                nc = await nats.connect([self.url], name="detector")
-                log(f"nats connected: {self.url}")
-                while not self._stop:
-                    raw = await self._q.get()
-                    await nc.publish(self.subject, raw)
-                await nc.close()
-                return
-            except Exception as e:
-                if self._stop:
-                    return
-                log(f"nats disconnected ({e}); retry in 5s - stills keep flowing")
-                await asyncio.sleep(5)
-
-
-# ---------------------------------------------------------------- burst state
 
 @dataclass
 class Candidate:
-    score: float            # conf x target-area fraction
-    frame: object           # full-res BGR ndarray (for the still)
+    score: float  # conf x target-area fraction
+    frame: object  # full-res BGR ndarray (for the still)
     ts: datetime
     conf: float
     label: str
-    box: tuple              # xyxy in full-res frame coords
+    box: tuple  # xyxy in full-res frame coords
 
 
-# ---------------------------------------------------------------- main
+# ---------------------------------------------------------------- pipeline
 
-def main():
-    stop = threading.Event()
-    signal.signal(signal.SIGTERM, lambda *a: stop.set())
-    signal.signal(signal.SIGINT, lambda *a: stop.set())
 
-    log(f"watching {CFG['rtsp_url']} (classes: {','.join(map(str, CFG['classes']))})")
+class Detector:
+    """Per-camera detection pipeline.
 
-    device = CFG["device"]
-    if device == "cuda" and not torch.cuda.is_available():
-        log("cuda requested but unavailable - running on CPU")
-        device = "cpu"
-    model = YOLO(CFG["model"])
-    try:
-        model.to(device)
-        log(f"device: {device} (torch {torch.__version__}, cuda {torch.version.cuda})")
-    except Exception as e:
-        device = "cpu"
-        model.to("cpu")
-        log(f"cuda init failed ({e}) - running on CPU")
-    # warm the CUDA context so the first real frame isn't a 10s spike
-    model.predict(torch.zeros(1, 3, CFG["input_size"], CFG["input_size"], device=device),
-                  verbose=False)
-    log(f"model ready: {CFG['model']} (input {CFG['input_size']}x{CFG['input_size']})")
+    Constructed on the main thread (cheap: state only); main() calls
+    load() for model load + warm-up (a hard failure there exits 1).
+    on_detect() registers the event callback; from then on `on_frame`
+    and `new_session` run only on the capture thread, and the
+    heartbeat thread only reads single attributes - so no locking
+    anywhere.
+    """
 
-    nats_pub = NatsPub(CFG["nats_url"], CFG["nats_subject"])
-    nats_pub.start()
+    def __init__(self, model_path: str, device: str):
+        self.min_interval = 1.0 / environment.max_fps
+        self._detect_cb = None   # registered via on_detect(); main wires it
+        self._cb_errors = 0
 
-    def open_capture():
-        cap = cv2.VideoCapture(CFG["rtsp_url"], cv2.CAP_FFMPEG)
-        cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)   # low latency: never process old frames
-        return cap
+        # ---- model init (main thread)
+        if device == "cuda" and not torch.cuda.is_available():
+            # a requested device that we silently downgrade is worth a warning
+            logger.warning("cuda requested but unavailable - running on CPU")
+            device = "cpu"
 
-    cap = open_capture()
-    stream_ok = False
-    ring: deque = deque(maxlen=16)
-    last_det = None
-    last_infer = 0.0
-    last_hb = time.monotonic()
-    last_dets = 0
-    frames = 0
-    t0 = time.monotonic()
-    min_interval = 1.0 / CFG["max_fps"]
+        self.device = device
+        self.model_path = model_path
 
-    def store_still(cand):
+        # ---- per-session detection state (reset by new_session)
+        self.ring = deque(maxlen=16)  # Candidates of the open burst
+        self.last_det = None  # stream ts of the last detection
+        self.last_infer = -1.0  # stream ts of the last predict
+        self.next_predict_ok = 0.0  # wall clock: post-failure backoff
+        # ---- detector-side heartbeat state (read by DetectionHeartbeat)
+        self.last_dets = 0  # dets in the last processed frame
+        self.last_det_mono = None  # wall clock of the last detection
+        self.ts0 = None  # UTC anchor of the current capture session
+        # append-only detection event log (wall ts, det count) - read by the
+        # DetectionHeartbeat thread (GIL-safe deque ops; no read-then-reset
+        # counter to race).
+        self.det_events = deque(maxlen=300)
+
+    def load(self):
+        try:
+            self.model = YOLO(Path(self.model_path))
+            self.model.to(self.device)
+            logger.info(
+                f"device: {self.device} (torch {torch.__version__}, "
+                f"cuda {torch.version.cuda})"
+            )
+        except Exception:
+            logger.error("model init failed", exc_info=True)
+            raise
+
+        self._warmup()
+        logger.info(
+            f"model ready: {self.model_path} (device={self.device}, "
+            f"input {environment.input_size}x{environment.input_size})"
+        )
+
+    # ---- event callback (call before the capture loop starts) ---------
+
+    def on_detect(self, cb) -> "Detector":
+        """Detection-event callback: receives the detection_burst payload
+        (dict, same shape NatsPub.publish would get). It runs on the
+        capture thread inside on_frame - keep it to a fast, thread-safe
+        enqueue. main.py wires it to NatsPub.publish."""
+        self._detect_cb = cb
+        return self
+
+    def _emit(self, payload):
+        """Guarded dispatch: an uncaught callback exception must never kill
+        the capture thread (same contract as capture.py's frame-callback
+        guard): log #1 + every 50th, keep the loop alive."""
+        cb = self._detect_cb
+        if cb is None:
+            return  # nobody registered - events are dropped by design
+        try:
+            cb(payload)
+        except Exception:
+            self._cb_errors += 1
+            if self._cb_errors == 1 or self._cb_errors % 50 == 0:
+                logger.error(
+                    f"detect callback error (#{self._cb_errors}) - continuing",
+                    exc_info=True,
+                )
+
+    def store_still(self, cand):
         """best frame -> JPEG at <= frame_width wide; returns (path, box-in-still)."""
         img = cand.frame
         fh, fw = img.shape[:2]
-        scale = min(1.0, CFG["frame_width"] / fw)
+        scale = min(1.0, environment.frame_width / fw)
         if scale < 1.0:
-            img = cv2.resize(img, (int(fw * scale), int(fh * scale)), interpolation=cv2.INTER_AREA)
-        p = Path(CFG["event_dir"]) / f"{cand.label}_{cand.ts.strftime('%Y%m%d_%H%M%S')}.jpg"
+            img = cv2.resize(
+                img, (int(fw * scale), int(fh * scale)), interpolation=cv2.INTER_AREA
+            )
+        p = (
+            Path(environment.event_dir)
+            / f"{cand.label}_{cand.ts.strftime('%Y%m%d_%H%M%S')}.jpg"
+        )
         p.parent.mkdir(parents=True, exist_ok=True)
         cv2.imwrite(str(p), img, [int(cv2.IMWRITE_JPEG_QUALITY), 90])
         return p, [round(v * scale) for v in cand.box]
 
-    while not stop:
-        ret, frame = cap.read()
-        if not ret or frame is None:
-            time.sleep(5.0 if not stream_ok else 0.5)
-            cap.release()
-            cap = open_capture()
-            stream_ok = False
-            log("stream lost - restarting capture")
-            continue
+    def new_session(self):
+        """The stream clock just restarted (open/reconnect): reset the
+        per-session detection state and anchor the UTC conversion."""
+        self.ts0 = datetime.now(timezone.utc)
+        self.ring.clear()
+        self.last_det = None
+        self.last_infer = -1.0
 
+    def _warmup(self):
+        """Run the production predict path a couple of times before the first
+        real frame: same input type (BGR uint8 numpy) and the same args as
+        on_frame, so letterbox/preprocess, model kernels, and the NMS +
+        class-filter post-process all get warmed. Two iterations: the first
+        primes cuDNN + the caching allocator, the second reuses them.
+        """
+        import numpy as np
+
+        s = environment.input_size
+        frame = np.zeros((s, s, 3), dtype=np.uint8)
+        for _ in range(2):
+            self.model.predict(
+                frame,
+                imgsz=environment.input_size,
+                conf=environment.min_conf,
+                iou=0.45,
+                classes=environment.classes,
+                verbose=False,
+            )
+
+    def on_frame(self, frame, ts):
+        """One frame in, per-frame pipeline out. Fast by design: heavy work
+        is just the throttled predict; everything else is bookkeeping.
+
+        `ts` is the frame's stream time - seconds since the capture
+        session opened. Window/throttle math keys off the stream clock,
+        not Python's processing clock; a stalled consumer can't skew it.
+        """
+        now = ts
         fh, fw = frame.shape[:2]
-        if not stream_ok:
-            stream_ok = True
-            log(f"stream {fw}x{fh} (stills <= {CFG['frame_width']}px wide)")
-            log(f"capture started ({fw}x{fh} bgr frames)")
 
-        frames += 1
-        now = time.monotonic()
-        if now - last_infer < min_interval:
-            time.sleep(0.05)      # throttle: next read hands over a newer frame
-            continue
-        last_infer = now
+        # close the burst: window of silence elapsed -> keep the best frame.
+        # Checked on EVERY frame (incl. throttled ones) so a burst closes
+        # within one frame period of the silence window.
+        if (
+            self.last_det is not None
+            and self.ring
+            and now - self.last_det >= environment.burst_window
+        ):
+            best = max(self.ring, key=lambda c: c.score)
+            n_burst = len(self.ring)
+            self.ring.clear()
+            self.last_det = None
+            path, box = self.store_still(best)
+            logger.info(
+                f"best still stored: {path} (burst of {n_burst} detection frames, "
+                f"best conf {best.conf:.2f})"
+            )
+            self._emit(
+                {
+                    "event": "detection_burst",
+                    "camera": environment.camera,
+                    "label": best.label,
+                    "detections": n_burst,
+                    "best": {
+                        "file": path.name,
+                        "path": str(path),
+                        "confidence": round(best.conf, 3),
+                        "frame_ts": best.ts.isoformat(),
+                        "box": box,
+                    },
+                    "detector": "detector/1.0",
+                }
+            )
 
-        res = model.predict(frame, imgsz=CFG["input_size"], conf=CFG["min_conf"],
-                            iou=0.45, classes=CFG["classes"], verbose=False)[0]
+        if (
+            now - self.last_infer < self.min_interval
+            or time.monotonic() < self.next_predict_ok
+        ):
+            return  # throttled / post-failure backoff; capture keeps flowing
+        self.last_infer = now
+
+        try:
+            res = self.model.predict(
+                frame,
+                imgsz=environment.input_size,
+                conf=environment.min_conf,
+                iou=0.45,
+                classes=environment.classes,
+                verbose=False,
+            )[0]
+        except Exception:
+            # hot-path failures (transient CUDA errors, a GPU-mem spike) must
+            # not kill a 24/7 service: log, back off, keep the loop alive.
+            logger.error(
+                "predict failed on a real frame - backing off 5s", exc_info=True
+            )
+            self.next_predict_ok = time.monotonic() + 5.0
+            return
+
         dets = []
         if res.boxes is not None and len(res.boxes):
             xyxy = res.boxes.xyxy.cpu().numpy()
             confs = res.boxes.conf.cpu().numpy()
             clss = res.boxes.cls.cpu().numpy().astype(int)
-            names = model.names
+            names = self.model.names
             for (x1, y1, x2, y2), c, cl in zip(xyxy, confs, clss):
-                if int(cl) in CFG["classes"] and c >= CFG["min_conf"]:
-                    dets.append((float(c), str(names.get(int(cl), cl)),
-                                 (float(x1), float(y1), float(x2), float(y2))))
+                if int(cl) in environment.classes and c >= environment.min_conf:
+                    dets.append(
+                        (
+                            float(c),
+                            str(names.get(int(cl), cl)),
+                            (float(x1), float(y1), float(x2), float(y2)),
+                        )
+                    )
 
         if dets:
-            last_dets = len(dets)
+            # the frame's own time: session anchor + stream offset
+            frame_utc = (
+                datetime.now(timezone.utc)
+                if self.ts0 is None
+                else self.ts0 + timedelta(seconds=now)
+            )
+            self.last_dets = len(dets)
+            self.det_events.append((time.monotonic(), len(dets)))
+            self.last_det_mono = time.monotonic()
             best = max(dets, key=lambda d: d[0])
-            last_det = now
-            log_event({"event": "detection", "camera": CFG["camera"],
-                       "ts": datetime.now(timezone.utc).isoformat(),
-                       "dets": len(dets), "best_conf": round(best[0], 3),
-                       "bbox": [round(v) for v in best[2]]})
+            self.last_det = now
+            logger.info(
+                json.dumps(
+                    {
+                        "event": "detection",
+                        "camera": environment.camera,
+                        "ts": frame_utc.isoformat(),
+                        "dets": len(dets),
+                        "best_conf": round(best[0], 3),
+                        "bbox": [round(v) for v in best[2]],
+                    },
+                    separators=(",", ":"),
+                )
+            )
             for c, label, box in dets:
                 area_frac = ((box[2] - box[0]) * (box[3] - box[1])) / (fw * fh)
-                ring.append(Candidate(c * area_frac, frame.copy(),
-                                      datetime.now(timezone.utc), c, label, box))
+                self.ring.append(
+                    Candidate(
+                        c * area_frac,
+                        frame.copy(),
+                        frame_utc,
+                        c,
+                        label,
+                        box,
+                    )
+                )
         else:
-            last_dets = 0
-
-        # close the burst: window of silence elapsed -> keep the best frame
-        if last_det is not None and ring and now - last_det >= CFG["burst_window"]:
-            best = max(ring, key=lambda c: c.score)
-            n_burst = len(ring)
-            ring.clear()
-            last_det = None
-            path, box = store_still(best)
-            log(f"best still stored: {path} (burst of {n_burst} detection frames, "
-                f"best conf {best.conf:.2f})")
-            nats_pub.publish({"event": "detection_burst", "camera": CFG["camera"],
-                              "label": best.label, "detections": n_burst,
-                              "best": {"file": path.name, "path": str(path),
-                                       "confidence": round(best.conf, 3),
-                                       "frame_ts": best.ts.isoformat(),
-                                       "box": box},
-                              "detector": "detector.py/1.0"})
-
-        if now - last_hb >= 60:
-            last_hb = now
-            log_event({"event": "heartbeat", "frames": frames,
-                       "fps": round(frames / max(now - t0, 1e-6), 1),
-                       "last_dets": last_dets, "stream_ok": stream_ok})
-        time.sleep(0.05)   # bound the read loop; the VFR stream paces the rest
-
-    cap.release()
-    nats_pub.stop()
-    log("stopped")
+            self.last_dets = 0
 
 
-if __name__ == "__main__":
-    main()
+# ---------------------------------------------------------------- detection heartbeat
+
+
+class DetectionHeartbeat(threading.Thread):
+    """Detector-side 60s heartbeat: its own timer, its own place - the
+    capture beat (capture.py) reports stream health, this one reports
+    detector activity.
+
+    Runs on its own daemon thread; reads Detector attributes written by
+    the capture thread. Single-value attribute reads and deque
+    append/iterate are GIL-safe, and dets_60s is summed from the
+    append-only event log - no read-then-reset counter, so no locking
+    anywhere.
+    """
+
+    def __init__(self, detector: "Detector"):
+        super().__init__(daemon=True, name="detect-hb")
+        self._det = detector
+
+    def run(self):
+        while True:
+            time.sleep(60)
+            now = time.monotonic()
+            ev = self._det.det_events
+            while ev and now - ev[0][0] > 120:
+                ev.popleft()
+            dets_60s = sum(n for t, n in ev if now - t <= 60)
+            idle = (
+                None
+                if self._det.last_det_mono is None
+                else round(now - self._det.last_det_mono, 1)
+            )
+            logger.info(
+                json.dumps(
+                    {
+                        "event": "heartbeat",
+                        "scope": "detection",
+                        "last_dets": self._det.last_dets,
+                        "dets_60s": dets_60s,
+                        "idle_s": idle,
+                    },
+                    separators=(",", ":"),
+                )
+            )

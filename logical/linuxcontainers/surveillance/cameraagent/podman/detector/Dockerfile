@@ -1,24 +1,12 @@
-FROM registry.linole.org/py312:cu13
+# The default AMD64 GPU image uses PyTorch 2.14 and CUDA 13.2. On Linux, CDI device requests require Docker >= 28.2.0 and NVIDIA Container Toolkit >= 1.18; 
+# the legacy --gpus all flag can lose GPU access after host daemon reloads, so use --device instead. 
+# See the Docker Quickstart Guide for the full image table (CPU, export, ARM64, and JetPack variants), host driver requirements, and volume mounts.
+FROM docker.io/ultralytics/ultralytics:latest
 
-COPY app/requirements.txt /app/requirements.txt
+COPY app /app
 
-# torch is already in the base; this installs only the app-side packages
-# (ultralytics, opencv, nats-py, ...). requirements.txt may keep a
-# `torch>=X` line — pip no-ops it when the base already satisfies it.
-#
-# ultralytics pulls in the GUI flavor (opencv-python), whose cv2 .so
-# links libxcb - which we don't have (headless base, no X11). Both
-# flavors unpack into the same site-packages/cv2/, so last-installed
-# wins. Purge both flavors after the batch install, then install
-# opencv-python-headless on its own so it lands last and stays.
-RUN pip install --no-cache-dir --break-system-packages -r /app/requirements.txt \
-    && pip uninstall -y opencv-python opencv-python-headless \
-    && pip install --no-cache-dir --break-system-packages opencv-python-headless
-
-COPY app/detector.py /app/detector.py
+RUN pip install --no-cache-dir --break-system-packages -r /app/requirements.txt 
 
 WORKDIR /app
 
-ENTRYPOINT ["python"]
-
-CMD ["/app/detector.py"]
+CMD ["python", "-c", "/app/main.py"]

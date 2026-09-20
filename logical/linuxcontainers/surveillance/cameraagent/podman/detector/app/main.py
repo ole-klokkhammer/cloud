@@ -61,7 +61,7 @@ def main():
 
     logger.info(
         f"starting: model={environment.model} device={environment.device} "
-        f"classes={','.join(map(str, environment.classes))} rtsp={environment.rtsp_url} "
+        f"classes={environment.classes_str} rtsp={environment.rtsp_url} "
         f"input={environment.input_size} conf={environment.min_conf} max_fps={environment.max_fps}"
     )
 

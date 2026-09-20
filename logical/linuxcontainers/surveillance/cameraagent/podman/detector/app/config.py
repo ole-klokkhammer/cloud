@@ -42,20 +42,29 @@ def _env_float(name, default):
         raise SystemExit(f"[detector] {name}={raw!r} is not a number")
 
 
-def _env_ints(name, default):
-    """comma-separated ints, e.g. DETECTOR_CLASS=15 or 15,16,24."""
+def _env_classes(name, default):
+    """Class filter for predict(): comma-separated COCO class ids
+    (DETECTOR_CLASS=15 or 15,16,24) or the keyword 'all' = no class
+    filter (any of the 80 COCO classes)."""
     raw = os.environ.get(name, default)
+    toks = [t.strip() for t in raw.split(",") if t.strip()]
+    if "all" in toks:
+        if toks != ["all"]:
+            raise SystemExit(
+                f"[detector] {name}={raw!r}: 'all' means no filter and "
+                f"cannot be mixed with class ids"
+            )
+        return None
     out = []
-    for tok in raw.split(","):
-        tok = tok.strip()
-        if not tok:
-            continue
+    for tok in toks:
         try:
             out.append(int(tok))
         except ValueError:
             raise SystemExit(f"[detector] {name}={raw!r}: {tok!r} is not an integer")
     if not out:
-        raise SystemExit(f"[detector] {name}={raw!r}: no class ids given")
+        raise SystemExit(
+            f"[detector] {name}={raw!r}: no class ids given (use 'all' for no filter)"
+        )
     return out
 
 
@@ -66,7 +75,7 @@ class Environment:
 
     rtsp_url: str
     model: str
-    classes: tuple
+    classes: tuple | None
     frame_width: int
     input_size: int
     min_conf: float
@@ -78,12 +87,19 @@ class Environment:
     nats_url: str
     nats_subject: str
 
+    @property
+    def classes_str(self) -> str:
+        """Class filter as displayed (env/log): 'all' or a comma-separated
+        list. The None<->'all' round-trip lives here, not in the users."""
+        return "all" if self.classes is None else ",".join(map(str, self.classes))
+
     @classmethod
     def from_env(cls) -> "Environment":
+        classes = _env_classes("DETECTOR_CLASS", "all")
         env = cls(
             rtsp_url=_env("DETECTOR_RTSP_URL", "rtsp://mediamtx.homelan:8554/entrance_roof_sub"),
             model=_env("DETECTOR_MODEL", "/models/yolo26m.pt"),
-            classes=tuple(_env_ints("DETECTOR_CLASS", "15")),
+            classes=tuple(classes) if classes is not None else None,
             frame_width=_env_int("DETECTOR_FRAME_WIDTH", 1280),
             input_size=_env_int("DETECTOR_INPUT_SIZE", 640),
             min_conf=_env_float("DETECTOR_MIN_CONF", 0.5),

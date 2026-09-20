@@ -79,7 +79,7 @@ class Detector:
 
     def __init__(self, model_path: str, device: str):
         self.min_interval = 1.0 / environment.max_fps
-        self._detect_cb = None   # registered via on_detect(); main wires it
+        self._detect_cb = None  # registered via on_detect(); main wires it
         self._cb_errors = 0
 
         # ---- model init (main thread)
@@ -221,8 +221,8 @@ class Detector:
             self.last_det = None
             path, box = self.store_still(best)
             logger.info(
-                f"best still stored: {path} (burst of {n_burst} detection frames, "
-                f"best conf {best.conf:.2f})"
+                f"best still stored: {path} ({best.label}, "
+                f"burst of {n_burst} detection frames, best conf {best.conf:.2f})"
             )
             self._emit(
                 {
@@ -273,7 +273,9 @@ class Detector:
             clss = res.boxes.cls.cpu().numpy().astype(int)
             names = self.model.names
             for (x1, y1, x2, y2), c, cl in zip(xyxy, confs, clss):
-                if int(cl) in environment.classes and c >= environment.min_conf:
+                if c >= environment.min_conf and (
+                    environment.classes is None or int(cl) in environment.classes
+                ):
                     dets.append(
                         (
                             float(c),
@@ -301,6 +303,7 @@ class Detector:
                         "camera": environment.camera,
                         "ts": frame_utc.isoformat(),
                         "dets": len(dets),
+                        "label": best[1],
                         "best_conf": round(best[0], 3),
                         "bbox": [round(v) for v in best[2]],
                     },

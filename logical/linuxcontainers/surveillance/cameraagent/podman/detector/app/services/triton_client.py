@@ -11,12 +11,28 @@ remote inference:
     de-letterbox back to full-frame pixels, class ids -> names.
 
 The client and the server share no config besides the server URL +
-model name. The model supports two export layouts, auto-detected from
-the output shape at load() time:
-  raw     out [84, 8400]   4 box (cxywh in 640-space) + 80 sigmoid
-                            class scores -> this client runs the NMS
-  end2end out [300, 6]     x1,y1,x2,y2,conf,cls, NMS already in the
-                            graph -> this client only filters
+model name + the model family (TRITON_MODEL_FAMILY, default yolo):
+
+  family=yolo   input: letterbox (center pad 114, scaleup) - exactly the
+                ultralytics predictor convention. Two output layouts,
+                auto-detected from the shape at load() time:
+                  raw     out [84, 8400]  4 box (cxywh in 640-space)
+                          + 80 sigmoid class scores -> this client runs
+                          the NMS
+                  end2end out [300, 6]    x1,y1,x2,y2,conf,cls in
+                          640-space, NMS in the graph -> filter only
+
+  family=rtdetr input: plain STRETCH to 640x640 (no letterbox padding -
+                the RT-DETR contract). Output out [300, 6]:
+                cx,cy,w,h NORMALIZED 0-1 to the ORIGINAL frame (stretch
+                keeps normalized coords valid) + conf + cls; NMS is
+                baked into the graph -> this client only filters and
+                de-normalizes to full-frame pixels (no NMS, no
+                de-letterbox).
+
+Mixing the two (letterbox input for a rtdetr model, or yolo postprocessing
+on a rtdetr output) is what produces off/clustered boxes - set the family
+to match the served model.
 """
 
 import logging
@@ -151,6 +167,23 @@ def _letterbox(frame: np.ndarray, size: int):
     return tensor, meta
 
 
+def _stretch(frame: np.ndarray, size: int):
+    """frame (H,W,3) BGR -> (tensor [1,3,size,size] FP32 RGB/255, meta).
+
+    RT-DETR's input contract: a plain aspect-ratio-ignoring resize to
+    size x size (NO letterbox padding, NO 114 fill). The model was
+    trained/served with this exact mapping, so the normalized output
+    boxes stay valid against the ORIGINAL frame (stretch keeps
+    normalized coords aligned). meta carries the original size for the
+    de-normalization below."""
+    oh, ow = frame.shape[:2]
+    resized = cv2.resize(frame, (size, size), interpolation=cv2.INTER_LINEAR)
+    rgb = resized[:, :, ::-1].astype(_TENSOR_DTYPE) / 255.0
+    tensor = np.ascontiguousarray(rgb.transpose(2, 0, 1))[None]
+    meta = {"r": 1.0, "top": 0, "left": 0, "ow": ow, "oh": oh}
+    return tensor, meta
+
+
 def _nms(cxywh: np.ndarray, confs: np.ndarray, iou_th: float) -> np.ndarray:
     """Greedy NMS on (K,4) cxywh boxes + (K,) scores; returns kept
     indices, highest-score-first. Vectorized; K is post-conf-filter
@@ -209,13 +242,23 @@ class TritonClient:
         imgsz: int = 640,
         timeout: float = 15.0,
         names: Optional[Sequence[str]] = None,
+        family: str = "yolo",
     ):
+        """family selects the model I/O contract (see the module docstring):
+        'yolo' (letterbox in, raw/end2end out, client-side NMS when raw)
+        or 'rtdetr' (stretch in, [300,6] normalized cxywh out, NMS in the
+        graph). Must match the model the triton server is actually
+        serving - a mismatch is exactly the 'boxes off' failure mode."""
+        if family not in ("yolo", "rtdetr"):
+            raise ValueError(f"unknown model family: {family!r}")
         self.server_url = server_url
         self.model = model
         self.imgsz = imgsz
         self.timeout = timeout
+        self.family = family
         self._names = tuple(names) if names else COCO_NAMES
         self._layout: Optional[str] = None  # 'raw' | 'end2end', from load()
+        self._warned_norm = False  # one-shot rtdetr-via-yolo-path warning
         self._client = tc_grpc.InferenceServerClient(
             url=server_url, channel_args=_CHANNEL_OPTIONS
         )
@@ -243,9 +286,12 @@ class TritonClient:
             attempt += 1
             try:
                 self.predict(gray, conf=conf, iou=iou, classes=classes)
+                detail = f"family={self.family}"
+                if self.family == "yolo":
+                    detail += f", layout={self._layout}"
                 logger.info(
                     f"triton ready: {self.server_url} model={self.model} "
-                    f"(sanity inference ok, layout={self._layout})"
+                    f"(sanity inference ok, {detail})"
                 )
                 return
             except Exception:
@@ -273,7 +319,10 @@ class TritonClient:
     ) -> TritonResult:
         """One frame -> TritonResult. Raises on transport / decode
         failure (the hot-path caller catches and backs off)."""
-        tensor, meta = _letterbox(frame, self.imgsz)
+        if self.family == "rtdetr":
+            tensor, meta = _stretch(frame, self.imgsz)
+        else:
+            tensor, meta = _letterbox(frame, self.imgsz)
         inputs = [tc_grpc.InferInput("images", list(tensor.shape), "FP32")]
         inputs[0].set_data_from_numpy(tensor)
         outputs = [tc_grpc.InferRequestedOutput("output0")]
@@ -316,6 +365,10 @@ class TritonClient:
         iou: float,
         classes: Optional[Sequence[int]],
     ) -> TritonResult:
+        if self.family == "rtdetr":
+            return self._postprocess_rtdetr(out, meta, conf, classes)
+        if out.ndim == 3:
+            out = out[0]  # drop the batch dim (predict() squeezes too)
         layout = self._layout_of(out.shape)
         if self._layout is None:
             self._layout = layout  # detected once (load's sanity inference)
@@ -329,6 +382,19 @@ class TritonClient:
             # x1,y1,x2,y2,conf,cls already NMS'd in the graph (640-space)
             rows = out
             sel = rows[:, 4] >= conf
+            if not self._warned_norm:
+                # the yolo end2end contract is 640-space pixels; a set of
+                # detected boxes whose coords all sit in [0,1] is the
+                # signature of an RT-DETR model (normalized cxywh) served
+                # through the yolo path - boxes land off. Warn once.
+                dets = rows[sel][:, :4]
+                if len(dets) and np.all((dets >= 0) & (dets <= 1)):
+                    self._warned_norm = True
+                    logger.warning(
+                        f"end2end output of {self.model!r} looks like RT-DETR "
+                        f"(normalized cxywh, not 640-space xyxy) - boxes will "
+                        f"be off unless TRITON_MODEL_FAMILY=rtdetr is set"
+                    )
             rows = rows[sel]
             if classes is not None:
                 rows = rows[
@@ -368,4 +434,50 @@ class TritonClient:
             ]
         ).astype(np.float32)
         labels = [self._label(int(c)) for c in top_cls[kept]]
+        return TritonResult(boxes, labels)
+
+    def _postprocess_rtdetr(
+        self,
+        out: np.ndarray,
+        meta: dict,
+        conf: float,
+        classes: Optional[Sequence[int]],
+    ) -> TritonResult:
+        """RT-DETR: out (300, 6) = cx,cy,w,h (normalized 0-1 to the
+        ORIGINAL frame) + conf + cls. NMS is already in the graph, so
+        this only conf-filters, class-filters, and de-normalizes to
+        full-frame pixels. (iou is unused on this path.)"""
+        rows = out
+        if rows.ndim == 3:
+            rows = rows[0]
+        if rows.shape[1] != 6:
+            raise RuntimeError(
+                f"rtdetr output has shape {rows.shape}, need [N, 6] "
+                f"(cx,cy,w,h,conf,cls) - TRITON_MODEL_FAMILY=rtdetr but the "
+                f"served model {self.model!r} is not an RT-DETR export? "
+                f"(a yolo raw [84,8400] export means the family must be yolo)"
+            )
+        rows = rows[:, :6]
+        sel = rows[:, 4] >= conf
+        if classes is not None:
+            sel &= np.isin(rows[:, 5].astype(np.int64), np.asarray(list(classes)))
+        rows = rows[sel]
+        if not len(rows):
+            return TritonResult(np.zeros((0, 5), np.float32), [])
+        ow, oh = meta["ow"], meta["oh"]
+        cx, cy, bw, bh = rows[:, 0], rows[:, 1], rows[:, 2], rows[:, 3]
+        x1 = (cx - bw / 2) * ow
+        y1 = (cy - bh / 2) * oh
+        x2 = (cx + bw / 2) * ow
+        y2 = (cy + bh / 2) * oh
+        # clamp to the frame (the model can emit slightly out-of-bounds)
+        x1 = np.clip(x1, 0, ow - 1)
+        y1 = np.clip(y1, 0, oh - 1)
+        x2 = np.clip(x2, 0, ow - 1)
+        y2 = np.clip(y2, 0, oh - 1)
+        boxes = np.column_stack([x1, y1, x2, y2, rows[:, 4]]).astype(np.float32)
+        # highest confidence first (stable for the detector's best-frame pick)
+        order = boxes[:, 4].argsort()[::-1]
+        boxes = boxes[order]
+        labels = [self._label(int(cl)) for cl in rows[order, 5]]
         return TritonResult(boxes, labels)

@@ -8,13 +8,11 @@ input [
     name: "images"
     data_type: TYPE_FP32
     dims: [ 1, 3, 640, 640 ]
-  }
+  } 
 ]
 
 output [
   {
-    # fused head: 4 xywh + 80 class scores, transposed to [84, 8400],
-    # static batch dim 1 included
     name: "output0"
     data_type: TYPE_FP32
     dims: [ 1, 84, 8400 ]

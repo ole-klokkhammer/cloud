@@ -92,6 +92,7 @@ class Detector:
             model_name,
             imgsz=environment.triton_input_size,
             names=environment.triton_class_labels,
+            family=environment.triton_model_family,
         )
 
     def load(self):

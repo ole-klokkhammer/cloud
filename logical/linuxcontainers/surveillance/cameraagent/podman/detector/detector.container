@@ -20,13 +20,14 @@ Environment=TZ=Europe/Oslo
 Environment=RTSP_URL=rtsp://mediamtx.homelan:8554/entrance_roof
 
 Environment=TRITON_URL=127.0.0.1:8001
-Environment=TRITON_MODEL=yolo26x
+Environment=TRITON_MODEL=rtdetr-x
+Environment=TRITON_MODEL_FAMILY=rtdetr
 Environment=TRITON_CLASS_FILTER=0,2,15,14,16,25,26,24,39,67,41,45,78,48,53
 Environment=TRITON_INPUT_SIZE=640
-Environment=TRITON_MIN_CONF=0.5
+Environment=TRITON_MIN_CONF=0.4
 Environment=TRITON_IOU=0.45
 
-Environment=DETECTOR_MAX_FPS=5
+Environment=DETECTOR_MAX_FPS=10
 Environment=DETECTOR_BURST_WINDOW_SECS=2.0
 
 Environment=EVENT_CAMERA_NAME=entrance_roof

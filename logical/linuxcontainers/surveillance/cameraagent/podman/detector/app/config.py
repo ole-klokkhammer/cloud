@@ -66,6 +66,19 @@ def _env_classes(name, default):
     return out
 
 
+def _env_family(name, default="yolo"):
+    """Model I/O contract family: 'yolo' (letterbox input, raw/end2end
+    output, client-side NMS for raw) or 'rtdetr' (stretch input,
+    [300,6] normalized cxywh output, NMS in the graph). Must match the
+    model the triton server serves - the wrong family = off/clustered
+    boxes, not an error (the client can't tell the two [300,6] layouts
+    apart by shape alone)."""
+    raw = os.environ.get(name, default).strip().lower()
+    if raw not in ("yolo", "rtdetr"):
+        raise SystemExit(f"[detector] {name}={raw!r} must be 'yolo' or 'rtdetr'")
+    return raw
+
+
 def _env_class_names(name, default=""):
     """Optional class-name override for fine-tuned models: a
     comma-separated list of names (index = class id). Empty = use the
@@ -88,6 +101,7 @@ class Environment:
     triton_class_labels: tuple | None
     triton_min_conf: float
     triton_iou: float
+    triton_model_family: str
     detector_max_fps: float
     detector_burst_window: float
     event_camera_name: str
@@ -125,9 +139,10 @@ environment = Environment(
     triton_input_size=_env_int("TRITON_INPUT_SIZE", 640),
     triton_min_conf=_env_float("TRITON_MIN_CONF", 0.5),
     triton_iou=_env_float("TRITON_IOU", 0.45),
+    triton_model_family=_env_family("TRITON_MODEL_FAMILY", "yolo"),
     detector_max_fps=_env_float("DETECTOR_MAX_FPS", 10),
     detector_burst_window=_env_float("DETECTOR_BURST_WINDOW_SECS", 2.0),
-    event_camera_name=_env("EVENT_FRAME_WIDTH", "entrance_roof"),
+    event_camera_name=_env("EVENT_CAMERA_NAME", "entrance_roof"),
     event_frame_width=_env_int("EVENT_FRAME_WIDTH", 1280),
     event_dir=_env("EVENT_DIR", "/detections/events"),
     mqtt_host=_env("MQTT_HOST", "hivemq.homelan"),

@@ -73,6 +73,7 @@ def main():
     )
     logger.info(
         f"starting: triton={environment.triton_url} model={environment.triton_model} "
+        f"family={environment.triton_model_family} "
         f"class_filter={environment.class_filter_str} rtsp={environment.rtsp_url} "
         f"input={environment.triton_input_size} conf={environment.triton_min_conf} "
         f"max_fps={environment.detector_max_fps} mqtt={mqtt_str}"

@@ -20,7 +20,7 @@ Exec=sh -c "tritonserver \
 AddDevice=nvidia.com/gpu=all
 
 Volume=/models/yolo/yolo26x.plan:/model_repository/yolo26x/1/model.plan:ro
-Volume=/models/yolo/rtdetr-x.engine:/model_repository/rtdetr-x/1/model.plan:ro
+Volume=/models/yolo/rtdetr-x.plan:/model_repository/rtdetr-x/1/model.plan:ro
 
 # -------------------------------------------------------------
 # CONFIGURATION CHOICES (Change these to switch models/profiles)
@@ -32,7 +32,7 @@ Volume=/models/yolo/rtdetr-x.engine:/model_repository/rtdetr-x/1/model.plan:ro
 # only reads model-level or version-level config - NOT configs/
 # subfolders). Model files are the LXD mounts above.
 # -------------------------------------------------------------
-Environment=ACTIVE_MODEL=yolo26x
+Environment=ACTIVE_MODEL=rtdetr-x
 Environment=CONFIG_PROFILE=tensorrt
 Environment=TZ=Europe/Oslo
 

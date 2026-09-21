@@ -74,8 +74,8 @@ def main():
     logger.info(
         f"starting: triton={environment.triton_url} model={environment.triton_model} "
         f"class_filter={environment.class_filter_str} rtsp={environment.rtsp_url} "
-        f"input={environment.input_size} conf={environment.min_conf} "
-        f"max_fps={environment.max_fps} mqtt={mqtt_str}"
+        f"input={environment.triton_input_size} conf={environment.triton_min_conf} "
+        f"max_fps={environment.detector_max_fps} mqtt={mqtt_str}"
     )
 
     # triton readiness wait + one-shot health check happen in
@@ -101,8 +101,8 @@ def main():
         detector.set_on_detect_callbacks(*[mqtt_pub.publish])
 
         logger.info(
-            f"Starting capture: rtsp={environment.rtsp_url} input={environment.input_size} "
-            f"conf={environment.min_conf} max_fps={environment.max_fps}"
+            f"Starting capture: rtsp={environment.rtsp_url} input={environment.triton_input_size} "
+            f"conf={environment.triton_min_conf} max_fps={environment.detector_max_fps}"
         )
         videoStream.start()
 

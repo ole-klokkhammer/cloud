@@ -83,16 +83,16 @@ class Environment:
     rtsp_url: str
     triton_url: str
     triton_model: str
-    class_filter: tuple | None
-    frame_width: int
-    input_size: int
-    min_conf: float
-    nms_iou: float
-    class_labels: tuple | None
-    max_fps: float
-    burst_window: float
+    triton_input_size: int
+    triton_class_filter: tuple | None
+    triton_class_labels: tuple | None
+    triton_min_conf: float
+    triton_iou: float
+    detector_max_fps: float
+    detector_burst_window: float
+    event_camera_name: str
+    event_frame_width: int
     event_dir: str
-    camera_name: str
     mqtt_host: str
     mqtt_port: int
     mqtt_topic: str
@@ -105,30 +105,31 @@ class Environment:
         list. The None<->'all' round-trip lives here, not in the users."""
         return (
             "all"
-            if self.class_filter is None
-            else ",".join(map(str, self.class_filter))
+            if self.triton_class_filter is None
+            else ",".join(map(str, self.triton_class_filter))
         )
 
 
-_detected_class_filter = _env_classes("DETECTOR_CLASS", "all")
+_detected_class_filter = _env_classes("TRITON_CLASS_FILTER", "all")
+triton_class_filter = (
+    tuple(_detected_class_filter) if _detected_class_filter is not None else None
+)
+triton_class_labels = tuple(_env_class_names("TRITON_CLASS_NAMES")) or None
+
 environment = Environment(
-    rtsp_url=_env(
-        "DETECTOR_RTSP_URL", "rtsp://mediamtx.homelan:8554/entrance_roof_sub"
-    ),
-    triton_url=_env("DETECTOR_TRITON_URL", "http://127.0.0.1:8000"),
-    triton_model=_env("DETECTOR_TRITON_MODEL", "detector"),
-    class_filter=(
-        tuple(_detected_class_filter) if _detected_class_filter is not None else None
-    ),
-    class_labels=tuple(_env_class_names("DETECTOR_CLASS_NAMES")) or None,
-    frame_width=_env_int("DETECTOR_FRAME_WIDTH", 1280),
-    input_size=_env_int("DETECTOR_INPUT_SIZE", 640),
-    min_conf=_env_float("DETECTOR_MIN_CONF", 0.5),
-    nms_iou=_env_float("DETECTOR_NMS_IOU", 0.45),
-    max_fps=_env_float("DETECTOR_MAX_FPS", 10),
-    burst_window=_env_float("DETECTOR_BURST_WINDOW_SECS", 2.0),
-    event_dir=_env("DETECTOR_EVENT_DIR", "/detections/events"),
-    camera_name=_env("DETECTOR_CAMERA", "entrance_roof"),
+    rtsp_url=_env("RTSP_URL", "rtsp://mediamtx.homelan:8554/entrance_roof_sub"),
+    triton_url=_env("TRITON_URL", "http://127.0.0.1:8000"),
+    triton_model=_env("TRITON_MODEL", "detector"),
+    triton_class_filter=triton_class_filter,
+    triton_class_labels=triton_class_labels,
+    triton_input_size=_env_int("TRITON_INPUT_SIZE", 640),
+    triton_min_conf=_env_float("TRITON_MIN_CONF", 0.5),
+    triton_iou=_env_float("TRITON_IOU", 0.45),
+    detector_max_fps=_env_float("DETECTOR_MAX_FPS", 10),
+    detector_burst_window=_env_float("DETECTOR_BURST_WINDOW_SECS", 2.0),
+    event_camera_name=_env("EVENT_FRAME_WIDTH", "entrance_roof"),
+    event_frame_width=_env_int("EVENT_FRAME_WIDTH", 1280),
+    event_dir=_env("EVENT_DIR", "/detections/events"),
     mqtt_host=_env("MQTT_HOST", "hivemq.homelan"),
     mqtt_port=_env_int("MQTT_PORT", 1883),
     mqtt_topic=_env("MQTT_TOPIC", "surveillance/detector"),

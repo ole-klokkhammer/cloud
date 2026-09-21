@@ -84,14 +84,14 @@ class Detector:
     """
 
     def __init__(self, server_url: str, model_name: str):
-        self.min_interval = 1.0 / environment.max_fps
+        self.min_interval = 1.0 / environment.detector_max_fps
         self._on_detect_callbacks = []  # registered via on_detect(); main wires them
         self._on_detect_cb_errors = 0
         self.tritonClient = TritonClient(
             server_url,
             model_name,
-            imgsz=environment.input_size,
-            names=environment.class_labels,
+            imgsz=environment.triton_input_size,
+            names=environment.triton_class_labels,
         )
 
     def load(self):
@@ -102,9 +102,9 @@ class Detector:
         triton down or its model failing to load; main() exits 1 and
         systemd retries within the window triton usually comes up."""
         self.tritonClient.load(
-            conf=environment.min_conf,
-            iou=environment.nms_iou,
-            classes=environment.class_filter,
+            conf=environment.triton_min_conf,
+            iou=environment.triton_iou,
+            classes=environment.triton_class_filter,
         )
 
         # ---- per-session detection state (reset by new_session)
@@ -170,7 +170,7 @@ class Detector:
         """best frame -> JPEG at <= frame_width wide; returns (path, box-in-still)."""
         img = cand.frame
         fh, fw = img.shape[:2]
-        scale = min(1.0, environment.frame_width / fw)
+        scale = min(1.0, environment.event_frame_width / fw)
         if scale < 1.0:
             img = cv2.resize(
                 img, (int(fw * scale), int(fh * scale)), interpolation=cv2.INTER_AREA
@@ -229,7 +229,7 @@ class Detector:
         if (
             self.last_det is not None
             and self.ring
-            and now - self.last_det >= environment.burst_window
+            and now - self.last_det >= environment.detector_burst_window
         ):
             best = max(self.ring, key=lambda c: c.score)
             n_burst = len(self.ring)
@@ -243,7 +243,7 @@ class Detector:
             self._on_detect(
                 {
                     "event": "detection_burst",
-                    "camera": environment.camera_name,
+                    "camera": environment.event_camera_name,
                     "label": best.label,
                     "detections": n_burst,
                     "best": {
@@ -269,9 +269,9 @@ class Detector:
             # around the remote inference - no re-filtering here
             res = self.tritonClient.predict(
                 frame,
-                conf=environment.min_conf,
-                iou=environment.nms_iou,
-                classes=environment.class_filter,
+                conf=environment.triton_min_conf,
+                iou=environment.triton_iou,
+                classes=environment.triton_class_filter,
             )
         except Exception:
             # hot-path failures (triton down, a transient network error)
@@ -313,7 +313,7 @@ class Detector:
                 json.dumps(
                     {
                         "event": "detection",
-                        "camera": environment.camera_name,
+                        "camera": environment.event_camera_name,
                         "ts": frame_utc.isoformat(),
                         "dets": len(dets),
                         "label": best[1],

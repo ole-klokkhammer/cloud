@@ -22,12 +22,10 @@ import os
 import signal
 import sys
 import threading
-from pathlib import Path
-
-from capture import CaptureStream
 from config import environment
 from detector import Detector
 from mqtt_pub import MqttPub
+from stream import VideoStream
 
 
 def setup_logging():
@@ -57,8 +55,8 @@ def main():
         user=environment.mqtt_user,
         password=environment.mqtt_pass,
     )
-    capture = CaptureStream(environment.rtsp_url)
-    detector = Detector(environment.model, environment.device)
+    videoStream = VideoStream(environment.rtsp_url)
+    detector = Detector(environment.triton_url, environment.triton_model)
 
     def on_signal(signum, frame):
         logger.info(f"exit signal {signum} received")
@@ -74,18 +72,20 @@ def main():
         f"topic={environment.mqtt_topic}/<camera>"
     )
     logger.info(
-        f"starting: model={environment.model} device={environment.device} "
+        f"starting: triton={environment.triton_url} model={environment.triton_model} "
         f"classes={environment.classes_str} rtsp={environment.rtsp_url} "
         f"input={environment.input_size} conf={environment.min_conf} "
         f"max_fps={environment.max_fps} mqtt={mqtt_str}"
     )
 
-    # model load + warm-up happens in detector.load() (the constructor
-    # is cheap: it only sets state); a hard failure = bad model path /
-    # driver - fail the process
+    # triton readiness wait + one-shot health check happen in
+    # detector.load() (the constructor is cheap: it only sets state); a
+    # hard failure = triton down or its model not loading - fail the
+    # process, systemd retries within the window triton usually comes up
     try:
         logger.info(
-            f"Loading detector: model={environment.model} device={environment.device}"
+            f"Loading detector: triton={environment.triton_url} "
+            f"model={environment.triton_model} (triton health gate)"
         )
         detector.load()
 
@@ -96,18 +96,18 @@ def main():
         mqtt_pub.start()
 
         logger.info("Registering callbacks")
-        capture.set_frame_callback(detector.on_frame)
-        capture.on_session(detector.new_session)
-        detector.on_detect(*[mqtt_pub.publish])
+        videoStream.set_frame_callback(detector.on_frame)
+        videoStream.set_on_new_session_cbs(detector.new_session)
+        detector.set_detection_callbacks(*[mqtt_pub.publish])
 
         logger.info(
             f"Starting capture: rtsp={environment.rtsp_url} input={environment.input_size} "
             f"conf={environment.min_conf} max_fps={environment.max_fps}"
         )
-        capture.start()
+        videoStream.start()
 
         logger.info(
-            f"Starting detector: model={environment.model} device={environment.device}"
+            f"Starting detector: triton={environment.triton_url} model={environment.triton_model}"
         )
         detector.start()
     except Exception:

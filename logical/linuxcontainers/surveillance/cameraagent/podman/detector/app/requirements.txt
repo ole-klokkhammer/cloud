@@ -1,2 +1,8 @@
-
+# opencv: FFMPEG backend for the RTSP capture (the manylinux wheel bundles
+# FFmpeg); headless = no GUI libs. glib comes from the image (see Dockerfile).
+numpy
+opencv-python-headless
+# triton gRPC client: the detector is a lean client of the triton container
+# (letterbox + NMS live here in triton_client.py - no torch, no GPU here)
+tritonclient[grpc]
 paho-mqtt>=2.1

@@ -45,10 +45,9 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import cv2
-import torch
-from ultralytics import YOLO
 
 from config import environment
+from triton_client import TritonClient
 
 logger = logging.getLogger("detector")
 
@@ -72,29 +71,41 @@ class Candidate:
 class Detector:
     """Per-camera detection pipeline.
 
-    Lifecycle: constructed on the main thread (cheap: state only);
-    main() calls load() for model load + warm-up (a hard failure
-    there exits 1), then start() to bring up this object's own
-    daemon thread (the 60s DetectionHeartbeat). on_detect() registers
-    the event callbacks (one per transport); from then on `on_frame`
-    and `new_session` run only on the capture thread, and the
-    heartbeat thread only reads single attributes - so no locking
-    anywhere.
+    Lifecycle: constructed on the main thread (cheap: the triton
+    client holds no model - the triton container owns the .pt + the
+    GPU, this process just talks gRPC to it); main() calls load() for
+    the triton readiness wait + a one-shot end-to-end health check (a
+    hard failure there exits 1), then start() to bring up this object's
+    own daemon thread
+    (the 60s DetectionHeartbeat). on_detect() registers the event
+    callbacks (one per transport); from then on `on_frame` and
+    `new_session` run only on the capture thread, and the heartbeat
+    thread only reads single attributes - so no locking anywhere.
     """
 
-    def __init__(self, model_path: str, device: str):
+    def __init__(self, server_url: str, model_name: str):
         self.min_interval = 1.0 / environment.max_fps
-        self._detect_cbs = []  # registered via on_detect(); main wires them
-        self._cb_errors = 0
+        self._on_detect_callbacks = []  # registered via on_detect(); main wires them
+        self._on_detect_cb_errors = 0
+        self.tritonClient = TritonClient(
+            server_url,
+            model_name,
+            imgsz=environment.input_size,
+            names=environment.class_names,
+        )
 
-        # ---- model init (main thread)
-        if device == "cuda" and not torch.cuda.is_available():
-            # a requested device that we silently downgrade is worth a warning
-            logger.warning("cuda requested but unavailable - running on CPU")
-            device = "cpu"
-
-        self.device = device
-        self.model_path = model_path
+    def load(self):
+        """Startup health gate (the model itself lives in the triton
+        container, so there is nothing for this process to load): wait
+        for triton to be ready - its model load takes ~30-60s after a
+        boot - then one end-to-end sanity inference. A hard failure =
+        triton down or its model failing to load; main() exits 1 and
+        systemd retries within the window triton usually comes up."""
+        self.tritonClient.load(
+            conf=environment.min_conf,
+            iou=environment.nms_iou,
+            classes=environment.classes,
+        )
 
         # ---- per-session detection state (reset by new_session)
         self.ring = deque(maxlen=16)  # Candidates of the open burst
@@ -110,24 +121,6 @@ class Detector:
         # counter to race).
         self.det_events = deque(maxlen=300)
 
-    def load(self):
-        try:
-            self.model = YOLO(Path(self.model_path))
-            self.model.to(self.device)
-            logger.info(
-                f"device: {self.device} (torch {torch.__version__}, "
-                f"cuda {torch.version.cuda})"
-            )
-        except Exception:
-            logger.error("model init failed", exc_info=True)
-            raise
-
-        self._warmup()
-        logger.info(
-            f"model ready: {self.model_path} (device={self.device}, "
-            f"input {environment.input_size}x{environment.input_size})"
-        )
-
     def start(self) -> "Detector":
         """Bring up this object's own daemon thread: the 60s
         DetectionHeartbeat (detector-activity beat + the trimmer for
@@ -142,30 +135,33 @@ class Detector:
 
     # ---- event callback (call before the capture loop starts) ---------
 
-    def on_detect(self, *cbs) -> "Detector":
+    def set_detection_callbacks(self, *cbs) -> "Detector":
         """Detection-event callbacks: each receives the detection_burst
         payload (dict, same shape NatsPub.publish / MqttPub.publish get).
         They run on the capture thread inside on_frame - keep each to a
         fast, thread-safe enqueue. main.py wires them: NatsPub.publish
         and MqttPub.publish (one callback per transport)."""
-        self._detect_cbs.extend(cbs)
+        self._on_detect_callbacks.extend(cbs)
         return self
 
-    def _emit(self, payload):
+    def _on_detect(self, payload):
         """Guarded dispatch to the registered callbacks (one per
         transport): an uncaught exception must never kill the capture
         thread (same contract as capture.py's frame-callback guard): log
         #1 + every 50th, keep the loop alive. Each callback is guarded
         separately - a failure in one transport must not stop the
         others. No callbacks registered = events dropped by design."""
-        for cb in self._detect_cbs:
+        for cb in self._on_detect_callbacks:
             try:
                 cb(payload)
             except Exception:
-                self._cb_errors += 1
-                if self._cb_errors == 1 or self._cb_errors % 50 == 0:
+                self._on_detect_cb_errors += 1
+                if (
+                    self._on_detect_cb_errors == 1
+                    or self._on_detect_cb_errors % 50 == 0
+                ):
                     logger.error(
-                        f"detect callback error (#{self._cb_errors}) from "
+                        f"detect callback error (#{self._on_detect_cb_errors}) from "
                         f"{getattr(cb, '__name__', 'callback')!r} - continuing",
                         exc_info=True,
                     )
@@ -195,27 +191,6 @@ class Detector:
         self.last_det = None
         self.last_infer = -1.0
 
-    def _warmup(self):
-        """Run the production predict path a couple of times before the first
-        real frame: same input type (BGR uint8 numpy) and the same args as
-        on_frame, so letterbox/preprocess, model kernels, and the NMS +
-        class-filter post-process all get warmed. Two iterations: the first
-        primes cuDNN + the caching allocator, the second reuses them.
-        """
-        import numpy as np
-
-        s = environment.input_size
-        frame = np.zeros((s, s, 3), dtype=np.uint8)
-        for _ in range(2):
-            self.model.predict(
-                frame,
-                imgsz=environment.input_size,
-                conf=environment.min_conf,
-                iou=0.45,
-                classes=environment.classes,
-                verbose=False,
-            )
-
     def on_frame(self, frame, ts):
         """One frame in, per-frame pipeline out. Fast by design: heavy work
         is just the throttled predict; everything else is bookkeeping.
@@ -244,7 +219,7 @@ class Detector:
                 f"best still stored: {path} ({best.label}, "
                 f"burst of {n_burst} detection frames, best conf {best.conf:.2f})"
             )
-            self._emit(
+            self._on_detect(
                 {
                     "event": "detection_burst",
                     "camera": environment.camera,
@@ -269,40 +244,37 @@ class Detector:
         self.last_infer = now
 
         try:
-            res = self.model.predict(
+            # the client already applied conf + NMS + the class filter
+            # around the remote inference - no re-filtering here
+            res = self.tritonClient.predict(
                 frame,
-                imgsz=environment.input_size,
                 conf=environment.min_conf,
-                iou=0.45,
+                iou=environment.nms_iou,
                 classes=environment.classes,
-                verbose=False,
-            )[0]
+            )
         except Exception:
-            # hot-path failures (transient CUDA errors, a GPU-mem spike) must
-            # not kill a 24/7 service: log, back off, keep the loop alive.
+            # hot-path failures (triton down, a transient network error)
+            # must not kill a 24/7 service: log, back off, keep the loop
+            # alive - triton comes back and the next frame is just in.
             logger.error(
                 "predict failed on a real frame - backing off 5s", exc_info=True
             )
             self.next_predict_ok = time.monotonic() + 5.0
             return
 
-        dets = []
-        if res.boxes is not None and len(res.boxes):
-            xyxy = res.boxes.xyxy.cpu().numpy()
-            confs = res.boxes.conf.cpu().numpy()
-            clss = res.boxes.cls.cpu().numpy().astype(int)
-            names = self.model.names
-            for (x1, y1, x2, y2), c, cl in zip(xyxy, confs, clss):
-                if c >= environment.min_conf and (
-                    environment.classes is None or int(cl) in environment.classes
-                ):
-                    dets.append(
-                        (
-                            float(c),
-                            str(names.get(int(cl), cl)),
-                            (float(x1), float(y1), float(x2), float(y2)),
-                        )
-                    )
+        dets = [
+            (
+                float(res.boxes[i, 4]),
+                res.labels[i],
+                (
+                    float(res.boxes[i, 0]),
+                    float(res.boxes[i, 1]),
+                    float(res.boxes[i, 2]),
+                    float(res.boxes[i, 3]),
+                ),
+            )
+            for i in range(res.count)
+        ]
 
         if dets:
             # the frame's own time: session anchor + stream offset

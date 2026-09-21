@@ -3,7 +3,7 @@
 The LXC-side /env/surveillance/detector.env (wired into the container via
 the quadlet unit's `EnvironmentFile=`) is the source of truth; this module
 is the only place that reads it. main.py and detector.py do
-`from config import environment` (attribute access: environment.model,
+`from config import environment` (attribute access: environment.triton_url,
 environment.classes, ...) and own no config logic.
 
 Every variable has a default so the binary also runs with no env file at
@@ -14,8 +14,6 @@ with a bare ValueError inside the capture loop.
 
 import os
 from dataclasses import dataclass
-
-_DEVICES = ("cuda", "cpu")
 
 
 def _env(name, default):
@@ -68,24 +66,33 @@ def _env_classes(name, default):
     return out
 
 
+def _env_class_names(name, default=""):
+    """Optional class-name override for fine-tuned models: a
+    comma-separated list of names (index = class id). Empty = use the
+    built-in COCO names in triton_client.py."""
+    raw = os.environ.get(name, default)
+    toks = [t.strip() for t in raw.split(",") if t.strip()]
+    return toks
+
+
 @dataclass(frozen=True)
 class Environment:
     """Typed view of the detector's environment config (immutable -
     a frozen dataclass: no module can mutate the config mid-run)."""
 
     rtsp_url: str
-    model: str
+    triton_url: str
+    triton_model: str
     classes: tuple | None
     frame_width: int
     input_size: int
     min_conf: float
+    nms_iou: float
+    class_names: tuple | None
     max_fps: float
     burst_window: float
     event_dir: str
     camera: str
-    device: str
-    nats_url: str
-    nats_subject: str
     mqtt_host: str
     mqtt_port: int
     mqtt_topic: str
@@ -105,32 +112,26 @@ class Environment:
             rtsp_url=_env(
                 "DETECTOR_RTSP_URL", "rtsp://mediamtx.homelan:8554/entrance_roof_sub"
             ),
-            model=_env("DETECTOR_MODEL", "/models/yolo26m.pt"),
+            # inference runs in the triton container: the .onnx is served
+            # there (from the LXC's /models), this process just talks gRPC
+            triton_url=_env("DETECTOR_TRITON_URL", "http://127.0.0.1:8000"),
+            triton_model=_env("DETECTOR_TRITON_MODEL", "detector"),
             classes=tuple(classes) if classes is not None else None,
             frame_width=_env_int("DETECTOR_FRAME_WIDTH", 1280),
             input_size=_env_int("DETECTOR_INPUT_SIZE", 640),
             min_conf=_env_float("DETECTOR_MIN_CONF", 0.5),
+            nms_iou=_env_float("DETECTOR_NMS_IOU", 0.45),
+            class_names=tuple(_env_class_names("DETECTOR_CLASS_NAMES")) or None,
             max_fps=_env_float("DETECTOR_MAX_FPS", 10),
             burst_window=_env_float("DETECTOR_BURST_WINDOW_SECS", 2.0),
             event_dir=_env("DETECTOR_EVENT_DIR", "/detections/events"),
             camera=_env("DETECTOR_CAMERA", "entrance_roof"),
-            device=_env("DETECTOR_DEVICE", "cuda"),
-            nats_url=_env("NATS_URL", "nats://nats.homelan:4222"),
-            nats_subject=_env("NATS_SUBJECT", "surveillance.detector"),
-            # MQTT is off unless MQTT_HOST is set (empty = no MQTT publisher);
-            # empty user/pass = anonymous (HiveMQ currently has no auth).
             mqtt_host=_env("MQTT_HOST", "hivemq.homelan"),
             mqtt_port=_env_int("MQTT_PORT", 1883),
             mqtt_topic=_env("MQTT_TOPIC", "surveillance/detector"),
             mqtt_user=_env("MQTT_USER", ""),
             mqtt_pass=_env("MQTT_PASS", ""),
         )
-        # cheap enum validation: a typo here used to be caught only after
-        # the model had loaded (cost: a ~15s startup for the privilege)
-        if env.device not in _DEVICES:
-            raise SystemExit(
-                f"[detector] DETECTOR_DEVICE={env.device!r} - expected one of {_DEVICES}"
-            )
         return env
 
 

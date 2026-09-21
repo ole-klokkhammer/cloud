@@ -31,7 +31,7 @@ devices:
   models:
     path: /models
     shift: "true"
-    source: /ssd/llm/models/cameraagent
+    source: /ssd/models
     type: disk
   env:
     path: /env

@@ -1,10 +1,13 @@
 LXC := core:cameraagent
 LXC_BIN ?= lxc
-IMAGE := registry.linole.org/detector:latest
+IMAGE := registry.linole.org/surveillance/detector:latest
 QUADLET_NAME := detector
 QUADLET_DIR := etc/containers/systemd
 
-.PHONY: push-model build_and_push deploy restart stop status logs
+MODELS_DIR ?= /ssd/llm/models/cameraagent
+VENV ?= $(MODELS_DIR)/.venv
+
+.PHONY: build_and_push deploy restart stop status logs
 
 build_and_deploy: build push deploy
 

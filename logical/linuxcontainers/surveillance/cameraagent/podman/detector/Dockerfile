@@ -1,11 +1,22 @@
-# The default AMD64 GPU image uses PyTorch 2.14 and CUDA 13.2. On Linux, CDI device requests require Docker >= 28.2.0 and NVIDIA Container Toolkit >= 1.18; 
-# the legacy --gpus all flag can lose GPU access after host daemon reloads, so use --device instead. 
-# See the Docker Quickstart Guide for the full image table (CPU, export, ARM64, and JetPack variants), host driver requirements, and volume mounts.
-FROM docker.io/ultralytics/ultralytics:latest
+# RTSP consumer + event publisher only: inference runs in the triton
+# container (surveillance/triton, onnxruntime backend), reached over
+# gRPC on 127.0.0.1:8001 (both host-network in the camagent LXC). The
+# letterbox + NMS live in this process (triton_client.py); no torch,
+# no GPU device here.
+FROM docker.io/library/python:3.13-slim
+
+# opencv's manylinux wheel bundles FFmpeg (the RTSP capture backend) but
+# still needs system glib. Bookworm and trixie name the package
+# differently (t64 suffix), so try both.
+RUN apt-get update \
+ && (apt-get install -y --no-install-recommends libglib2.0-0 \
+     || apt-get install -y --no-install-recommends libglib2.0-0t64) \
+ && rm -rf /var/lib/apt/lists/*
+
+COPY app/requirements.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir --break-system-packages -r /tmp/requirements.txt
 
 COPY app /app
-
-RUN pip install --no-cache-dir --break-system-packages -r /app/requirements.txt 
 
 WORKDIR /app
 

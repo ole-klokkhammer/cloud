@@ -17,7 +17,7 @@ Behavior:
 
 H.264 (not H.265) deliberately: H.265-over-RTSP is fiddly (RTP
 fragmentation + keyframe spacing), H.264 zerolatency is bulletproof
-for live players. H.265 stays where it helps - the burst-clip files.
+for live players.
 """
 
 import logging

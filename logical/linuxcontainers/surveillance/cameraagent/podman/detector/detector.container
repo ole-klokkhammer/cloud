@@ -13,10 +13,9 @@ Image=registry.linole.org/surveillance/detector:latest
 
 # inference runs in the triton container - this one is CPU-only
 Volume=/config/detector:/config:rw
-Volume=/media/detector:/detector:rw
 
 Environment=TZ=Europe/Oslo
-Environment=RTSP_URL=rtsp://mediamtx.homelan:8554/entrance_roof_sub
+Environment=RTSP_URL=rtsp://mediamtx.homelan:8554/entrance_roof
 
 Environment=TRITON_URL=triton.homelan:8001
 Environment=TRITON_MODEL=yolo26x
@@ -30,11 +29,9 @@ Environment=EVENT_CAMERA_NAME=entrance_roof
 
 Environment=DETECTOR_MAX_FPS=10
 Environment=DETECTOR_BURST_WINDOW_SECS=2.0
-Environment=DETECTOR_TRACK_LABELS=person,cat
-Environment=DETECTOR_CLIP_SECONDS=20
-Environment=DETECTOR_CLIP_DIR=/detector/clips
-Environment=DETECTOR_LIVE_PATH=rtsp://mediamtx.homelan:8554/entrance_roof_annotated
 Environment=DETECTOR_LIVE_HOLD_SECONDS=3
+Environment=DETECTOR_TRACK_LABELS=person,cat,dog
+Environment=DETECTOR_LIVE_PATH=rtsp://mediamtx.homelan:8554/entrance_roof_annotated
 
 Environment=MQTT_HOST=hivemq.homelan
 Environment=MQTT_PORT=1883

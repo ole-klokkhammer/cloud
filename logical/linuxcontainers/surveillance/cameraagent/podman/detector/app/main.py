@@ -5,16 +5,17 @@ Owns everything process-level; each domain module owns its own:
   * capture.py   - CaptureStream daemon (VideoCapture, reconnect policy,
                    stream clock, capture heartbeat beat)
   * detector.py  - Detector pipeline + its own heartbeat (detector beat)
-  * nats_pub.py  - NatsPub daemon (auto-reconnecting publisher)
+  * live_push.py - LivePusher daemon (annotated RTSP re-stream into
+                   mediaMTX, only when DETECTOR_LIVE_PATH is set)
   * mqtt_pub.py  - MqttPub daemon (auto-reconnecting MQTT publisher,
                    only when MQTT_HOST is set)
   * config.py    - env -> typed Environment (attribute access)
 
 main() wires the pieces together and coordinates shutdown: the main
 thread's only job is to wait for the stop signal, then tear down. The
-capture, detect-hb, and NATS threads are daemons - they run until process
-exit and are killed there (the kernel reclaims ffmpeg fds and the CUDA
-context; mediaMTX just sees a connection close).
+capture, detect-hb, mqtt, and live-push threads are daemons - they run
+until process exit and are killed there (the kernel reclaims ffmpeg fds
+and the CUDA context; mediaMTX just sees a connection close).
 """
 
 import logging
@@ -24,6 +25,7 @@ import sys
 import threading
 from config import environment
 from services.detector import Detector
+from services.live_push import LivePusher
 from services.mqtt_pub import MqttPub
 from services.rtsp import RtspStream
 
@@ -56,7 +58,12 @@ def main():
         password=environment.mqtt_pass,
     )
     videoStream = RtspStream(environment.rtsp_url)
-    detector = Detector(environment.triton_url, environment.triton_model)
+    livePusher = LivePusher(
+        environment.detector_live_path,
+        fps=environment.detector_max_fps,
+        hold_s=environment.detector_live_hold,
+    )
+    detector = Detector(environment.triton_url, environment.triton_model, livePusher)
 
     def on_signal(signum, frame):
         logger.info(f"exit signal {signum} received")
@@ -71,24 +78,26 @@ def main():
         else f"{environment.mqtt_host}:{environment.mqtt_port} "
         f"topic={environment.mqtt_topic}/<camera>"
     )
+    live_str = (
+        "off" if not environment.detector_live_path else environment.detector_live_path
+    )
     logger.info(
         f"starting: triton={environment.triton_url} model={environment.triton_model} "
         f"family={environment.triton_model_family} "
         f"class_filter={environment.class_filter_str} rtsp={environment.rtsp_url} "
         f"input={environment.triton_input_size} conf={environment.triton_min_conf} "
-        f"max_fps={environment.detector_max_fps} mqtt={mqtt_str}"
+        f"max_fps={environment.detector_max_fps} mqtt={mqtt_str} live={live_str}"
     )
 
-    # triton readiness wait + one-shot health check happen in
-    # detector.load() (the constructor is cheap: it only sets state); a
-    # hard failure = triton down or its model not loading - fail the
-    # process, systemd retries within the window triton usually comes up
     try:
         logger.info(
             f"Loading detector: triton={environment.triton_url} "
             f"model={environment.triton_model} (triton health gate)"
         )
         detector.load()
+
+        logger.info(f"Starting live push: {environment.detector_live_path}")
+        livePusher.start()
 
         logger.info(
             f"Starting MQTT: host={environment.mqtt_host}:{environment.mqtt_port} "
@@ -116,9 +125,9 @@ def main():
         sys.exit(1)
 
     # main thread's only job: wait for the stop signal, then exit.
-    # The capture, detect-hb, NATS, and MQTT threads are all daemons:
+    # The capture, detect-hb, mqtt, and live-push threads are all daemons:
     # they die at process exit (the kernel reclaims ffmpeg fds + the
-    # CUDA context; mediaMTX, NATS, and HiveMQ just see a TCP close).
+    # CUDA context; mediaMTX and HiveMQ just see a TCP close).
     stop.wait()
     logger.info("stopped")
 

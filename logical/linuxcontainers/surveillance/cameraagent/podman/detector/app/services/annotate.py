@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Shared box-painting used by both the ad-hoc paint harness and the
-live service (live-push + clip frames). Boxes arrive already in
+"""Shared box-painting used by the detector's live service (live-push).
+Boxes arrive already in
 full-frame pixels (predict de-letterboxes), so this module is pure
 drawing: cv2.rectangle / putText, nothing else.
 

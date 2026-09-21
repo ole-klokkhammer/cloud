@@ -49,7 +49,11 @@ paths:
     recordDeleteAfter: 7d 
   entrance_roof_annotated:
     source: publisher
-    record: no
+    # the detector's annotated re-stream - continuously recorded here
+    # (fmp4 via pathDefaults: 1s parts, 1h segments, 7d retention).
+    # This replaces the detector's former H.265 burst-clip encoding:
+    # a burst's footage is just a slice of this recording.
+    record: yes
 
   # entrance_door:
   #   source: rtsp://CAM-IP-2:554/h264

@@ -4,15 +4,14 @@
 # letterbox + NMS live in this process (triton_client.py); no torch,
 # no GPU device here.
 #
-# ffmpeg is here too: the clip encoder (H.265 .mp4 of a burst's ~20s
-# .buf ring) and the live-push (H.264 RTSP annotated re-stream into
-# mediaMTX) both shell out to it.
+# ffmpeg is here too: the live-push (H.264 RTSP annotated re-stream
+# into mediaMTX) shells out to it.
 FROM docker.io/library/python:3.13-slim
 
 # opencv's manylinux wheel bundles FFmpeg (the RTSP capture backend) but
 # still needs system glib. Bookworm and trixie name the package
-# differently (t64 suffix), so try both. ffmpeg (clip + live encoders)
-# rides in the same apt run.
+# differently (t64 suffix), so try both. ffmpeg (the live-push
+# encoder) rides in the same apt run.
 RUN apt-get update \
  && apt-get install -y --no-install-recommends ffmpeg \
  && (apt-get install -y --no-install-recommends libglib2.0-0 \

@@ -115,11 +115,9 @@ class Environment:
     triton_model_family: str
     detector_max_fps: float
     detector_burst_window: float
-    tracker_labels: tuple
-    detector_clip_seconds: float
-    detector_clip_dir: str
     detector_live_path: str
     detector_live_hold: float
+    tracker_labels: tuple
     event_camera_name: str
     mqtt_host: str
     mqtt_port: int
@@ -157,8 +155,6 @@ environment = Environment(
     detector_max_fps=_env_float("DETECTOR_MAX_FPS", 10),
     detector_burst_window=_env_float("DETECTOR_BURST_WINDOW_SECS", 2.0),
     tracker_labels=_env_labels("DETECTOR_TRACK_LABELS", "person,cat"),
-    detector_clip_seconds=_env_float("DETECTOR_CLIP_SECONDS", 20),
-    detector_clip_dir=_env("DETECTOR_CLIP_DIR", "/detector/clips"),
     # the annotated RTSP push into mediaMTX (path auto-created on publish);
     # empty = the live push is disabled
     detector_live_path=_env("DETECTOR_LIVE_PATH", ""),

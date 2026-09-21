@@ -47,7 +47,7 @@ from pathlib import Path
 import cv2
 
 from config import environment
-from triton_client import TritonClient
+from services.triton_client import TritonClient
 
 logger = logging.getLogger("detector")
 
@@ -91,7 +91,7 @@ class Detector:
             server_url,
             model_name,
             imgsz=environment.input_size,
-            names=environment.class_names,
+            names=environment.class_labels,
         )
 
     def load(self):
@@ -104,7 +104,7 @@ class Detector:
         self.tritonClient.load(
             conf=environment.min_conf,
             iou=environment.nms_iou,
-            classes=environment.classes,
+            classes=environment.class_filter,
         )
 
         # ---- per-session detection state (reset by new_session)
@@ -135,7 +135,7 @@ class Detector:
 
     # ---- event callback (call before the capture loop starts) ---------
 
-    def set_detection_callbacks(self, *cbs) -> "Detector":
+    def set_on_detect_callbacks(self, *cbs) -> "Detector":
         """Detection-event callbacks: each receives the detection_burst
         payload (dict, same shape NatsPub.publish / MqttPub.publish get).
         They run on the capture thread inside on_frame - keep each to a
@@ -180,8 +180,29 @@ class Detector:
             / f"{cand.label}_{cand.ts.strftime('%Y%m%d_%H%M%S')}.jpg"
         )
         p.parent.mkdir(parents=True, exist_ok=True)
+
+        # paint the winning box onto the still (scaled to still coords) so
+        # the JPEG shows exactly what was detected, not just a raw frame
+        box = [int(v * scale) for v in cand.box]
+        x1, y1, x2, y2 = box
+        hgt, wid = img.shape[:2]
+        x1, x2 = max(0, min(x1, wid - 1)), max(0, min(x2, wid - 1))
+        y1, y2 = max(0, min(y1, hgt - 1)), max(0, min(y2, hgt - 1))
+        color = (0, 255, 0)  # green
+        cv2.rectangle(img, (x1, y1), (x2, y2), color, 2)
+        txt = f"{cand.label} {cand.conf:.2f}"
+        cv2.putText(
+            img,
+            txt,
+            (x1, max(y1 - 6, 12)),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.6,
+            color,
+            2,
+            cv2.LINE_AA,
+        )
         cv2.imwrite(str(p), img, [int(cv2.IMWRITE_JPEG_QUALITY), 90])
-        return p, [round(v * scale) for v in cand.box]
+        return p, box
 
     def new_session(self):
         """The stream clock just restarted (open/reconnect): reset the
@@ -222,7 +243,7 @@ class Detector:
             self._on_detect(
                 {
                     "event": "detection_burst",
-                    "camera": environment.camera,
+                    "camera": environment.camera_name,
                     "label": best.label,
                     "detections": n_burst,
                     "best": {
@@ -250,7 +271,7 @@ class Detector:
                 frame,
                 conf=environment.min_conf,
                 iou=environment.nms_iou,
-                classes=environment.classes,
+                classes=environment.class_filter,
             )
         except Exception:
             # hot-path failures (triton down, a transient network error)
@@ -292,7 +313,7 @@ class Detector:
                 json.dumps(
                     {
                         "event": "detection",
-                        "camera": environment.camera,
+                        "camera": environment.camera_name,
                         "ts": frame_utc.isoformat(),
                         "dets": len(dets),
                         "label": best[1],

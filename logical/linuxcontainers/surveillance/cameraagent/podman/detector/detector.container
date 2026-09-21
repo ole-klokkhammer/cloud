@@ -27,8 +27,8 @@ Environment=DETECTOR_BURST_WINDOW_SECS=2.0
 Environment=DETECTOR_EVENT_DIR=/detector/events
 Environment=DETECTOR_CAMERA=entrance_roof
 Environment=DETECTOR_DEVICE=cuda
-Environment=NATS_URL=nats://nats.homelan:4222
-Environment=NATS_SUBJECT=surveillance.detector
+Environment=DETECTOR_TRITON_URL=127.0.0.1:8001
+Environment=DETECTOR_TRITON_MODEL=yolo26x
 Environment=MQTT_HOST=hivemq.homelan
 Environment=MQTT_PORT=1883
 Environment=MQTT_TOPIC=surveillance/detector 

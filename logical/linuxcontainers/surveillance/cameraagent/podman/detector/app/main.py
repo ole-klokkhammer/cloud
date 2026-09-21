@@ -23,9 +23,9 @@ import signal
 import sys
 import threading
 from config import environment
-from detector import Detector
-from mqtt_pub import MqttPub
-from stream import VideoStream
+from services.detector import Detector
+from services.mqtt_pub import MqttPub
+from services.rtsp import RtspStream
 
 
 def setup_logging():
@@ -55,7 +55,7 @@ def main():
         user=environment.mqtt_user,
         password=environment.mqtt_pass,
     )
-    videoStream = VideoStream(environment.rtsp_url)
+    videoStream = RtspStream(environment.rtsp_url)
     detector = Detector(environment.triton_url, environment.triton_model)
 
     def on_signal(signum, frame):
@@ -73,7 +73,7 @@ def main():
     )
     logger.info(
         f"starting: triton={environment.triton_url} model={environment.triton_model} "
-        f"classes={environment.classes_str} rtsp={environment.rtsp_url} "
+        f"class_filter={environment.class_filter_str} rtsp={environment.rtsp_url} "
         f"input={environment.input_size} conf={environment.min_conf} "
         f"max_fps={environment.max_fps} mqtt={mqtt_str}"
     )
@@ -97,8 +97,8 @@ def main():
 
         logger.info("Registering callbacks")
         videoStream.set_frame_callback(detector.on_frame)
-        videoStream.set_on_new_session_cbs(detector.new_session)
-        detector.set_detection_callbacks(*[mqtt_pub.publish])
+        videoStream.set_on_new_session_callback(detector.new_session)
+        detector.set_on_detect_callbacks(*[mqtt_pub.publish])
 
         logger.info(
             f"Starting capture: rtsp={environment.rtsp_url} input={environment.input_size} "

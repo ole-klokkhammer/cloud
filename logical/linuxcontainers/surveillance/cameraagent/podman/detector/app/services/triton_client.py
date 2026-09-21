@@ -169,9 +169,10 @@ def _nms(cxywh: np.ndarray, confs: np.ndarray, iou_th: float) -> np.ndarray:
         keep.append(i)
         if rest.size == 1:
             break
-        inter = (
-            np.maximum(0.0, np.minimum(x2[i], x2[rest[1:]]) - np.maximum(x1[i], x1[rest[1:]]))
-            * np.maximum(0.0, np.minimum(y2[i], y2[rest[1:]]) - np.maximum(y1[i], y1[rest[1:]]))
+        inter = np.maximum(
+            0.0, np.minimum(x2[i], x2[rest[1:]]) - np.maximum(x1[i], x1[rest[1:]])
+        ) * np.maximum(
+            0.0, np.minimum(y2[i], y2[rest[1:]]) - np.maximum(y1[i], y1[rest[1:]])
         )
         iou = inter / (area[i] + area[rest[1:]] - inter + 1e-9)
         rest = rest[1:][iou <= iou_th]
@@ -204,7 +205,7 @@ class TritonClient:
     def __init__(
         self,
         server_url: str,
-        model: str = "detector",
+        model: str,
         imgsz: int = 640,
         timeout: float = 15.0,
         names: Optional[Sequence[str]] = None,
@@ -216,7 +217,7 @@ class TritonClient:
         self._names = tuple(names) if names else COCO_NAMES
         self._layout: Optional[str] = None  # 'raw' | 'end2end', from load()
         self._client = tc_grpc.InferenceServerClient(
-            url=server_url, channel_options=_CHANNEL_OPTIONS
+            url=server_url, channel_args=_CHANNEL_OPTIONS
         )
 
     # ---- lifecycle --------------------------------------------------------
@@ -273,14 +274,16 @@ class TritonClient:
         """One frame -> TritonResult. Raises on transport / decode
         failure (the hot-path caller catches and backs off)."""
         tensor, meta = _letterbox(frame, self.imgsz)
-        request = self._client.model_infer_request(
+        inputs = [tc_grpc.InferInput("images", list(tensor.shape), "FP32")]
+        inputs[0].set_data_from_numpy(tensor)
+        outputs = [tc_grpc.InferRequestedOutput("output0")]
+        res = self._client.infer(
             self.model,
-            inputs=[
-                {"name": "images", "shape": list(tensor.shape), "data": tensor},
-            ],
+            inputs,
+            outputs=outputs,
+            client_timeout=self.timeout,
         )
-        res = self._client.infer(self.model, request, timeout=self.timeout)
-        out = np.asarray(res.get_tensor("output0"))
+        out = res.as_numpy("output0")
         if out.ndim == 3:
             out = out[0]
         return self._postprocess(out, meta, conf, iou, classes)
@@ -328,7 +331,9 @@ class TritonClient:
             sel = rows[:, 4] >= conf
             rows = rows[sel]
             if classes is not None:
-                rows = rows[np.isin(rows[:, 5].astype(np.int64), np.asarray(list(classes)))]
+                rows = rows[
+                    np.isin(rows[:, 5].astype(np.int64), np.asarray(list(classes)))
+                ]
             if not len(rows):
                 return TritonResult(np.zeros((0, 5), np.float32), [])
             xyxy = self._deletterbox(rows[:, :4], meta)
@@ -354,7 +359,13 @@ class TritonClient:
         x2 = cxywh[kept, 0] + cxywh[kept, 2] / 2 - meta["left"]
         y2 = cxywh[kept, 1] + cxywh[kept, 3] / 2 - meta["top"]
         boxes = np.column_stack(
-            [x1 / meta["r"], y1 / meta["r"], x2 / meta["r"], y2 / meta["r"], top_conf[kept]]
+            [
+                x1 / meta["r"],
+                y1 / meta["r"],
+                x2 / meta["r"],
+                y2 / meta["r"],
+                top_conf[kept],
+            ]
         ).astype(np.float32)
         labels = [self._label(int(c)) for c in top_cls[kept]]
         return TritonResult(boxes, labels)

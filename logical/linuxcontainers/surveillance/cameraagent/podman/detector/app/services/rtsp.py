@@ -43,7 +43,7 @@ OnFrameCallback = Callable[[object, float], None]
 _TCP_OPTIONS = "rtsp_transport;tcp|stimeout;60000"
 
 
-class VideoStream(threading.Thread):
+class RtspStream(threading.Thread):
     """Owns the VideoCapture; delivers each frame to the frame callback
     with the frame's stream time; emits the 60s heartbeat beats (the
     built-in capture beat plus any registered beats) - all on this thread.
@@ -67,13 +67,13 @@ class VideoStream(threading.Thread):
 
     # ---- registration (call before start()) -----------------------------
 
-    def set_frame_callback(self, cb: OnFrameCallback) -> "VideoStream":
+    def set_frame_callback(self, cb: OnFrameCallback) -> "RtspStream":
         """Per-frame callback (frame, stream_ts) - runs on the capture
         thread, so keep it to bookkeeping plus one throttled predict."""
         self._frame_cb = cb
         return self
 
-    def set_on_new_session_cbs(self, cb: Callable[[], None]) -> "VideoStream":
+    def set_on_new_session_callback(self, cb: Callable[[], None]) -> "RtspStream":
         """Called at every open/reconnect - the moment the stream clock
         restarts. Reset per-session state there (windows, rings,
         throttle timers) and set the UTC anchor for stream-time -> UTC

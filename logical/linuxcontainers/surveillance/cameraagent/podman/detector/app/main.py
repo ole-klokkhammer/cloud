@@ -50,6 +50,8 @@ def main():
 
     stop = threading.Event()
     logger = logging.getLogger("detector")
+
+    logger.info("Instantiating")
     mqtt_pub = MqttPub(
         environment.mqtt_host,
         environment.mqtt_port,
@@ -64,6 +66,11 @@ def main():
         hold_s=environment.detector_live_hold,
     )
     detector = Detector(environment.triton_url, environment.triton_model, livePusher)
+
+    logger.info("Registering callbacks")
+    videoStream.set_frame_callback(detector.on_frame)
+    videoStream.set_on_new_session_callback(detector.new_session)
+    detector.set_on_detect_callbacks(*[mqtt_pub.publish])
 
     def on_signal(signum, frame):
         logger.info(f"exit signal {signum} received")
@@ -90,6 +97,7 @@ def main():
     )
 
     try:
+
         logger.info(
             f"Loading detector: triton={environment.triton_url} "
             f"model={environment.triton_model} (triton health gate)"
@@ -105,21 +113,16 @@ def main():
         )
         mqtt_pub.start()
 
-        logger.info("Registering callbacks")
-        videoStream.set_frame_callback(detector.on_frame)
-        videoStream.set_on_new_session_callback(detector.new_session)
-        detector.set_on_detect_callbacks(*[mqtt_pub.publish])
+        logger.info(
+            f"Starting detector: triton={environment.triton_url} model={environment.triton_model}"
+        )
+        detector.start()
 
         logger.info(
             f"Starting capture: rtsp={environment.rtsp_url} input={environment.triton_input_size} "
             f"conf={environment.triton_min_conf} max_fps={environment.detector_max_fps}"
         )
         videoStream.start()
-
-        logger.info(
-            f"Starting detector: triton={environment.triton_url} model={environment.triton_model}"
-        )
-        detector.start()
     except Exception:
         logger.exception("detector init failed")
         sys.exit(1)

@@ -15,9 +15,10 @@ callback on the capture thread:
     configured labels)
   * every inferred frame gets painted (all boxes; tracked ones bold,
     with ids) and, when enabled, forwarded to the live-push, which
-    streams the annotated frames to mediaMTX (held still when nothing
-    tracked) - mediaMTX records the annotated path, so the recording
-    IS the footage; no detector-side clip encoding.
+    streams the annotated frames to mediaMTX only while a tracked
+    target is active - so mediaMTX records the annotated path exactly
+    when something is happening (idle = dark = nothing recorded); the
+    recording IS the footage; no detector-side clip encoding.
   * burst close -> one detection_burst event via the registered
     on_detect callbacks (main.py wires them to MqttPub.publish - the
     domain owns no transport). A burst's footage is a slice of the

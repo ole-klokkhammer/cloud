@@ -40,6 +40,17 @@ def _env_float(name, default):
         raise SystemExit(f"[detector] {name}={raw!r} is not a number")
 
 
+def _env_labels(name, default):
+    """Comma-separated model class NAMES to track (persistent ids across
+    frames): DETECTOR_TRACK_LABELS=person,cat. Names, not ids - ids
+    depend on the model's export, names don't."""
+    raw = os.environ.get(name, default)
+    toks = [t.strip().lower() for t in raw.split(",") if t.strip()]
+    if not toks:
+        raise SystemExit(f"[detector] {name}={raw!r}: empty name list")
+    return tuple(toks)
+
+
 def _env_classes(name, default):
     """Class filter for predict(): comma-separated COCO class ids
     (DETECTOR_CLASS=15 or 15,16,24) or the keyword 'all' = no class
@@ -104,9 +115,12 @@ class Environment:
     triton_model_family: str
     detector_max_fps: float
     detector_burst_window: float
+    tracker_labels: tuple
+    detector_clip_seconds: float
+    detector_clip_dir: str
+    detector_live_path: str
+    detector_live_hold: float
     event_camera_name: str
-    event_frame_width: int
-    event_dir: str
     mqtt_host: str
     mqtt_port: int
     mqtt_topic: str
@@ -142,9 +156,14 @@ environment = Environment(
     triton_model_family=_env_family("TRITON_MODEL_FAMILY", "yolo"),
     detector_max_fps=_env_float("DETECTOR_MAX_FPS", 10),
     detector_burst_window=_env_float("DETECTOR_BURST_WINDOW_SECS", 2.0),
+    tracker_labels=_env_labels("DETECTOR_TRACK_LABELS", "person,cat"),
+    detector_clip_seconds=_env_float("DETECTOR_CLIP_SECONDS", 20),
+    detector_clip_dir=_env("DETECTOR_CLIP_DIR", "/detector/clips"),
+    # the annotated RTSP push into mediaMTX (path auto-created on publish);
+    # empty = the live push is disabled
+    detector_live_path=_env("DETECTOR_LIVE_PATH", ""),
+    detector_live_hold=_env_float("DETECTOR_LIVE_HOLD_SECONDS", 3),
     event_camera_name=_env("EVENT_CAMERA_NAME", "entrance_roof"),
-    event_frame_width=_env_int("EVENT_FRAME_WIDTH", 1280),
-    event_dir=_env("EVENT_DIR", "/detections/events"),
     mqtt_host=_env("MQTT_HOST", "hivemq.homelan"),
     mqtt_port=_env_int("MQTT_PORT", 1883),
     mqtt_topic=_env("MQTT_TOPIC", "surveillance/detector"),

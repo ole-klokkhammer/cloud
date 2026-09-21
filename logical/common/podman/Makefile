@@ -1,12 +1,14 @@
 # podman common Makefile - setup + registry login + GC for an LXC.
 # fresh LXC: make setup && make deploy
-LXC ?= core:cameraagent
+LXC ?= core:seldon
 UNIT_DIR := etc/systemd/system
 REGISTRY_SERVICE := podman-registry-login.service
 GC_SERVICE       := podman-gc.service
 GC_TIMER         := podman-gc.timer
 
 .PHONY: setup deploy deploy-registry deploy-gc gc-now status logs undeploy
+
+deploy: deploy-registry deploy-gc
 
 # bootstrap: podman + quadlet generator + auto-update timer + storage/registry checks.
 # Idempotent; must NOT create /env/zot.env (secret, stays out of the repo).
@@ -29,7 +31,6 @@ deploy-gc:
 	lxc exec $(LXC) -- systemctl daemon-reload
 	lxc exec $(LXC) -- systemctl enable --now $(GC_TIMER)
 
-deploy: deploy-registry deploy-gc
 
 # one-shot run of what the timer does
 gc-now:

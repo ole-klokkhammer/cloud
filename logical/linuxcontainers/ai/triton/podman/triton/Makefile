@@ -1,4 +1,4 @@
-LXC := core:cameraagent
+LXC := core:triton
 LXC_BIN ?= lxc
 IMAGE := registry.linole.org/surveillance/triton:latest
 QUADLET_NAME := triton
@@ -30,4 +30,8 @@ status:
 
 logs:
 	$(LXC_BIN) exec $(LXC) -- journalctl -u $(QUADLET_NAME) -f
- 
+
+remove:
+	$(LXC_BIN) exec $(LXC) -- systemctl stop $(QUADLET_NAME)
+	$(LXC_BIN) exec $(LXC) -- systemctl disable $(QUADLET_NAME)
+	$(LXC_BIN) exec $(LXC) -- systemctl disable $(QUADLET_NAME)

@@ -1,12 +1,15 @@
-name: ai-utils
+name: triton
 description: A profile for running AI utilities on a GPU worker with local models.
 config:
   user.host: "core"
   limits.cpu: "16"
   limits.cpu.nodes: "0,1,2,3"
   limits.memory: 64GB
-  limits.kernel.memlock: unlimited
   limits.memory.swap: "false"
+  raw.lxc: |
+    lxc.apparmor.profile = unconfined
+    lxc.cap.drop =
+  security.nesting: "true"
 devices:
   eth0:
     name: eth0
@@ -24,5 +27,15 @@ devices:
   models:
     path: /models
     shift: "true"
-    source: /ssd/llm/models
+    source: /ssd/models/seldon
+    type: disk
+  env:
+    path: /env/zot.env
+    shift: "true"
+    source: /ssd/appdata/env/zot.env
+    type: disk
+  models:
+    path: /models
+    shift: "true"
+    source: /ssd/models/triton
     type: disk

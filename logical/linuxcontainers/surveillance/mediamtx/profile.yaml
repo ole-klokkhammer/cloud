@@ -25,9 +25,9 @@ devices:
     source: /hdd/surveillance/mediamtx
     type: disk
   env:
-    path: /env
+    path: /env/mediamtx.env
     shift: "true"
-    source: /ssd/appdata/env
+    source: /ssd/appdata/env/mediamtx.env
     type: disk
   root:
     path: /

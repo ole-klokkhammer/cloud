@@ -87,6 +87,11 @@ else
   warn 'podman not installed - skipping container smoke test'
 fi
 
+
+sudo nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml
+sudo systemctl enable --now nvidia-cdi-refresh.path
+sudo systemctl enable --now nvidia-cdi-refresh.service
+
 step "done"
 echo "nvidia-container-toolkit ${V} ready in this LXC; CDI spec at ${CDI_OUTPUT}"
 echo "quadlet/container: use AddDevice=nvidia.com/gpu=all (podman) or the CDI name"

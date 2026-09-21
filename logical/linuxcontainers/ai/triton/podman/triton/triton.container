@@ -32,7 +32,7 @@ Volume=/models/yolo/rtdetr-x.plan:/model_repository/rtdetr-x/1/model.plan:ro
 # only reads model-level or version-level config - NOT configs/
 # subfolders). Model files are the LXD mounts above.
 # -------------------------------------------------------------
-Environment=ACTIVE_MODEL=rtdetr-x
+Environment=ACTIVE_MODEL=yolo26x
 Environment=CONFIG_PROFILE=tensorrt
 Environment=TZ=Europe/Oslo
 

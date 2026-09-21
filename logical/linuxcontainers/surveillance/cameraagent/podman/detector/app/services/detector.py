@@ -11,12 +11,18 @@ callback on the capture thread:
   * throttled predict: MAX_FPS on the stream clock; post-failure
     backoff on the wall clock (a cooldown on our side, not a stream
     property)
-  * per-frame detection JSON; best-frame ring of 16 Candidates keyed
-    on confidence x target-area fraction
-  * burst close -> best-frame still (JPEG, <= frame_width wide) + one
-    detection_burst event via the registered on_detect callbacks
-    (main.py wires them to NatsPub.publish + MqttPub.publish - the
-    domain owns no transport).
+  * per-frame detection JSON (+ the live tracker's ids for the
+    configured labels)
+  * every inferred frame gets painted (all boxes; tracked ones bold,
+    with ids) into one shared copy: it feeds (a) the rolling .buf
+    JPEG ring under clip_dir - the ~20s clip source - and (b) the
+    optional live-push, which forwards painted frames to mediaMTX
+    (held still when nothing tracked).
+  * burst close -> an H.265 clip of the .buf ring (ffmpeg encodes on
+    its own thread; the path goes into the event when the *job* is
+    queued, not when the file lands) + one detection_burst event via
+    the registered on_detect callbacks (main.py wires them to
+    MqttPub.publish - the domain owns no transport).
 
 DetectionHeartbeat: the detector-side 60s beat - its own daemon thread
 (started by Detector.start(), so the trimmer's lifecycle belongs to
@@ -36,33 +42,21 @@ consumers. Config: env vars, see detector.env.example.
 
 import json
 import logging
-import sys
+import subprocess
 import threading
 import time
 from collections import deque
-from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import cv2
 
 from config import environment
+from services.annotate import draw_boxes
+from services.tracker import Tracker
 from services.triton_client import TritonClient
 
 logger = logging.getLogger("detector")
-
-
-# ---------------------------------------------------------------- candidates
-
-
-@dataclass
-class Candidate:
-    score: float  # conf x target-area fraction
-    frame: object  # full-res BGR ndarray (for the still)
-    ts: datetime
-    conf: float
-    label: str
-    box: tuple  # xyxy in full-res frame coords
 
 
 # ---------------------------------------------------------------- pipeline
@@ -109,10 +103,38 @@ class Detector:
         )
 
         # ---- per-session detection state (reset by new_session)
-        self.ring = deque(maxlen=16)  # Candidates of the open burst
         self.last_det = None  # stream ts of the last detection
         self.last_infer = -1.0  # stream ts of the last predict
         self.next_predict_ok = 0.0  # wall clock: post-failure backoff
+        self._burst_frames = 0  # detection frames in the open burst window
+        self._burst_tracks: dict[int, str] = {}  # track id -> label, seen in burst
+        self._burst_best = None  # (conf, label) of the best det in the burst
+        # ---- tracker + clip buffers (created at load so the dirs exist
+        # before the capture thread ever touches them)
+        self.tracker = Tracker(track_labels=environment.tracker_labels)
+        self.buf_dir = str(Path(environment.detector_clip_dir) / ".buf")
+        Path(self.buf_dir).mkdir(parents=True, exist_ok=True)
+        n_buf = max(
+            4, int(environment.detector_clip_seconds * environment.detector_max_fps)
+        )
+        self._buf_seqs: deque[int] = deque(
+            maxlen=n_buf
+        )  # painted-frame seq numbers, oldest left -> newest right
+        self._seq = 0  # monotonic painted-frame counter (zero-padded file names)
+        # optional live streamer: painted frames loop as an RTSP push into
+        # mediaMTX (the path is auto-created on publish); when nothing
+        # tracked, the last painted frame holds still. None when
+        # DETECTOR_LIVE_PATH is empty.
+        self.live_push = None
+        if environment.detector_live_path:
+            from services.live_push import LivePusher
+
+            self.live_push = LivePusher(
+                environment.detector_live_path,
+                fps=environment.detector_max_fps,
+                hold_s=environment.detector_live_hold,
+            )
+            self.live_push.start()
         # ---- detector-side heartbeat state (read by DetectionHeartbeat)
         self.last_dets = 0  # dets in the last processed frame
         self.last_det_mono = None  # wall clock of the last detection
@@ -167,51 +189,129 @@ class Detector:
                         exc_info=True,
                     )
 
-    def store_still(self, cand):
-        """best frame -> JPEG at <= frame_width wide; returns (path, box-in-still)."""
-        img = cand.frame
-        fh, fw = img.shape[:2]
-        scale = min(1.0, environment.event_frame_width / fw)
-        if scale < 1.0:
-            img = cv2.resize(
-                img, (int(fw * scale), int(fh * scale)), interpolation=cv2.INTER_AREA
-            )
-        p = (
-            Path(environment.event_dir)
-            / f"{cand.label}_{cand.ts.strftime('%Y%m%d_%H%M%S')}.jpg"
+    def _save_buf_frame(self, frame):
+        """Persist one painted full-res frame into the rolling .buf ring
+        (a JPEG per frame; the oldest is evicted automatically). Returns
+        the frame's seq number - the clip encoder stitches a seq RANGE of
+        these together, so the ring is the clip source, not per-burst
+        stills. When the ring is full each new frame evicts the oldest,
+        and that file is unlinked too - otherwise the ring would leak
+        disk at ~full-res-JPEG rate forever."""
+        seq = self._seq
+        self._seq += 1
+        out = Path(self.buf_dir) / f"{seq:08d}.jpg"
+        cv2.imwrite(str(out), frame, [int(cv2.IMWRITE_JPEG_QUALITY), 85])
+        # if this append overflows the ring, the oldest tracked seq is the
+        # one being dropped - its .jpg goes with it
+        evicted = (
+            self._buf_seqs[0] if len(self._buf_seqs) >= self._buf_seqs.maxlen else None
         )
-        p.parent.mkdir(parents=True, exist_ok=True)
+        self._buf_seqs.append(seq)
+        if evicted is not None:
+            try:
+                (Path(self.buf_dir) / f"{evicted:08d}.jpg").unlink()
+            except OSError:
+                pass
+        return seq
 
-        # paint the winning box onto the still (scaled to still coords) so
-        # the JPEG shows exactly what was detected, not just a raw frame
-        box = [int(v * scale) for v in cand.box]
-        x1, y1, x2, y2 = box
-        hgt, wid = img.shape[:2]
-        x1, x2 = max(0, min(x1, wid - 1)), max(0, min(x2, wid - 1))
-        y1, y2 = max(0, min(y1, hgt - 1)), max(0, min(y2, hgt - 1))
-        color = (0, 255, 0)  # green
-        cv2.rectangle(img, (x1, y1), (x2, y2), color, 2)
-        txt = f"{cand.label} {cand.conf:.2f}"
-        cv2.putText(
-            img,
-            txt,
-            (x1, max(y1 - 6, 12)),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            0.6,
-            color,
-            2,
-            cv2.LINE_AA,
+    def _clear_buf(self):
+        """Drop every ring frame (a new session: the .jpg files are the
+        previous session's - never clip across a stream restart)."""
+        for seq in self._buf_seqs:
+            try:
+                (Path(self.buf_dir) / f"{seq:08d}.jpg").unlink()
+            except OSError:
+                pass
+        self._buf_seqs.clear()
+
+    def _render_clip(self, frame_utc, tracks) -> dict:
+        """Encode the .buf ring (up to DETECTOR_CLIP_SECONDS of painted
+        frames) into an H.265 MP4 under the clip dir, ffmpeg on its own
+        (subprocess) so the capture thread just enqueues the event.
+
+        Returns the event's `clip` sub-payload. Runs on the capture thread
+        at burst-close (not on the 10fps hot path), so a ~15MB encode
+        there is acceptable; the path is into the dir the ffmpeg job
+        fills, not the finished file. `tracks` is a list of (id, label)
+        for every tracked target seen during the open burst (deduped:
+        first-seen label wins, so a flicker can't mislabel an id).
+        """
+        clip_dir = Path(environment.detector_clip_dir)
+        clip_dir.mkdir(parents=True, exist_ok=True)
+        name = (
+            f"{environment.event_camera_name}_{frame_utc.strftime('%Y%m%d_%H%M%S')}.mp4"
         )
-        cv2.imwrite(str(p), img, [int(cv2.IMWRITE_JPEG_QUALITY), 90])
-        return p, box
+        clip_path = clip_dir / name
+
+        # a burst can't close with an empty ring (no inference happened in
+        # this session yet) - nothing to encode. The event still fires; it
+        # just carries no clip.
+        if not self._buf_seqs:
+            return {"error": "empty"}
+
+        # the ring holds the newest n_buf seqs oldest->newest; encode that
+        # range with the image2 demuxer. A seq gap can't happen within the
+        # ring (a single .buf dir, appended in order), so -start_number +
+        # a frame-rate on the input is all ffmpeg needs.
+        lo, hi = self._buf_seqs[0], self._buf_seqs[-1]
+        fps = environment.detector_max_fps
+        cmd = [
+            "ffmpeg",
+            "-hide_banner",
+            "-loglevel",
+            "error",
+            "-framerate",
+            str(fps),
+            "-start_number",
+            str(lo),
+            "-i",
+            f"{self.buf_dir}/%08d.jpg",
+            "-frames:v",
+            str(hi - lo + 1),
+            "-c:v",
+            "libx265",
+            "-preset",
+            "fast",
+            "-pix_fmt",
+            "yuv420p",
+            "-b:v",
+            "6M",
+            "-tag:v",
+            "hvc1",  # Apple/QuickTime compatibility in the mp4 wrapper
+            "-y",
+            str(clip_path),
+        ]
+        track_payload = [{"id": tid, "label": lab} for tid, lab in sorted(set(tracks))]
+        try:
+            subprocess.run(cmd, capture_output=True, check=False, timeout=120)
+        except (subprocess.SubprocessError, OSError):
+            logger.error("clip encode failed - no clip for this burst", exc_info=True)
+            return {"file": name, "path": str(clip_path), "error": "encode"}
+        n = hi - lo + 1 if lo <= hi else 0
+        return {
+            "file": name,
+            "path": str(clip_path),
+            "duration_s": round(n / fps, 1) if fps else 0.0,
+            "fps": fps,
+            "tracks": track_payload,
+        }
 
     def new_session(self):
         """The stream clock just restarted (open/reconnect): reset the
-        per-session detection state and anchor the UTC conversion."""
+        per-session detection state, clear the previous session's ring
+        frames, and re-anchor the UTC conversion + the tracker/live state
+        (the ts domain they key off has changed)."""
         self.ts0 = datetime.now(timezone.utc)
-        self.ring.clear()
         self.last_det = None
         self.last_infer = -1.0
+        self._burst_frames = 0
+        self._burst_tracks = {}
+        self._burst_best = None
+        self._seq = 0
+        self.tracker.reset()
+        self._clear_buf()
+        if self.live_push is not None:
+            self.live_push.on_new_session()
 
     def on_frame(self, frame, ts):
         """One frame in, per-frame pipeline out. Fast by design: heavy work
@@ -222,38 +322,41 @@ class Detector:
         not Python's processing clock; a stalled consumer can't skew it.
         """
         now = ts
-        fh, fw = frame.shape[:2]
 
-        # close the burst: window of silence elapsed -> keep the best frame.
+        # close the burst: a window of silence elapsed after a detection.
         # Checked on EVERY frame (incl. throttled ones) so a burst closes
         # within one frame period of the silence window.
         if (
-            self.last_det is not None
-            and self.ring
+            self._burst_frames > 0
+            and self.last_det is not None
             and now - self.last_det >= environment.detector_burst_window
         ):
-            best = max(self.ring, key=lambda c: c.score)
-            n_burst = len(self.ring)
-            self.ring.clear()
-            self.last_det = None
-            path, box = self.store_still(best)
-            logger.info(
-                f"best still stored: {path} ({best.label}, "
-                f"burst of {n_burst} detection frames, best conf {best.conf:.2f})"
+            frame_utc = (
+                datetime.now(timezone.utc)
+                if self.ts0 is None
+                else self.ts0 + timedelta(seconds=now)
             )
+            n_burst = self._burst_frames
+            best_conf, label = self._burst_best or (0.0, None)
+            clip = self._render_clip(frame_utc, self._burst_tracks.items())
+            logger.info(
+                f"burst clip stored: {clip.get('path', 'n/a')} ({n_burst} detection "
+                f"frames, {clip.get('duration_s', 0)}s, "
+                f"{len(clip.get('tracks', []))} tracks, best {label or 'n/a'} "
+                f"{best_conf:.2f})"
+            )
+            self.last_det = None
+            self._burst_frames = 0
+            self._burst_tracks = {}
+            self._burst_best = None
             self._on_detect(
                 {
                     "event": "detection_burst",
                     "camera": environment.event_camera_name,
-                    "label": best.label,
+                    "label": label,
+                    "best_conf": round(best_conf, 3),
                     "detections": n_burst,
-                    "best": {
-                        "file": path.name,
-                        "path": str(path),
-                        "confidence": round(best.conf, 3),
-                        "frame_ts": best.ts.isoformat(),
-                        "box": box,
-                    },
+                    "clip": clip,
                     "detector": "detector/1.0",
                 }
             )
@@ -298,6 +401,32 @@ class Detector:
             for i in range(res.count)
         ]
 
+        # tracker ALWAYS sees this frame (even a detless one) - that is how
+        # stale tracks get pruned. ids align to dets (== res box order).
+        ids, had_active = self.tracker.update(dets, now)
+
+        # one shared painted copy (all boxes, tracked ones bold + #id): it
+        # feeds the rolling clip ring and the live pusher below. Empty
+        # detection frames still paint (a plain frame) so the ring stays a
+        # dense 20s of real footage, not gappy.
+        painted = draw_boxes(
+            frame,
+            res.boxes,
+            res.labels,
+            [float(res.boxes[i, 4]) for i in range(res.count)],
+            ids=ids,
+        )
+        self._save_buf_frame(painted)
+        if self.live_push is not None:
+            self.live_push.offer(painted, now, had_active)
+
+        # which of this frame's boxes are tracked targets (for the log).
+        frame_tracks = [
+            {"id": ids[i], "label": res.labels[i]}
+            for i in range(res.count)
+            if ids[i] is not None
+        ]
+
         if dets:
             # the frame's own time: session anchor + stream offset
             frame_utc = (
@@ -310,6 +439,14 @@ class Detector:
             self.last_det_mono = time.monotonic()
             best = max(dets, key=lambda d: d[0])
             self.last_det = now
+            # the burst's overall best det (label + conf the event reports)
+            if self._burst_best is None or best[0] > self._burst_best[0]:
+                self._burst_best = (best[0], best[1])
+            # fold this frame's tracked ids into the open burst (first-seen
+            # label wins, so a 1-frame flicker can't mislabel an id).
+            for t in frame_tracks:
+                self._burst_tracks.setdefault(t["id"], t["label"])
+            self._burst_frames += 1
             logger.info(
                 json.dumps(
                     {
@@ -320,22 +457,11 @@ class Detector:
                         "label": best[1],
                         "best_conf": round(best[0], 3),
                         "bbox": [round(v) for v in best[2]],
+                        "tracks": frame_tracks,
                     },
                     separators=(",", ":"),
                 )
             )
-            for c, label, box in dets:
-                area_frac = ((box[2] - box[0]) * (box[3] - box[1])) / (fw * fh)
-                self.ring.append(
-                    Candidate(
-                        c * area_frac,
-                        frame.copy(),
-                        frame_utc,
-                        c,
-                        label,
-                        box,
-                    )
-                )
         else:
             self.last_dets = 0
 

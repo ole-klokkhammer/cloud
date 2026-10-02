@@ -8,12 +8,12 @@ ContainerName=mediamtx
 Image=docker.io/bluenviron/mediamtx:1.21.0
 Exec="/config/mediamtx.yml"
 
-Volume=/config:/config:rw
-Volume=/media:/media:rw
+Volume=/config/mediamtx:/config:rw
+Volume=/media/mediamtx:/media:rw
 Volume=/etc/localtime:/etc/localtime:ro
 
 Environment=TZ=Europe/Oslo
-EnvironmentFile=/env/mediamtx.env
+EnvironmentFile=/env/surveillance/mediamtx.env
 
 [Service]
 Restart=always

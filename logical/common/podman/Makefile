@@ -1,6 +1,6 @@
 # podman common Makefile - setup + registry login + GC for an LXC.
 # fresh LXC: make setup && make deploy
-LXC ?= core:seldon
+LXC ?= core:surveillance
 UNIT_DIR := etc/systemd/system
 REGISTRY_SERVICE := podman-registry-login.service
 GC_SERVICE       := podman-gc.service

@@ -15,9 +15,9 @@ Image=registry.linole.org/surveillance/detector:latest
 Volume=/config/detector:/config:rw
 
 Environment=TZ=Europe/Oslo
-Environment=RTSP_URL=rtsp://mediamtx.homelan:8554/entrance_roof
+Environment=RTSP_URL=rtsp://surveillance.homelan:8554/entrance_roof
 
-Environment=TRITON_URL=triton.homelan:8001
+Environment=TRITON_URL=surveillance.homelan:8001
 Environment=TRITON_MODEL=yolo26x
 Environment=TRITON_MODEL_FAMILY=yolo
 Environment=TRITON_CLASS_FILTER=0,2,15,14,16,25,26,24,39,67,41,45,78,48,53
@@ -31,7 +31,7 @@ Environment=DETECTOR_MAX_FPS=10
 Environment=DETECTOR_BURST_WINDOW_SECS=2.0
 Environment=DETECTOR_LIVE_HOLD_SECONDS=3
 Environment=DETECTOR_TRACK_LABELS=person,cat,dog
-Environment=DETECTOR_LIVE_PATH=rtsp://mediamtx.homelan:8554/entrance_roof_annotated
+Environment=DETECTOR_LIVE_PATH=rtsp://surveillance.homelan:8554/entrance_roof_annotated
 
 Environment=MQTT_HOST=hivemq.homelan
 Environment=MQTT_PORT=1883

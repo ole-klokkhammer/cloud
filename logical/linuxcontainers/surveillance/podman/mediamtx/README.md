@@ -1,23 +1,3 @@
-# mediamtx (core:mediamtx)
-
-CPU-only, unprivileged LXC running mediamtx as a podman quadlet: camera
-ingest + recording + playback API. No GPU - the 5060 Ti stays with the camagent LXC. No nesting/apparmor overrides: an unprivileged LXC is enough
-for podman.
-
-## setup
-
-### lxc
-
-lxc profile import mediamtx/profile.yaml # or: lxc profile create mediamtx + edit
-lxc launch ubuntu:24.04 mediamtx -p default -p mediamtx
-lxc exec mediamtx -- bash
-
-#### install podman
-
-sudo apt update && sudo apt install -y podman systemd-container gettext-base
-systemctl enable --now podman-auto-update.timer
-
-no nvidia container toolkit - there is no GPU here.
 
 ## playback (recorded footage)
 

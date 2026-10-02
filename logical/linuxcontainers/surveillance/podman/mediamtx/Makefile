@@ -1,9 +1,9 @@
-LXC := core:mediamtx
+LXC := core:surveillance
 LXC_BIN ?= lxc
 QUADLET_NAME := mediamtx
 QUADLET_DIR := etc/containers/systemd
 CONFIG_DIR := config
-ENV_FILE := /env/mediamtx.env
+ENV_FILE := /env/surveillance/mediamtx.env
 
 .PHONY: deploy config restart status logs
 

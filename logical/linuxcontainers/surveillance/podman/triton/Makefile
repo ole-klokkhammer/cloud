@@ -1,21 +1,18 @@
-LXC := core:cameraagent
+LXC := core:surveillance
 LXC_BIN ?= lxc
-IMAGE := registry.linole.org/surveillance/detector:latest
-QUADLET_NAME := detector
+IMAGE := registry.linole.org/surveillance/triton:latest
+QUADLET_NAME := triton
 QUADLET_DIR := etc/containers/systemd
 
-MODELS_DIR ?= /ssd/llm/models/cameraagent
-VENV ?= $(MODELS_DIR)/.venv
-
-.PHONY: build_and_push deploy restart stop status logs
-
-build_and_deploy: build push deploy
+.PHONY: build_and_push deploy restart stop status logs trt-engine
 
 build:
 	podman build -t $(IMAGE) -f Dockerfile .
 
 push:
 	podman push $(IMAGE)
+
+build_and_deploy: build push deploy
 
 deploy:
 	$(LXC_BIN) file push ./$(QUADLET_NAME).container $(LXC)/etc/containers/systemd/$(QUADLET_NAME).container
@@ -33,3 +30,8 @@ status:
 
 logs:
 	$(LXC_BIN) exec $(LXC) -- journalctl -u $(QUADLET_NAME) -f
+
+remove:
+	$(LXC_BIN) exec $(LXC) -- systemctl stop $(QUADLET_NAME)
+	$(LXC_BIN) exec $(LXC) -- systemctl disable $(QUADLET_NAME)
+	$(LXC_BIN) exec $(LXC) -- systemctl disable $(QUADLET_NAME)

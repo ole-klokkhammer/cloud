@@ -6,7 +6,6 @@ Requires=nats.service
 [Container]
 Network=host
 ContainerName=query
-# CPU-only image: the LLM runs on the 5090 llm LXC, not here
 Image=registry.linole.org/query:latest
 Volume=/config/query:/config/query:rw
 Volume=/detector:/detector:ro

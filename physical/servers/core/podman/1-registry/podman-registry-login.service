@@ -1,6 +1,4 @@
 [Unit]
-# Rootful registry login - writes root's podman auth file so image pulls
-# are authenticated. EnvironmentFile is created manually (out of the repo).
 Description=Podman Registry Login Service
 Wants=network-online.target systemd-resolved.service
 After=network-online.target systemd-resolved.service

@@ -11,6 +11,6 @@ lxc exec surveillance -- bash
 
 #### install podman
 
-sudo apt update && sudo apt install -y podman systemd-container gettext-base
+sudo apt update && sudo apt install -y podman systemd-container
 systemctl enable --now podman-auto-update.timer
 

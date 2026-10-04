@@ -11,7 +11,7 @@ ShmSize=32g
 Volume=/root/.cache/huggingface:/root/.cache/huggingface
 Volume=/models:/models
 
-Image=docker.io/lmsysorg/sglang:v0.5.21
+Image=docker.io/lmsysorg/sglang:v0.5.20
 Exec=sh -c 'numactl --interleave=all sglang serve \
     --tp-size 1 \
     --trust-remote-code \

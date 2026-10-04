@@ -48,7 +48,7 @@ install:
 
 # enable CDI auto-refresh (regenerates the spec on host driver updates)
 enable_cdi:
-	$(EXECSH) "systemctl enable --now nvidia-cdi-refresh.path nvidia-cdi-refresh.service"
+	$(EXECSH) "systemctl enable --now nvidia-cdi-refresh.path nvidia-cdi-refresh.service" 
 
 # generate the CDI spec
 generate:

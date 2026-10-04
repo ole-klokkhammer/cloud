@@ -6,10 +6,12 @@ After=network-online.target
 Network=host
 ContainerName=sglang
 AddDevice=nvidia.com/gpu=all
+ShmSize=32g
+
 Volume=/root/.cache/huggingface:/root/.cache/huggingface
 Volume=/models:/models
-Image=docker.io/lmsysorg/sglang:v0.5.20
-ShmSize=32g
+
+Image=docker.io/lmsysorg/sglang:v0.5.21
 Exec=sh -c 'numactl --interleave=all sglang serve \
     --tp-size 1 \
     --trust-remote-code \
@@ -37,6 +39,7 @@ Exec=sh -c 'numactl --interleave=all sglang serve \
     --tool-call-parser qwen3_coder \
     --host 0.0.0.0 \
     --port 8000 \
+    --sleep-on-idle \
     2>&1'
 
 [Service]

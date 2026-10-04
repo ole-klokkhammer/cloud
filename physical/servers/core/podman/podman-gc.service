@@ -1,0 +1,9 @@
+[Unit]
+Description=Podman image GC (rootful)
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/podman image prune -af --filter until=7d
+ExecStart=/usr/bin/podman container prune -af --filter until=7d
+ExecStart=/usr/bin/podman network prune -af --filter until=7d

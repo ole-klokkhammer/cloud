@@ -1,0 +1,15 @@
+[Unit]
+# Rootful registry login - writes root's podman auth file so image pulls
+# are authenticated. EnvironmentFile is created manually (out of the repo).
+Description=Podman Registry Login Service
+Wants=network-online.target systemd-resolved.service
+After=network-online.target systemd-resolved.service
+
+[Service]
+Type=oneshot
+EnvironmentFile=/ssd/appdata/env/zot.env
+ExecStart=/usr/bin/podman login $REGISTRY_URL --username $REGISTRY_USERNAME --password $REGISTRY_PASSWORD
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

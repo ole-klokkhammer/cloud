@@ -1,0 +1,6 @@
+[Timer]
+OnCalendar=daily
+RandomizedDelay=2h
+
+[Install]
+WantedBy=timers.target

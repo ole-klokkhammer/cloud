@@ -1,0 +1,7 @@
+# dynamic/dashboard.yaml
+http:
+  routers:
+    dashboard:
+      rule: "Host(`dash.cloud.homelan`)"
+      entrypoints: [ web ]
+      service: api@internal

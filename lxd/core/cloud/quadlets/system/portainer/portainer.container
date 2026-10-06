@@ -1,0 +1,11 @@
+[Unit]
+Description=Portainer
+After=network-online.target
+
+[Container]
+ContainerName=portainer
+Network=host                          # needs to reach 127.0.0.1:10010
+Image=ghcr.io/portainer/portainer-ce:latest
+
+[Install]
+WantedBy=multi-user.target

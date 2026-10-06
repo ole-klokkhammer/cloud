@@ -1,0 +1,11 @@
+http:
+  routers:
+    matrix:
+      rule: "Host(`matrix.cloud.homelan`)"
+      entrypoints: [ web ]        # :80 — websecure:443 once you get TLS
+      service: matrix
+  services:
+    matrix:
+      loadBalancer:
+        servers:
+          - url: "http://matrix:8008"

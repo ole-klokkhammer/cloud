@@ -1,0 +1,52 @@
+name: cloud
+description: Cloud profile
+config:
+  limits.memory: 164GB
+  # Hard cap, no swap: guest OOM (restarts one pod) is the scheduler; swapped
+  # KV pages / frigate stalls are both worse. Pod-level Memory= owns sizing.
+  limits.memory.swap: "false"
+  security.nesting: "true"
+  security.privileged: "false"
+  raw.lxc: |
+    lxc.apparmor.profile = unconfined
+    lxc.cap.drop =
+devices:
+  gpu:
+    type: gpu
+    gputype: physical
+    id: nvidia.com/gpu=all
+  eth0:
+    name: eth0
+    nictype: bridged
+    parent: br0
+    type: nic
+  root:
+    path: /
+    pool: zpool
+    type: disk
+  podman_store:
+    path: /ssd/podman
+    source: /ssd/podman
+    shift: "true"
+    type: disk
+  models:
+    path: /ssd/models
+    shift: "true"
+    source: /ssd/models
+    type: disk
+  env:
+    path: /ssd/appdata/env
+    source: /ssd/appdata/env
+    shift: "true"
+    type: disk
+  appdata_traefik:
+    path: /ssd/appdata/traefik
+    source: /ssd/appdata/traefik
+    shift: "true"
+    type: disk
+  appdata_matrix:
+    path: /ssd/appdata/matrix
+    shift: "true"
+    source: /ssd/appdata/matrix
+    type: disk
+project: default

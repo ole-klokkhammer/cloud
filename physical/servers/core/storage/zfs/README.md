@@ -45,6 +45,7 @@ for backup
 * sudo zfs receive ssd/k3s/homeassistant-data < /tmp/snapshot-1752566019.zfs
 
 ## ARC CACHE size
+set 64gb for 256gb host
 
-- sudo nano /etc/modprobe.d/zfs.conf
-  - options zfs zfs_arc_max=137438953472
+sudo nano /etc/modprobe.d/zfs.conf
+  options zfs zfs_arc_max=68719476736

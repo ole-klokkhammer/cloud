@@ -49,4 +49,9 @@ devices:
     shift: "true"
     source: /ssd/appdata/matrix
     type: disk
+  appdata_portainer:
+    path: /ssd/appdata/portainer
+    shift: "true"
+    source: /ssd/appdata/portainer
+    type: disk
 project: default

@@ -26,5 +26,10 @@ devices:
   models:
     path: /models
     shift: "true"
-    source: /ssd/llm/models
+    source: /ssd/models/huggingface
+    type: disk
+  env:
+    path: /ssd/appdata/env
+    source: /ssd/appdata/env
+    shift: "true"
     type: disk

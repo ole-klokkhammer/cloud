@@ -1,7 +1,8 @@
 # prime-agent
 
 Local **Prime Agent** [`PrimeIntellect-ai/prime-agent`](https://github.com/PrimeIntellect-ai/prime-agent)
-appliance, run as a **user-level (rootless) Podman Quadlet**.
+appliance, run as **rootless `podman compose`** projects — one compose project
+per registered workspace, generated and driven by [`agent.sh`](agent.sh).
 
 Instead of running a headless service, it is a keep-alive "workbench" container:
 the container stays up, and you drop into it to drive the interactive coding TUI
@@ -17,98 +18,102 @@ against a mounted workspace.
 
 | File | Purpose |
 | :-- | :-- |
-| [`podman/prime-agent.container`](podman/prime-agent.container) | The Quadlet -> user service `prime-agent.service` |
-| [`podman/Dockerfile`](podman/Dockerfile) | Slim `node:22-slim` image wrapping the official installer |
-| [`podman/models.json`](podman/models.json) | LLM provider config (`qwen-local`) |
-| [`podman/makefile`](podman/makefile) | Local lifecycle: image / deploy / status / logs / exec |
-| [`agent.sh`](agent.sh) | Register **one service per workspace** (Model B) |
+| [`agent.sh`](agent.sh) | Register **one compose project per workspace** + lifecycle |
+| [`podman/Dockerfile`](podman/Dockerfile) | `node:24` image wrapping the official installer |
+| [`podman/build.sh`](podman/build.sh) | Builds `prime-agent:latest` (context = `podman/`) |
+| [`podman/models.json`](podman/models.json) | LLM provider config (`qwen-local`), bind-mounted live |
 
-## One-time setup
+## How it works
+
+`agent.sh <workspace-path> [slug]` writes a compose project to
+`~/.config/prime-agent/<slug>/compose.yaml` (generated, don't edit by hand):
+
+- container `prime-agent-<slug>`: `sleep infinity` keep-alive, host network, the
+  workspace RW-mounted at `/workspace`, its own state volume
+  `prime-agent-<slug>-state` at `/home/agent/.prime/agent`, and the repo's
+  `models.json` bind-mounted read-only on top;
+- lifecycle via `podman compose -f <file>` (the docker-compose provider talking
+  to the **rootless podman API socket** — `agent.sh` enables `podman.socket`
+  for you on first use).
+
+Legacy per-workspace **quadlet** units migrate automatically: if a
+`prime-agent-<slug>.container` still exists in `~/.config/containers/systemd`,
+re-registering (or removing) that slug retires the systemd unit and recreates
+the same container and state volume under compose.
+
+## Setup
 
 ```bash
-# User-level services auto-start only if the user has lingering enabled.
-loginctl enable-linger $USER
-
 # Build the image (podman/ is the build context; Dockerfile + models.json are there).
-cd podman && make image
+cd podman && ./build.sh
 ```
 
 ## Run
 
 ```bash
-cd podman
-make deploy          # install the quadlet, daemon-reload, start the service
-make status          # user service + container state
-make exec            # enter the keep-alive container -> interactive TUI on /workspace
+agent.sh <workspace-path> [slug]   # register + start (idempotent; migrates old quadlets)
+agent.sh list                      # every registered workspace + live status
+agent.sh exec <slug>               # enter the keep-alive container -> interactive TUI
+agent.sh shell <slug>              # plain shell in the container
+agent.sh status|start|stop|logs|ps <slug>
+agent.sh remove <slug>             # stop + unregister + drop its state volume
 ```
+
+The slug defaults to the lowercased workspace basename. Registering a second
+workspace is just another `agent.sh <path>` call — N workspaces run side by
+side, each with its own container and state volume.
 
 Inside the TUI, pick the provider/model. The local provider is available as
 `qwen-local` / model `Qwen3.8-27b`, pointed at `https://llm.linole.org/v1`.
 
-## Changing the workspace
-
-Edit the host path in [`podman/prime-agent.container`](podman/prime-agent.container)
-(the `Volume=...:/workspace:rw` line), then `make deploy`. By default it attachses
-the cloud repo:
-
-```
-/home/ole/workspace/oleklokkhammer/projects/cloud  -> /workspace
-```
-
 ## Changing the LLM / model
 
 - **Edit the provider** — tweak `baseUrl` / `models` in
-  [`podman/models.json`](podman/models.json), then `make deploy` (it is a live host
-  bind; no image rebuild needed).
+  [`podman/models.json`](podman/models.json); it is a live host bind, picked up on the
+  next TUI start (no rebuild or restart needed).
 - **Add auth** — the `qwen-local` provider references the `LOCAL_LLM_KEY` env var;
   the current gateway ignores it (set to `dummy`). If your backend starts requiring a
-  key, put the real value in the `Environment=LOCAL_LLM_KEY=...` line of the quadlet.
+  key, set its real value in the compose template inside `agent.sh`
+  (`LOCAL_LLM_KEY:`), then re-register the workspaces.
 
 ## Update the agent
 
 ```bash
-cd podman && make redeploy   # rebuild image (new version/channel) + redeploy
-# or pin a release:
-docker build --build-arg PRIME_AGENT_VERSION=<ver> -t prime-agent:latest podman
+cd podman && ./build.sh      # rebuild image (the installer re-fetches the latest)
+agent.sh <path> <slug>       # re-register: recreates that workbench on the new image
 ```
 
 ## Logs & teardown
 
 ```bash
-make logs          # journalctl tail of the user service
-make clean         # stop + remove the container and its state volume (wipes sessions)
+agent.sh logs <slug>     # container log tail (the TUI itself runs on your exec tty)
+agent.sh remove <slug>   # stop + unregister + drop the container & state volume
 ```
 
-> `make clean` deletes the `prime-agent-state` volume — i.e. agent sessions,
+> `remove` deletes the `prime-agent-<slug>-state` volume — i.e. agent sessions,
 > `auth.json`, and the kernel venv. Use it only when you want a fresh agent.
 
-## One service per workspace — `agent.sh`
+## Migrating from the old quadlet layout
 
-The static quadlet above attaches a *single* workspace. When you want **N
-workspaces, each with its own running agent**, `agent.sh` generates a
-dedicated quadlet per workspace (Model B: one service per workspace, keep-alive
-+ manual start):
+Existing quadlet registrations (`prime-agent-<slug>.container` in
+`~/.config/containers/systemd`) keep running untouched until you choose to
+migrate them. Re-registering that workspace retires the systemd unit and
+recreates the identical container + state volume under compose:
 
 ```bash
-agent.sh <workspace-path> [slug]        # register + start prime-agent-<slug>
-agent.sh list                           # show every registered workspace
-agent.sh exec <slug>                    # enter that workbench → interactive TUI
-agent.sh remove <slug>                  # stop + unregister + drop its state volume
+agent.sh ~/projects/cloud        # quadlet unit removed, compose project takes over,
+                                 # prime-agent-cloud-state volume (sessions) survives
 ```
 
-What it does for `agent.sh <path>`:
+`agent.sh list` prints a reminder line for every legacy quadlet still installed.
 
-- writes `~/.config/containers/systemd/prime-agent-<slug>.container` (slug
-  defaults to the lowercased workspace basename), with `Volume=<path>:/workspace:rw`
-  and its own `prime-agent-<slug>-state` volume,
-- `systemctl --user daemon-reload` so the quadlet generator materializes the
-  first-class unit `prime-agent-<slug>.service`,
-- starts it (keep-alive: `Exec=sleep infinity`).
+## Reboot behaviour (quadlet trade-off)
 
-Each workspace therefore runs in isolation (separate container + state volume);
-`agent.sh list` shows them all with their live status. The `makefile` XDG
-shielding is re-implemented inside `agent.sh`, so registration works even
-launched from the snap-confined VS Code terminal.
+Compose projects are **not** wired into systemd, so unlike the old quadlet
+units they do not come back after a host reboot by themselves (lingering is
+no longer relevant). Just re-run `agent.sh <path>` per workspace — it is
+idempotent and keeps all state. `restart: unless-stopped` still covers
+container crashes while the machine is up.
 
 ## Notes / troubleshooting
 
@@ -118,10 +123,15 @@ launched from the snap-confined VS Code terminal.
 - **Rootless network is host.** The agent makes only outbound calls; no ports are
   published. If `https://llm.linole.org` is unreachable from the host, check host
   firewall/VPN before touching the container.
-- **`prime-agent` not found after rebuild** — the installer places the binary on
-  PATH inside the image; if it's missing, rebuild with `make image` and re-`deploy`.
+- **`podman compose` complains it cannot reach the API** — the compose provider
+  talks to the rootless podman socket; `agent.sh` enables it, or do it manually:
+  `systemctl --user enable --now podman.socket`.
+- **`prime-agent` not found after rebuild** — the installer runs as root, so the
+  binary lands in `/root/.local/bin` and only patches shell rc files; the
+  Dockerfile fixes this with `ENV PATH="/root/.local/bin:${PATH}"` after the
+  install step. Keep that line if the Dockerfile is restructured.
 - **Workspace writes don't appear on host** — confirm the host path exists and the
-  `rw` bind in the quadlet points at it; `podman exec prime-agent sh -c 'touch /workspace/.writetest'`.
+  `rw` bind in the compose file points at it; `podman exec prime-agent-<slug> sh -c 'touch /workspace/.writetest'`.
 
 ## Out of scope
 

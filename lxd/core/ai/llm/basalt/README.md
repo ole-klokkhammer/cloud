@@ -1,0 +1,1 @@
+https://huggingface.co/jesdga/Qwen3.8-Flash-Next-Basalt

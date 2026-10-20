@@ -16,18 +16,7 @@ sudo zfs create -o compression=lz4 -o atime=off -o xattr=sa -o acltype=posixacl 
 - lxc exec matrix -- bash 
 
 
-### dependencies
-sudo apt update
-sudo apt install -y lsb-release wget apt-transport-https
-sudo wget -O /usr/share/keyrings/matrix-org-archive-keyring.gpg https://packages.matrix.org/debian/matrix-org-archive-keyring.gpg
-echo "deb [signed-by=/usr/share/keyrings/matrix-org-archive-keyring.gpg] https://packages.matrix.org/debian/ $(lsb_release -cs) main" |
-    sudo tee /etc/apt/sources.list.d/matrix-org.list
-sudo apt update
-sudo apt install matrix-synapse-py3
- 
-
-### Setup database
-sudo apt install -y postgresql postgresql-contrib
+### Setup database 
 
 // synapse need C collation
 CREATE DATABASE matrix WITH ENCODING='UTF8' LC_COLLATE='C' LC_CTYPE='C' TEMPLATE template0;

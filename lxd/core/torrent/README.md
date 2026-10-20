@@ -9,6 +9,11 @@ sudo zfs create -V 20G \
   ssd/vm/torrent-zvol
 sudo zfs set sync=disabled ssd/vm/torrent-zvol
 
+#### resize disk
+sudo zfs set volsize=50G ssd/vm/torrent-zvol
+sudo e2fsck -f /dev/zvol/ssd/vm/torrent-zvol
+sudo resize2fs /dev/zvol/ssd/vm/torrent-zvol
+
 ### lxc 
 lxc profile create torrent-vm
 lxc profile edit torrent-vm

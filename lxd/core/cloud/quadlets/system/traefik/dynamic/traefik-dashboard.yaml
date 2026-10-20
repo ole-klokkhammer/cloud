@@ -2,6 +2,6 @@
 http:
   routers:
     dashboard:
-      rule: "Host(`dash.cloud.homelan`)"
+      rule: "Host(`dash.cloud.core.homelan`)"
       entrypoints: [ web ]
       service: api@internal

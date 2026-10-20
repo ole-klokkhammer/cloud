@@ -8,6 +8,9 @@ RUN mkdir -p /home/agent/.prime/agent /workspace
 COPY models.json /home/agent/.prime/agent/models.json
 
 RUN curl -fsSL https://app.primeintellect.ai/prime-agent/install.sh | sh
- 
+
+# install.sh (run as root here) lands in /root/.local/bin and patches shell rc
+# files, which `podman exec prime-agent` never sources. Put it on the ENV PATH.
+ENV PATH="/root/.local/bin:${PATH}"
 
 WORKDIR /workspace

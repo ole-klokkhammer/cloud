@@ -1,7 +1,7 @@
 name: cloud
 description: Cloud profile
 config:
-  limits.memory: 164GB
+  limits.memory: 64GB
   # Hard cap, no swap: guest OOM (restarts one pod) is the scheduler; swapped
   # KV pages / frigate stalls are both worse. Pod-level Memory= owns sizing.
   limits.memory.swap: "false"
@@ -14,12 +14,13 @@ devices:
   gpu:
     type: gpu
     gputype: physical
-    id: nvidia.com/gpu=all
+    id: nvidia.com/gpu=0
   eth0:
     name: eth0
     nictype: bridged
     parent: br0
     type: nic
+    hwaddr: 00:16:3e:ce:84:dc
   root:
     path: /
     pool: zpool

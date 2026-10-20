@@ -1,0 +1,39 @@
+[Unit]
+Description=Infernix Service (Wallawalla47 Qwen3.8-Flash-Next NVFP4 Dense8 + DFlash2 drafter)
+After=network-online.target
+
+[Container]
+Network=host
+ContainerName=infernix
+AddDevice=nvidia.com/gpu=all
+ShmSize=32g
+
+Volume=/models:/models:ro
+
+Image=registry.linole.org/infernix:latest
+Exec=sh -c 'infernix-serve \
+    /models/qwen3.8/wallawalla47_Qwen3.8-Flash-Next-NVIDIA-NVFP4-Dense8-Infernix/Qwen3.8-Flash-Next-NVIDIA-NVFP4-Dense8-Infernix-00001-of-00003.infernix \
+    --ngram-volume /models/qwen3.8/wallawalla47_Qwen3.8-Flash-Next-NVIDIA-NVFP4-Dense8-Infernix/Qwen3.8-Flash-Next-NVIDIA-NVFP4-Infernix.ngram \
+    --host-context-mib 16384 \
+    --max-context 262144 \
+    --kv-dtype int8 \
+    --spec dflash2 \
+    --draft-model /models/qwen3.8/wallawalla47_Qwen3.8-Flash-Next-DFlash2-Infernix/Qwen3.8-Flash-Next-DFlash2-Infernix.infernix \
+    --draft-tokens auto \
+    --lm-head-draft \
+    --max-concurrency 2 \
+    --vision \
+    --vision-max-merged 4096 \
+    --model-id "llm" \
+    --host 0.0.0.0 \
+    --port 8000 \
+    2>&1'
+
+[Service]
+Restart=always
+TimeoutStopSec=30
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

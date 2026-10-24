@@ -4,9 +4,10 @@ FROM node:24
 ENV PRIME_AGENT_CODING_AGENT_DIR=/home/agent/.prime/agent
 RUN mkdir -p /home/agent/.prime/agent /workspace
 
-# Bake the LLM provider config into the image (self-contained appliance).
-COPY models.json /home/agent/.prime/agent/models.json
-
+# LLM provider config is NOT baked in: agent.sh bind-mounts podman/models.json
+# (the repo copy) live at /home/agent/.prime/agent/models.json. Without that
+# mount the container simply has no provider config until you register a
+# workspace.
 RUN curl -fsSL https://app.primeintellect.ai/prime-agent/install.sh | sh
 
 # install.sh (run as root here) lands in /root/.local/bin and patches shell rc

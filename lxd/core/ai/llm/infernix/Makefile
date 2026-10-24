@@ -5,7 +5,7 @@ SRC := Infernix
 QUADLET_NAME := infernix
 QUADLET_DIR := etc/containers/systemd
 
-.PHONY: update build push update_push build_and_deploy deploy restart stop status logs
+.PHONY: update build push update_push build_and_deploy deploy restart stop start status logs
 
 update: ## refresh the Wallawalla47/Infernix source checkout
 	git -C $(SRC) pull --ff-only
@@ -30,6 +30,9 @@ restart:
 
 stop:
 	$(LXC_BIN) exec $(LXC) -- systemctl stop $(QUADLET_NAME)
+
+start:
+	$(LXC_BIN) exec $(LXC) -- systemctl start $(QUADLET_NAME)
 
 status:
 	$(LXC_BIN) exec $(LXC) -- systemctl status $(QUADLET_NAME)

@@ -9,6 +9,8 @@ The llm LXC device is `nvidia.com/gpu=1` (host core, RTX 5090). Host
 
 ## setup
 
+https://github.com/Wallawalla47/Infernix/blob/main/docs/serving.md
+
 ### build the image (llm LXC)
 git clone https://github.com/Wallawalla47/Infernix
 cd Infernix

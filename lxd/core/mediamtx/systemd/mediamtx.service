@@ -1,0 +1,23 @@
+[Unit]
+Description=MediaMTX media server (ingest, continuous recording, playback)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# single Go binary; releases: https://github.com/bluenviron/mediamtx/releases
+# install as /usr/local/bin/mediamtx (unpack mediamtx_v*_linux_amd64.tar.gz)
+ExecStart=/usr/local/bin/mediamtx /config/mediamtx.yml
+WorkingDirectory=/config
+EnvironmentFile=/env/mediamtx.env
+Environment=TZ=Europe/Oslo
+Restart=always
+RestartSec=5
+TimeoutStopSec=15
+# streams are lossy-safe; stop hard after grace so segments close cleanly
+KillSignal=SIGINT
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

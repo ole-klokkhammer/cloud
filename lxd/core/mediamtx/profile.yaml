@@ -1,0 +1,30 @@
+name: mediamtx
+description: MediaMTX LXC - camera ingest, continuous recording, playback server. Single binary, no container runtime.
+config:
+  limits.cpu: "2"
+  limits.memory: 2GB
+  security.nesting: "false"
+  security.privileged: "false"
+devices:
+  eth0:
+    name: eth0
+    nictype: bridged
+    parent: br0
+    type: nic
+  config:
+    path: /config
+    shift: "true"
+    source: /ssd/appdata/mediamtx
+    type: disk
+  env:
+    path: /env/mediamtx.env
+    shift: "true"
+    source: /ssd/appdata/env/mediamtx.env
+    type: disk
+  media:
+    path: /media
+    shift: "true"
+    source: /hdd/surveillance/mediamtx
+    type: disk
+used_by: []
+project: default

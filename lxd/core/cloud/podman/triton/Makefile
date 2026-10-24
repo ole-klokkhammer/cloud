@@ -1,4 +1,4 @@
-LXC := core:surveillance
+LXC := core:cloud
 LXC_BIN ?= lxc
 IMAGE := registry.linole.org/surveillance/triton:latest
 QUADLET_NAME := triton

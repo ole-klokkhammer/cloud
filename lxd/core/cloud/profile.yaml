@@ -11,6 +11,8 @@ config:
     lxc.apparmor.profile = unconfined
     lxc.cap.drop =
 devices:
+  # VERIFY the id is the 5060 Ti: triton + embedder expect the surveillance
+  # GPU (see podman/triton). If gpu=0 is the 5090 (llm LXC), switch this id.
   gpu:
     type: gpu
     gputype: physical
@@ -54,5 +56,23 @@ devices:
     path: /ssd/appdata/portainer
     shift: "true"
     source: /ssd/appdata/portainer
+    type: disk
+  # --- surveillance service layout (mirrors the old surveillance-LXC mount
+  # names so the moved quadlets under podman/ keep their /config, /env and
+  # /models paths unchanged; data stays at the same host locations) ---
+  surv_config:
+    path: /config
+    source: /ssd/appdata/surveillance
+    shift: "true"
+    type: disk
+  surv_env:
+    path: /env
+    source: /ssd/appdata/env/surveillance
+    shift: "true"
+    type: disk
+  surv_models:
+    path: /models
+    source: /ssd/models/surveillance
+    shift: "true"
     type: disk
 project: default

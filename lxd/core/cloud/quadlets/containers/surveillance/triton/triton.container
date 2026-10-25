@@ -1,0 +1,54 @@
+[Unit]
+Description=Surveillance triton inference server (YOLO model host)
+After=network-online.target
+StartLimitIntervalSec=120
+StartLimitBurst=10
+
+[Container]
+ContainerName=triton
+
+Network=apps.network
+DropCapability=ALL
+AddCapability=SETUID,SETGID
+NoNewPrivileges=true
+# NO ReadOnly=true on GPU containers: nvidia-cdi-hook must write driver
+# library symlinks + ld.so.cache inside the rootfs at create time.
+# (Stale /etc/cdi spec + old surveillance toolkit hid this before.)
+
+AddDevice=nvidia.com/gpu=all
+
+Volume=/ssd/models/surveillance/triton/config:/model_repository:ro
+
+# -------------------------------------------------------------
+# Image is the plain vendor tritonserver; everything triton-specific
+# is data under /ssd/models/surveillance/triton-repo, mounted :ro
+# whole (native triton layout: <model>/<profile>.pbtxt + 1/model.plan).
+# make deploy pushes the configs from this repo and restarts - no
+# image build exists. The .plan engines were moved (same dataset,
+# free) from /ssd/models/surveillance/yolo/*.plan into <model>/1/.
+# Profile MUST match the artifact: .plan -> tensorrt, .onnx -> onnx.
+# Engine rebuild on GPU/TRT upgrade: trtexec once inside
+#   nvcr.io/nvidia/tritonserver:25.08-py3
+# Never overwrite the last working engine (model.plan.bak-2508).
+# -------------------------------------------------------------
+Environment=ACTIVE_MODEL=yolo26x
+Environment=CONFIG_PROFILE=tensorrt
+Environment=TZ=Europe/Oslo
+
+Image=nvcr.io/nvidia/tritonserver:25.08-py3
+Exec=sh -c "tritonserver \
+    --model-repository=/model_repository \
+    --model-control-mode=explicit \
+    --load-model=$ACTIVE_MODEL \
+    --model-config-name=$CONFIG_PROFILE \
+    --log-info=true"
+
+[Service]
+Restart=always
+RestartSec=5
+TimeoutStopSec=30
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

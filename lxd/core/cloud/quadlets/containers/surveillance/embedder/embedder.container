@@ -9,10 +9,12 @@ Network=host
 ContainerName=embedder
 Image=registry.linole.org/embedder:latest
 AddDevice=nvidia.com/gpu=all
-Volume=/config/embedder:/config/embedder:rw
-Volume=/detector:/detector:ro
+
+Volume=/ssd/appdata/surveillance/embedder:/config/embedder:rw
+Volume=/ssd/appdata/surveillance/detector:/detector:ro
 Volume=/etc/localtime:/etc/localtime:ro
-EnvironmentFile=/env/surveillance/embedder.env
+
+EnvironmentFile=/ssd/appdata/env/embedder.env
 Environment=TZ=Europe/Oslo
 Exec="python3 /app/embedder.py"
 

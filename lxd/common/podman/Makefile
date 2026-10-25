@@ -1,5 +1,6 @@
-# podman common Makefile - setup + registry login + GC for an LXC.
-# fresh LXC: make setup && make deploy
+# podman common Makefile - setup + registry login + GC for ANY podman LXC.
+# fresh LXC:  make LXC=core:<name> setup && make LXC=core:<name> deploy
+# (cloud, llm, ... - the only podman hosts; see GC unit for why it is gentle.)
 LXC ?= core:llm
 UNIT_DIR := etc/systemd/system
 REGISTRY_SERVICE := podman-registry-login.service

@@ -12,7 +12,7 @@ Pull=newer
 Image=registry.linole.org/surveillance/detector:latest
 
 # inference runs in the triton container (same LXC, host net) - this one is CPU-only
-Volume=/config/detector:/config:rw
+Volume=/ssd/appdata/surveillance/detector:/config:rw
 
 Environment=TZ=Europe/Oslo
 Environment=RTSP_URL=rtsp://mediamtx.homelan:8554/entrance_roof

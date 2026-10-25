@@ -1,19 +1,20 @@
 # nvidia/Makefile
 #
-# Idempotent NVIDIA Container Toolkit (CDI) bootstrap for a Proxmox LXC with
-# PVE GPU passthrough (security.nesting=true). Makefile mirror of
-# nvidia-cdi-setup.sh, driven against a remote LXC in house style
-# (see ../../linuxcontainers/surveillance/podman/triton/Makefile).
+# Idempotent NVIDIA Container Toolkit (CDI) bootstrap, two layers:
+#   host:  install-host.sh on core (sudo) - toolkit + auto-refreshed CDI
+#          spec in /var/run/cdi, the default search path for all users
+#   guest: per-LXC bootstrap below for GPU LXCs (security.nesting=true)
 #
 # Usage:
-#   make setup                       # full bootstrap, in order
-#   make LXC=core:cameraagent setup  # target a different LXC
-#   make LXC=core:surveillance generate   # just (re)generate the CDI spec
+#   make host                                   # core host toolkit (needs passwordless sudo via ssh)
+#   make setup                                  # full LXC bootstrap, in order
+#   make LXC=core:cloud generate                # just (re)generate the CDI spec
 #
 # Knobs (make overrides, mirror the script's env):
 #   LXC, LXC_BIN, CTK_VERSION, CDI_OUTPUT, CDI_DIR, SKIP_APT_UPDATE
 
-LXC ?= core:surveillance
+LXC ?= core:cloud
+CORE_SSH ?= core
 LXC_BIN ?= lxc
 
 CTK_VERSION    ?= 1.20.1-1
@@ -24,7 +25,11 @@ SKIP_APT_UPDATE    ?= 0
 EXECSH = $(LXC_BIN) exec $(LXC) -- sh -c
 
 # full bootstrap, in order
-.PHONY: setup prereq apt_prereq repo install enable_cdi generate verify
+.PHONY: host setup prereq apt_prereq repo install enable_cdi generate verify
+
+# host layer: run the sudo'd bootstrap on the LXD host
+host:
+	ssh $(CORE_SSH) 'sudo -n bash -s' < install-host.sh
 
 setup: prereq apt_prereq repo install enable_cdi generate verify
 
@@ -32,7 +37,7 @@ setup: prereq apt_prereq repo install enable_cdi generate verify
 prereq:
 	@$(LXC_BIN) exec $(LXC) -- sh -c "command -v apt-get >/dev/null || { echo 'need apt (Ubuntu LXC)' >&2; exit 1; }"
 	@$(LXC_BIN) exec $(LXC) -- sh -c "command -v systemctl >/dev/null || { echo 'need systemd' >&2; exit 1; }"
-	@$(LXC_BIN) exec $(LXC) -- sh -c "ls /dev/nvidia* >/dev/null 2>&1 && echo \"GPU device(s): \" \$(ls /dev/nvidia*) || echo 'WARN: no /dev/nvidia* - PVE GPU not attached?'"
+	@$(LXC_BIN) exec $(LXC) -- sh -c "ls /dev/nvidia* >/dev/null 2>&1 && echo \"GPU device(s): \" \$(ls /dev/nvidia*) || echo 'WARN: no /dev/nvidia* - GPU not attached to this LXC?'"
 
 # ca-certificates curl gnupg2
 apt_prereq:

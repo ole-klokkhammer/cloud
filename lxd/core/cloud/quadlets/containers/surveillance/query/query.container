@@ -4,13 +4,13 @@ After=network-online.target nats.service embedder.service
 Requires=nats.service
 
 [Container]
-Network=host
+Network=apps.network
 ContainerName=query
 Image=registry.linole.org/query:latest
-Volume=/config/query:/config/query:rw
-Volume=/detector:/detector:ro
+Volume=/ssd/appdata/surveillance/query:/config/query:rw
+Volume=/ssd/appdata/surveillance/detector:/detector:ro
 Volume=/etc/localtime:/etc/localtime:ro
-EnvironmentFile=/env/surveillance/query.env
+EnvironmentFile=/ssd/appdata/env/surveillance/query.env
 Environment=TZ=Europe/Oslo
 Exec="python3 /app/agent.py"
 

@@ -23,17 +23,19 @@ import os
 import signal
 import sys
 import threading
-from linuxcontainers.core.surveillance.podman.detector.app.config import environment
-from linuxcontainers.core.surveillance.podman.detector.app.services.detector import (
+from common.config import (
+    environment,
+)
+from services.detector import (
     Detector,
 )
-from linuxcontainers.core.surveillance.podman.detector.app.services.live_push import (
+from services.live_push import (
     LivePusher,
 )
-from linuxcontainers.core.surveillance.podman.detector.app.services.mqtt_pub import (
+from services.mqtt_pub import (
     MqttPub,
 )
-from linuxcontainers.core.surveillance.podman.detector.app.services.rtsp import (
+from services.rtsp import (
     RtspStream,
 )
 

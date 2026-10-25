@@ -1,8 +1,6 @@
 # RTSP consumer + event publisher only: inference runs in the triton
-# container (surveillance/triton, onnxruntime backend), reached over
-# gRPC on 127.0.0.1:8001 (both host-network in the camagent LXC). The
-# letterbox + NMS live in this process (triton_client.py); no torch,
-# no GPU device here.
+# container, reached over gRPC at $TRITON_URL (apps.network); no torch,
+# no GPU device here (letterbox + NMS live in triton_client.py).
 #
 # ffmpeg is here too: the live-push (H.264 RTSP annotated re-stream
 # into mediaMTX) shells out to it.
@@ -21,9 +19,14 @@ RUN apt-get update \
 COPY app/requirements.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir --break-system-packages -r /tmp/requirements.txt
 
-COPY app /app
+# The code mixes three import styles (app.services.*, services.*, config.*),
+# so BOTH the package and its parent must be on sys.path. -m puts the
+# parent there; PYTHONPATH adds the package dir. (The clean fix is making
+# every import app.-qualified; this is the honest minimum.)
+COPY app /srv/detector/app
+ENV PYTHONPATH=/srv/detector/app
 
-WORKDIR /app
+WORKDIR /srv/detector
 
 ENTRYPOINT ["python"]
-CMD ["/app/main.py"]
+CMD ["-m", "app.main"]

@@ -48,17 +48,17 @@ import time
 from collections import deque
 from datetime import datetime, timedelta, timezone
 
-from linuxcontainers.core.surveillance.podman.detector.app.config import environment
-from linuxcontainers.core.surveillance.podman.detector.app.services.annotate import (
+from common.config import environment
+from services.annotate import (
     draw_boxes,
 )
-from linuxcontainers.core.surveillance.podman.detector.app.services.live_push import (
+from services.live_push import (
     LivePusher,
 )
-from linuxcontainers.core.surveillance.podman.detector.app.services.tracker import (
+from services.tracker import (
     Tracker,
 )
-from linuxcontainers.core.surveillance.podman.detector.app.services.triton_client import (
+from services.triton_client import (
     TritonClient,
 )
 

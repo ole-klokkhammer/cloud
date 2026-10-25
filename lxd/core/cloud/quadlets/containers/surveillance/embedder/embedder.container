@@ -5,11 +5,12 @@ Wants=detector.service
 Requires=nats.service
 
 [Container]
-Network=host
+Network=apps.network
 ContainerName=embedder
 Image=registry.linole.org/embedder:latest
 AddDevice=nvidia.com/gpu=all
 
+Volume=/ssd/models/surveillance/clip:/models:ro
 Volume=/ssd/appdata/surveillance/embedder:/config/embedder:rw
 Volume=/ssd/appdata/surveillance/detector:/detector:ro
 Volume=/etc/localtime:/etc/localtime:ro

@@ -5,19 +5,18 @@ StartLimitIntervalSec=120
 StartLimitBurst=10
 
 [Container]
-Network=host
+Network=apps.network
 ContainerName=detector
 
-Pull=newer
-Image=registry.linole.org/surveillance/detector:latest
-
-# inference runs in the triton container (same LXC, host net) - this one is CPU-only
-Volume=/ssd/appdata/surveillance/detector:/config:rw
+Network=apps.network
+DropCapability=ALL
+AddCapability=SETUID,SETGID
+NoNewPrivileges=true
 
 Environment=TZ=Europe/Oslo
 Environment=RTSP_URL=rtsp://mediamtx.homelan:8554/entrance_roof
 
-Environment=TRITON_URL=cloud.homelan:8001
+Environment=TRITON_URL=triton:8001
 Environment=TRITON_MODEL=yolo26x
 Environment=TRITON_MODEL_FAMILY=yolo
 Environment=TRITON_CLASS_FILTER=0,2,15,14,16,25,26,24,39,67,41,45,78,48,53
@@ -36,6 +35,11 @@ Environment=DETECTOR_LIVE_PATH=rtsp://mediamtx.homelan:8554/entrance_roof_annota
 Environment=MQTT_HOST=hivemq.homelan
 Environment=MQTT_PORT=1883
 Environment=MQTT_TOPIC=surveillance/detector 
+
+Pull=newer
+Image=registry.linole.org/surveillance/detector:latest
+
+Volume=/ssd/appdata/surveillance/detector:/config:rw
 
 
 [Service]

@@ -11,9 +11,6 @@ Network=apps.network
 DropCapability=ALL
 AddCapability=SETUID,SETGID
 NoNewPrivileges=true
-# NO ReadOnly=true on GPU containers: nvidia-cdi-hook must write driver
-# library symlinks + ld.so.cache inside the rootfs at create time.
-# (Stale /etc/cdi spec + old surveillance toolkit hid this before.)
 
 AddDevice=nvidia.com/gpu=all
 

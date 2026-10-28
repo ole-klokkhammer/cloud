@@ -16,11 +16,11 @@ Environment=INFERNIX_CUDA_SYNC=blocking
 
 Image=registry.linole.org/infernix:latest
 Exec=sh -c 'numactl --interleave=all infernix-serve \
-    /models/qwen3.8/wallawalla47_Qwen3.8-Flash-Next-NVIDIA-NVFP4-Dense8-Infernix/Qwen3.8-Flash-Next-NVIDIA-NVFP4-Dense8-Infernix-00001-of-00003.infernix \
-    --ngram-volume /models/qwen3.8/wallawalla47_Qwen3.8-Flash-Next-NVIDIA-NVFP4-Dense8-Infernix/Qwen3.8-Flash-Next-NVIDIA-NVFP4-Infernix.ngram \
+    /models/qwen3.8/wallawalla47_Qwen3.8-Flash-Next-NVIDIA-FP4-Local-Infernix/Qwen3.8-Flash-Next-NVIDIA-FP4-Local-Infernix-00001-of-00003.infernix \
+    --ngram-volume /models/qwen3.8/wallawalla47_Qwen3.8-Flash-Next-NVIDIA-FP4-Local-Infernix/Qwen3.8-Flash-Next-NVIDIA-NVFP4-Infernix.ngram \
+    --chat-template /models/qwen3.8/wallawalla47_Qwen3.8-Flash-Next-NVIDIA-FP4-Local-Infernix/chat_template.jinja \
     --prefix-cache-file /cache/qwen3.8-flash-next.cache \
     --expert-state /cache/qwen3.8-flash-next.expert-state \
-    --chat-template /models/qwen3.8/wallawalla47_Qwen3.8-Flash-Next-NVIDIA-NVFP4-Dense8-Infernix/chat_template.jinja \
     --tolerant-tool-calls \
     --host-context-mib 16384 \
     --max-context 262144 \

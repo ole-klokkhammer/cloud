@@ -12,6 +12,7 @@ Network=apps.network
 DropCapability=ALL
 AddCapability=SETUID,SETGID
 NoNewPrivileges=true
+ReadOnly=true
 
 Environment=TZ=Europe/Oslo
 Environment=RTSP_URL=rtsp://mediamtx.homelan:8554/entrance_roof

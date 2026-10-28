@@ -33,7 +33,7 @@ Environment=DETECTOR_LIVE_HOLD_SECONDS=3
 Environment=DETECTOR_TRACK_LABELS=person,cat,dog
 Environment=DETECTOR_LIVE_PATH=rtsp://mediamtx.homelan:8554/entrance_roof_annotated
 
-Environment=MQTT_HOST=hivemq.homelan
+Environment=MQTT_HOST=mqtt.cloud.core.homelan
 Environment=MQTT_PORT=1883
 Environment=MQTT_TOPIC=surveillance/detector 
 

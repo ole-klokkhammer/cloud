@@ -9,7 +9,9 @@ deploy:
 	lxc exec $(LXC) -- systemctl restart traefik
 
 sync:
-	lxc file push dynamic/* $(LXC)/$(TRAEFIK_DYNAMIC_DIR)
+	# trailing slash is required: with several sources, `lxc file push` only treats
+	# the target as a directory when the path ends in /
+	lxc file push dynamic/* $(LXC)/$(TRAEFIK_DYNAMIC_DIR)/
 	lxc exec $(LXC) -- systemctl daemon-reload
 	lxc exec $(LXC) -- systemctl restart traefik
 

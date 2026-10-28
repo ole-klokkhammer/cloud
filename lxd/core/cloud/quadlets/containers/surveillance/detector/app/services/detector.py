@@ -15,14 +15,14 @@ callback on the capture thread:
     configured labels)
   * every inferred frame gets painted (all boxes; tracked ones bold,
     with ids) and, when enabled, forwarded to the live-push, which
-    streams the annotated frames to mediaMTX only while a tracked
-    target is active - so mediaMTX records the annotated path exactly
-    when something is happening (idle = dark = nothing recorded); the
-    recording IS the footage; no detector-side clip encoding.
+    streams the annotated frames to mediaMTX while a tracked target is
+    active. That path is live viewing only (record: no in mediamtx.yml)
+    - the detector encodes nothing for storage.
   * burst close -> one detection_burst event via the registered
     on_detect callbacks (main.py wires them to MqttPub.publish - the
-    domain owns no transport). A burst's footage is a slice of the
-    mediaMTX recording; the query side builds the playback URL.
+    domain owns no transport). Footage is never the detector's: a
+    burst's clip is a time-window slice of the recorded camera path, and
+    the query side builds the playback URL.
 
 DetectionHeartbeat: the detector-side 60s beat - its own daemon thread
 (started by Detector.start(), so the trimmer's lifecycle belongs to
@@ -36,8 +36,8 @@ Threading: all Detector state is touched only on the capture thread
 attributes (GIL-safe) and sums dets_60s from the append-only event log
 - no read-then-reset counter, no locks anywhere.
 
-Events are the dedupe signal for consumers; the footage lives in the
-mediaMTX recording of the annotated stream. Config: env vars, see
+Events are the dedupe signal for consumers; footage lives in mediaMTX's
+recording of the camera path that has record: yes. Config: env vars, see
 detector.env.example.
 """
 
@@ -223,8 +223,8 @@ class Detector:
             logger.info(
                 f"burst closed: {n_burst} detection frames, "
                 f"{len(self._burst_tracks)} tracks, best {label or 'n/a'} "
-                f"{best_conf:.2f} - footage: mediaMTX recording of "
-                f"the annotated stream"
+                f"{best_conf:.2f} - clip: mediaMTX /get on the recorded "
+                f"path, window ending {frame_utc.isoformat()}"
             )
             self.last_det = None
             self._burst_frames = 0

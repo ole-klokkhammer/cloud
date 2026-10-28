@@ -1,0 +1,36 @@
+# NanoMQ behind traefik: two broker listeners, two routers, one file.
+#
+# MQTT (tcp/1883) is raw TCP, not HTTP, so it needs a tcp router on its own
+# entrypoint: --entrypoints.mqtt.address=:1883 in traefik.container, with traefik
+# publishing 1883 (the broker publishes nothing). The rule has to be HostSNI(`*`) -
+# that is the only form a non-TLS tcp router accepts.
+#
+# HTTP API (http/8081) is NanoMQ's http_server - an API, not a dashboard; NanoMQ
+# ships no web UI, so / 404s and the useful paths are the v4 GETs (/api/v4/brokers,
+# /clients, /subscriptions, /metrics). The route is kept so broker state stays
+# queryable from the LAN. Basic auth, password from NANOMQ_API_PASSWORD in
+# /ssd/appdata/env/nanomq.env on the broker; if that variable is missing the broker
+# does not start at all rather than falling back to admin/public.
+http:
+  routers:
+    mqtt:
+      rule: "Host(`mqtt.cloud.core.homelan`)"
+      entrypoints: [ web ]
+      service: mqtt
+  services:
+    mqtt:
+      loadBalancer:
+        servers:
+          - url: "http://mqtt:8081"
+
+tcp:
+  routers:
+    mqtt:
+      rule: "HostSNI(`*`)"
+      entrypoints: [ mqtt ]
+      service: mqtt
+  services:
+    mqtt:
+      loadBalancer:
+        servers:
+          - address: "mqtt:1883"

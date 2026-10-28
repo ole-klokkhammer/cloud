@@ -53,4 +53,10 @@ devices:
     source: /ssd/appdata/surveillance
     shift: "true"
     type: disk
+  appdata_mqtt:
+    path: /ssd/appdata/mqtt
+    source: /ssd/appdata/mqtt
+    shift: "true"
+    type: disk
+
 project: default

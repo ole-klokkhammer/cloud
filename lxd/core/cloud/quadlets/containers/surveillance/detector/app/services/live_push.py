@@ -5,18 +5,19 @@ One ffmpeg subprocess (H.264, low-latency) with a raw-BGR pipe input;
 the capture thread hands painted frames in via offer() (an attribute
 swap under the GIL - no locks, same convention as the heartbeat reads).
 
-Behavior (activity-gated - the push is the recording source, so the
-recording follows the push):
+Behavior (activity-gated - a live view, not a recording: the annotated
+path has record: no in mediamtx.yml, so nothing pushed here is stored):
   * while a tracked target is active, or within hold_s of the last one
-    -> ffmpeg runs and each tick sends the newest painted frame;
-    mediaMTX records the path for as long as the publisher is connected.
+    -> ffmpeg runs and each tick sends the newest painted frame; live
+    players (HLS / WebRTC / RTSP) see the boxes as they happen.
   * when idle (no tracked target within hold_s) -> ffmpeg is stopped:
-    the RTSP path then has no publisher, so mediaMTX records nothing
-    and no bandwidth is consumed. The path stays defined (configured
-    in mediamtx.yml) but dark.
+    the RTSP path has no publisher, so no bandwidth is consumed. The
+    path stays defined (configured in mediamtx.yml) but dark.
   * when activity resumes -> ffmpeg respawns (a fresh H.264 session
-    whose first frame is an IDR) and recording resumes; each burst is
-    its own recording segment.
+    whose first frame is an IDR) and the view comes back.
+  * if this thread gives up after repeated failed respawns, the live
+    view is all you lose - the recorded footage is mediaMTX's own
+    capture of the camera path and is unaffected.
   * ffmpeg exits (mediaMTX restart, network blip) -> respawn with a
     backoff; a dims change (stream re-negotiated) -> respawn with the
     new size.

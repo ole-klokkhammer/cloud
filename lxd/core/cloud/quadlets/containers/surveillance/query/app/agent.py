@@ -41,6 +41,9 @@ LLM_KEY = env("QUERY_LLM_API_KEY")
 PG_DSN = env("QUERY_PG_DSN", "")
 EMBED_URL = env("QUERY_EMBED_URL", "http://127.0.0.1:8101").rstrip("/")
 MEDIAMTX = env("QUERY_MEDIAMTX", "http://mediamtx.homelan:9996").rstrip("/")
+# Clips come off the camera's recorded stream. The detector's annotated path
+# is a live view (record: no), so the recorded path is the sub stream.
+RECORDING_SUFFIX = env("QUERY_RECORDING_SUFFIX", "_sub")
 VISION_URL = env("QUERY_VISION_URL")
 VISION_MODEL = env("QUERY_VISION_MODEL")
 MAX_ROUNDS = int(env("QUERY_MAX_ROUNDS", "4"))
@@ -114,19 +117,29 @@ def search_stills(text, top_k=5):
     )
 
 
+def _recording_path(camera):
+    """events.camera name -> the mediamtx path holding its recording."""
+    cam = camera or ""
+    return cam if cam.endswith(RECORDING_SUFFIX) else f"{cam}{RECORDING_SUFFIX}"
+
+
 def get_clip(camera, start, duration=60):
+    path = _recording_path(camera)
     url = (
-        f"{MEDIAMTX}/get?path={camera}&start={start}"
+        f"{MEDIAMTX}/get?path={path}&start={start}"
         f"&duration={int(duration)}&format=mp4"
     )
     return {
+        "path": path,
         "url": url,
         "note": "http URL on the mediamtx LXC - fetch from a network its ufw allows",
     }
 
 
 def list_recordings(camera, start=None):
-    u = f"{MEDIAMTX}/list?path={camera}" + (f"&start={start}" if start else "")
+    u = f"{MEDIAMTX}/list?path={_recording_path(camera)}" + (
+        f"&start={start}" if start else ""
+    )
     return httpx.get(u, timeout=60).json()
 
 
@@ -239,7 +252,7 @@ TOOLS = [
         "type": "function",
         "function": {
             "name": "get_clip",
-            "description": "Build a playback URL for a recorded clip (RFC3339 start time).",
+            "description": "Build a playback URL for a recorded clip (RFC3339 start time). camera is the event camera name (e.g. entrance_roof); the clip is served from that camera's recorded stream.",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -262,7 +275,7 @@ TOOLS = [
         "type": "function",
         "function": {
             "name": "list_recordings",
-            "description": "List recorded segments for a camera (mediamtx VOD server).",
+            "description": "List recorded segments for a camera (mediamtx VOD server). camera is the event camera name.",
             "parameters": {
                 "type": "object",
                 "properties": {

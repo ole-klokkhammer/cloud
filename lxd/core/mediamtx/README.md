@@ -38,4 +38,7 @@ Rollback is the inverse. Recordings are unaffected (same host path).
   the historical layout; the effective chain is now
   `host /hdd/surveillance/mediamtx -> LXC /media -> %path segments`.
 - The detector republishes `entrance_roof_annotated` (publisher path) — it
-  pushes here from the cloud LXC over RTSP.
+  pushes here from the cloud LXC over RTSP. That path is `record: no`: a live
+  view with boxes burned in, nothing more. Footage of record is the camera path
+  that has `record: yes` (`entrance_roof_sub` today), sliced by time through the
+  VOD server.

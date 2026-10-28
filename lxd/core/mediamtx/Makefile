@@ -5,7 +5,7 @@ TARBALL := mediamtx_v$(VERSION)_linux_amd64.tar.gz
 URL := https://github.com/bluenviron/mediamtx/releases/download/v$(VERSION)/$(TARBALL)
 CACHE := /tmp/$(TARBALL)
 
-.PHONY: install-binary deploy-unit start stop restart status logs
+.PHONY: install-binary deploy start stop restart status logs
 
 install-binary:
 	test -f $(CACHE) || curl -fsSLo $(CACHE) $(URL)
@@ -14,7 +14,7 @@ install-binary:
 	  'cd /tmp && tar xzf $(TARBALL) mediamtx && install -m 0755 mediamtx /usr/local/bin/mediamtx && rm -f $(TARBALL)'
 	$(LXC_BIN) exec $(LXC) -- mediamtx --version
 
-deploy-unit:
+deploy:
 	$(LXC_BIN) file push ./systemd/mediamtx.service $(LXC)/etc/systemd/system/mediamtx.service
 	$(LXC_BIN) exec $(LXC) -- systemctl daemon-reload
 	$(LXC_BIN) exec $(LXC) -- systemctl enable mediamtx

@@ -1,0 +1,22 @@
+name: mqtt
+description: MQTT stack profile
+config:
+  user.host: "core"
+  limits.cpu: "1"
+  limits.memory: 4GB
+devices:
+  eth0:
+    name: eth0
+    nictype: bridged
+    parent: br0
+    type: nic
+  data:
+    path: /ssd/appdata/mqtt
+    shift: "true"
+    source: /ssd/appdata/mqtt
+    type: disk
+  root:
+    path: /
+    pool: zpool
+    type: disk
+project: default

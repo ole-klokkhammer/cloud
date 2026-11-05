@@ -1,4 +1,4 @@
-"""MQTT publisher for the detector service (HiveMQ at hivemq.homelan).
+"""MQTT publisher for the detector service (mqtt at mqtt.homelan).
 
 The MQTT counterpart of nats_pub.py: background, auto-reconnecting, and
 *queues nothing lost*: paho's client runs its own network thread and
@@ -20,7 +20,7 @@ like the capture loop must never die): the thread recreates the
 client and retries after 5s - the same retry shape as NatsPub.
 
 Pure daemon - no stop()/join(): it dies at process exit, the kernel
-closes the socket, and HiveMQ just sees a TCP close (clean session,
+closes the socket, and mqtt just sees a TCP close (clean session,
 nothing retained).
 
 The module uses the same `"detector"` logger (configured by main.py's
@@ -88,7 +88,9 @@ class MqttPub(threading.Thread):
             rc = int(r.rc)
             if rc not in (
                 int(MQTTErrorCode.MQTT_ERR_SUCCESS),
-                int(MQTTErrorCode.MQTT_ERR_NO_CONN),  # queued while down - paho flushes on reconnect
+                int(
+                    MQTTErrorCode.MQTT_ERR_NO_CONN
+                ),  # queued while down - paho flushes on reconnect
             ):
                 self._note(f"publish {t!r} rc={rc}")
         except Exception:
@@ -97,7 +99,9 @@ class MqttPub(threading.Thread):
     def _note(self, what):
         self._pub_errors += 1
         if self._pub_errors == 1 or self._pub_errors % 50 == 0:
-            logger.warning(f"mqtt publish error (#{self._pub_errors}): {what} - continuing")
+            logger.warning(
+                f"mqtt publish error (#{self._pub_errors}): {what} - continuing"
+            )
 
     def run(self):
         # paho does the initial connect on the loop thread; while the

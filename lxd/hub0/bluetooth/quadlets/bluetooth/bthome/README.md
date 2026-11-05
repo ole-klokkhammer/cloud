@@ -55,7 +55,7 @@ Any device broadcasting BTHome v2 format (UUID: `fcd2`):
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `MQTT_BROKER` | `hivemq.home.lan` | MQTT broker hostname |
+| `MQTT_BROKER` | `mqtt.homelan` | MQTT broker hostname |
 | `LOG_LEVEL` | `INFO` | Log level (DEBUG, INFO, WARNING, ERROR) |
 | `HA_DISCOVERY` | `true` | Enable Home Assistant MQTT auto-discovery |
 
@@ -155,10 +155,10 @@ If activation fails with "requires registration" or similar errors:
 Trigger a scan and check for BTHome data:
 ```bash
 # Trigger scan
-mosquitto_pub -h hivemq.home.lan -t "bluetooth/command/scan" -m ""
+mosquitto_pub -h mqtt.homelan -t "bluetooth/command/scan" -m ""
 
 # Watch for decoded data
-mosquitto_sub -h hivemq.home.lan -t "bthome/state/bthome/#" -v
+mosquitto_sub -h mqtt.homelan -t "bthome/state/bthome/#" -v
 ```
 
 ### Troubleshooting

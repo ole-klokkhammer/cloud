@@ -9,12 +9,8 @@
   - apt update
     apt install curl gnupg -y
 
-    curl https://downloads.plex.tv/plex-keys/PlexSign.key \
-    | gpg --dearmor \
-    | tee /usr/share/keyrings/plex.gpg >/dev/null
-
-    echo "deb [signed-by=/usr/share/keyrings/plex.gpg] https://downloads.plex.tv/repo/deb public main" \
-    > /etc/apt/sources.list.d/plexmediaserver.list
+    curl -sSO https://downloads.plex.tv/plex-keys/PlexSign.v2.key
+    gpg --show-keys --with-subkey-fingerprints PlexSign.v2.key
 
     apt update
     apt install plexmediaserver -y

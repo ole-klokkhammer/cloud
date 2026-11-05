@@ -31,6 +31,8 @@ TZ_NAME="Europe/Oslo"
 VARTMP_SIZE="8g"
 PIDS_LIMIT=4096
 
+echo "agent.sh: using image ${IMAGE} (build with ${APPLIANCE_DIR}/podman/build.sh) and models.json ${MODEL_JSON}"
+
 die() { echo "agent.sh: error: $*" >&2; exit 1; }
 sanitize() { echo "$1" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//'; }
 unit() { echo "prime-agent-$1"; }

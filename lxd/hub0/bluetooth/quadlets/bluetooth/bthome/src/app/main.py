@@ -21,7 +21,7 @@ from logical.linuxcontainers.workloads.cloud0.radios.bluetooth.bthome.src.app.in
     publish_discovery,
 )
 
-MQTT_BROKER = os.getenv("MQTT_BROKER", "hivemq.home.lan")
+MQTT_BROKER = os.getenv("MQTT_BROKER", "mqtt.homelan")
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
 HA_DISCOVERY = os.getenv("HA_DISCOVERY", "true").lower() == "true"
 HEALTH_PORT = int(os.getenv("HEALTH_PORT", "8080"))

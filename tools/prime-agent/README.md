@@ -63,8 +63,8 @@ The slug defaults to the lowercased workspace basename. Re-running `agent.sh
 state volume (sessions, kernel venv) survives, so it doubles as the "update the
 sandbox" step after `./build.sh`.
 
-Inside the TUI, pick the provider/model: `qwen-local` / `llm` (and the older
-`Qwen3.8-27b`), pointed at `https://llm.linole.org/v1`.
+Inside the TUI, pick the provider/model: `qwen-local` / `llm`
+(Qwen3.8-Flash-Next-NVIDIA-NVFP4-Infernix), pointed at `https://llm.linole.org/v1`.
 
 ## Changing the LLM / model
 

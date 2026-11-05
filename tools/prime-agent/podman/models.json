@@ -6,22 +6,18 @@
       "apiKey": "LOCAL_LLM_KEY",
       "compat": {
         "supportsDeveloperRole": false,
-        "supportsReasoningEffort": false,
+        "supportsReasoningEffort": true,
         "thinkingFormat": "qwen-chat-template"
       },
       "models": [
         {
-          "id": "Qwen3.8-27b",
-          "name": "Qwen 3.8 27B (linole)",
-          "reasoning": true,
-          "input": ["text", "image"],
-          "contextWindow": 151000,
-          "maxTokens": 32000,
-          "cost": { "input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0 }
-        },
-        {
           "id": "llm",
-          "name": "Qwen3.8-Flash-Next-NVIDIA-NVFP4-Infernix",
+          "name": "Qwen3.8-Flash-Next",
+          "thinkingLevelMap": {
+            "low": "low",
+            "medium": "medium",
+            "xhigh": "xhigh"
+          },
           "reasoning": true,
           "input": ["text", "image"],
           "contextWindow": 230000,

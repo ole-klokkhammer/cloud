@@ -9,7 +9,7 @@ from aiomqtt import Client, Will
 from bluetooth import service as bt_service
 import env
 
-MQTT_BROKER = os.getenv("MQTT_BROKER", "hivemq.home.lan")
+MQTT_BROKER = os.getenv("MQTT_BROKER", "mqtt.homelan")
 
 # Topic structure:
 #   bluetooth/command/...  - Commands (subscribe)
@@ -87,7 +87,9 @@ async def handle_scan(client):
     try:
         devices = await bt_service.scan(env.scan_timeout)
         await client.publish(STATE_SCAN_DEVICES, json.dumps(devices), retain=True)
-        await client.publish(f"{PREFIX}/event/scan/complete", json.dumps({"count": len(devices)}))
+        await client.publish(
+            f"{PREFIX}/event/scan/complete", json.dumps({"count": len(devices)})
+        )
         last_scan_success_at = utc_now()
     except Exception as e:
         logger.error(f"Scan failed: {e}")
@@ -126,27 +128,33 @@ async def handle_read(client, address, characteristic, payload):
     """
     if not payload or not payload.get("command"):
         error_topic = f"{PREFIX}/error/read/{address}/{characteristic}"
-        await client.publish(error_topic, json.dumps({
-            "characteristic": characteristic,
-            "error": "Missing 'command' in payload"
-        }))
+        await client.publish(
+            error_topic,
+            json.dumps(
+                {
+                    "characteristic": characteristic,
+                    "error": "Missing 'command' in payload",
+                }
+            ),
+        )
         return
-        
+
     command_hex = payload.get("command")
     format_type = payload.get("format_type", "<B")
     state_topic = f"{PREFIX}/state/read/{address}/{characteristic}"
     event_topic = f"{PREFIX}/event/read/{address}/{characteristic}"
     error_topic = f"{PREFIX}/error/read/{address}/{characteristic}"
-    
+
     try:
         import uuid
+
         char_uuid = uuid.UUID(characteristic)
         command_bytes = bytearray.fromhex(command_hex)
-        
+
         result = await bt_service.send_command(
             address, char_uuid, command_bytes, format_type
         )
-        
+
         response = {
             "address": address,
             "characteristic": characteristic,
@@ -156,10 +164,9 @@ async def handle_read(client, address, characteristic, payload):
         await client.publish(event_topic, json.dumps(response))
     except Exception as e:
         logger.error(f"Read from {address}/{characteristic} failed: {e}")
-        await client.publish(error_topic, json.dumps({
-            "characteristic": characteristic,
-            "error": str(e)
-        }))
+        await client.publish(
+            error_topic, json.dumps({"characteristic": characteristic, "error": str(e)})
+        )
 
 
 async def main():
@@ -202,8 +209,12 @@ async def main():
                 elif message.topic.matches(CMD_READ):
                     address = topic_parts[2]
                     characteristic = topic_parts[4]
-                    payload = json.loads(message.payload.decode()) if message.payload else {}
-                    asyncio.create_task(handle_read(client, address, characteristic, payload))
+                    payload = (
+                        json.loads(message.payload.decode()) if message.payload else {}
+                    )
+                    asyncio.create_task(
+                        handle_read(client, address, characteristic, payload)
+                    )
     finally:
         mqtt_connected = False
         await runner.cleanup()

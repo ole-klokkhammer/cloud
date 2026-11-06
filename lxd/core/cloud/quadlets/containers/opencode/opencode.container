@@ -1,0 +1,39 @@
+[Unit]
+Description=OpenCode web agent 
+After=network-online.target apps.network.service
+
+[Container]
+ContainerName=opencode
+Network=apps.network
+
+Image=registry.linole.org/system/opencode:latest
+Pull=newer
+
+DropCapability=ALL
+NoNewPrivileges=true
+ReadOnly=true
+Tmpfs=/tmp:rw,nosuid,nodev,size=2g
+PidsLimit=1024
+ 
+Volume=/root/workspace/opencode/workspace:/workspace:rw
+Volume=/root/workspace/opencode/home:/home/node:rw
+# Must be writable: opencode writes .gitignore (and instance state) into
+# ~/.config/opencode on every bootstrap; :ro makes all requests 500 with EROFS.
+Volume=/root/workspace/opencode/config:/home/node/.config/opencode:rw
+
+Environment=TZ=Europe/Oslo
+EnvironmentFile=/ssd/appdata/env/opencode.env
+
+[Service]
+Restart=on-failure
+RestartSec=5
+# The model runs on llm.linole.org; this process only moves tokens, so a phone
+# driving long sessions must not be able to take the LXC down with it.
+MemoryHigh=1536M
+MemoryMax=3G
+TimeoutStopSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

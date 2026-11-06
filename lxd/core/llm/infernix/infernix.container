@@ -1,5 +1,5 @@
 [Unit]
-Description=Infernix Service (Wallawalla47 Qwen3.8-Flash-Next NVFP4 Dense8 + DFlash2 drafter)
+Description=Infernix Service
 After=network-online.target
 
 [Container]

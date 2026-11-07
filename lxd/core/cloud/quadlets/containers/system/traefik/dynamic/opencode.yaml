@@ -16,16 +16,17 @@
 # providers.file -> http -> serversTransport -> responseForwarding.flushInterval
 # on the service side, not a timeout change here.
 #
-# Reachability is the actual access control: opencode.cloud.core.homelan lives in
-# the pfSense local zone (same trick as llm.linole.org -> core-cloud.homelan), so
-# it resolves for the WireGuard/pfSense side only. Never pair it with a WAN
-# forward or a PublishPort - the transport is plain HTTP, so the basic auth
-# credential would be readable by anyone on the LAN segment.
+# Reachability: opencode.cloud.core.homelan lives in the pfSense local zone, so
+# it resolves for the WireGuard/pfSense side only. opencode.linole.org is public:
+# TLS MUST terminate in front (pfSense HAProxy with an ACME cert, Send Host
+# preserved) — the basic auth credential must never cross a plain-HTTP WAN hop.
+# Consider the exposure: this is a shell-capable agent; WireGuard-only is the
+# safer default if "public" was not a hard requirement.
 http:
   routers:
     opencode:
-      rule: "Host(`opencode.cloud.core.homelan`)"
-      entrypoints: [ web ]        # :80 — websecure:443 once you get TLS
+      rule: "Host(`opencode.cloud.core.homelan`) || Host(`opencode.linole.org`)"
+      entrypoints: [ web ]        # TLS-terminated public traffic arrives here from HAProxy
       service: opencode
   services:
     opencode:
